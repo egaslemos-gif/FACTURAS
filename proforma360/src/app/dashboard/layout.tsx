@@ -20,7 +20,9 @@ import {
   ChevronRight,
   Search,
   Bell,
-  HelpCircle
+  HelpCircle,
+  Settings,
+  CloudArrowUp
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -30,6 +32,7 @@ const NAV_ITEMS = [
   { name: "Clientes", href: "/dashboard/clients", icon: Users },
   { name: "Produtos", href: "/dashboard/products", icon: PackageOpen },
   { name: "Empresa", href: "/dashboard/company", icon: Building2 },
+  { name: "Definições", href: "/dashboard/settings", icon: Settings },
 ];
 
 import { PWAInstallPrompt } from "@/components/PWAInstallPrompt";
@@ -106,12 +109,33 @@ export default function DashboardLayout({
               >
                 <Icon className={cn("w-5 h-5 shrink-0", isActive ? "text-[var(--color-primary)]" : "text-[var(--color-outline)]")} />
                 {!isSidebarCollapsed && <span className="truncate">{item.name}</span>}
+                {item.name === "Definições" && (
+                  <span className="absolute right-3 w-2 h-2 bg-red-500 rounded-full"></span>
+                )}
               </Link>
             );
           })}
         </nav>
 
-        <div className="p-4 border-t border-[var(--color-outline-variant)] shrink-0">
+        <div className="p-4 border-t border-[var(--color-outline-variant)] shrink-0 space-y-2">
+          {!isSidebarCollapsed && (
+            <button className="w-full flex items-center justify-center py-2.5 px-4 mb-4 bg-[var(--color-surface-container)] text-[var(--color-primary)] font-semibold text-sm rounded-lg border border-[var(--color-outline-variant)] hover:bg-[var(--color-surface-container-highest)] transition-colors">
+              <CloudArrowUp className="w-4 h-4 mr-2" />
+              Upgrade Plan
+            </button>
+          )}
+          
+          <button 
+            className={cn(
+              "flex items-center gap-3 w-full px-3 py-2 text-sm font-medium text-[var(--color-on-surface-variant)] hover:bg-[var(--color-surface-container)] hover:text-[var(--color-on-surface)] rounded-lg transition-colors",
+              isSidebarCollapsed && "justify-center px-0"
+            )}
+            title="Centro de Ajuda"
+          >
+            <HelpCircle className="w-5 h-5 shrink-0" />
+            {!isSidebarCollapsed && <span>Help Center</span>}
+          </button>
+
           <button 
             onClick={() => signOut({ callbackUrl: "/login" })}
             className={cn(
@@ -121,7 +145,7 @@ export default function DashboardLayout({
             title="Terminar Sessão"
           >
             <LogOut className="w-5 h-5 shrink-0" />
-            {!isSidebarCollapsed && <span>Terminar Sessão</span>}
+            {!isSidebarCollapsed && <span>Logout</span>}
           </button>
         </div>
       </aside>
