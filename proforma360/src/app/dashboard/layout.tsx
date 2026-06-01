@@ -21,7 +21,6 @@ import {
   Search,
   Bell,
   HelpCircle,
-  Settings,
   CloudArrowUp
 } from "lucide-react";
 import { cn } from "@/lib/utils";
