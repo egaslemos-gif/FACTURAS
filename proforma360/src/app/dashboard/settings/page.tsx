@@ -13,7 +13,7 @@ import { cn } from "@/lib/utils";
 
 export default function SettingsPage() {
   return (
-    <div className="max-w-6xl mx-auto space-y-6">
+    <div className="max-w-6xl mx-auto space-y-6 px-4 md:px-0 max-w-full overflow-x-hidden">
       
       {/* Header */}
       <div>

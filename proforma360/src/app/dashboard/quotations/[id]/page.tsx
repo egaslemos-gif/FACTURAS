@@ -115,20 +115,29 @@ export default function QuotationDetailPage() {
             </button>
           )}
 
-          <div className="relative group">
-            <button className="p-2 border border-[var(--color-outline-variant)] bg-white hover:bg-gray-50 rounded-lg transition-colors">
-              <MoreVertical className="w-5 h-5 text-gray-600" />
+          <Link href={`/dashboard/quotations/${quotation.id}/edit`} className="flex items-center gap-2 px-4 py-2 border border-gray-300 bg-white hover:bg-gray-50 text-gray-700 rounded-lg text-sm font-medium transition-colors whitespace-nowrap">
+            Editar
+          </Link>
+
+          {quotation.status !== 'rejected' && quotation.status !== 'approved' && (
+            <button 
+              onClick={() => handleStatusChange('rejected')} 
+              disabled={isUpdatingStatus}
+              className="flex items-center gap-2 px-4 py-2 border border-red-200 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg text-sm font-medium transition-colors whitespace-nowrap"
+            >
+              Rejeitar
             </button>
-            <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-[var(--color-outline-variant)] py-1 hidden group-hover:block z-10">
-              <Link href={`/dashboard/quotations/${quotation.id}/edit`} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Editar Proforma</Link>
-              {quotation.status !== 'rejected' && (
-                <button onClick={() => handleStatusChange('rejected')} className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50">Marcar Rejeitada</button>
-              )}
-              {quotation.status !== 'draft' && (
-                <button onClick={() => handleStatusChange('draft')} className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Reverter para Rascunho</button>
-              )}
-            </div>
-          </div>
+          )}
+
+          {quotation.status !== 'draft' && (
+            <button 
+              onClick={() => handleStatusChange('draft')} 
+              disabled={isUpdatingStatus}
+              className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition-colors whitespace-nowrap"
+            >
+              Reverter (Rascunho)
+            </button>
+          )}
         </div>
       </div>
 

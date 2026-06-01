@@ -128,9 +128,23 @@ export default function CompanyPage() {
 
         {/* Identidade Visual */}
         <div className="bg-white p-6 md:p-8 rounded-[var(--radius-lg)] elevation-1 border border-[var(--color-outline-variant)]">
-          <div className="flex items-center gap-3 mb-6">
-            <FileSignature className="w-6 h-6 text-[var(--color-primary)]" />
-            <h2 className="text-headline-sm">Identidade Visual & Assinaturas</h2>
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-3">
+              <FileSignature className="w-6 h-6 text-[var(--color-primary)]" />
+              <h2 className="text-headline-sm">Identidade Visual & Assinaturas</h2>
+            </div>
+            <div className="flex items-center gap-4 bg-[var(--color-surface-container)] px-4 py-2 rounded-lg border border-[var(--color-outline-variant)]">
+              <label className="text-sm font-semibold text-[var(--color-on-surface)] whitespace-nowrap">Estilo da Proforma:</label>
+              <select
+                name="pdf_template"
+                value={formData.pdf_template || "classic"}
+                onChange={(e) => setFormData(prev => ({ ...prev, pdf_template: e.target.value as any }))}
+                className="bg-white border border-[var(--color-outline-variant)] rounded-md px-3 py-1.5 text-sm font-medium focus:ring-2 focus:ring-[var(--color-primary)] outline-none cursor-pointer"
+              >
+                <option value="classic">Standard (Clássico)</option>
+                <option value="modern">Moderno (Colorido & Arredondado)</option>
+              </select>
+            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -220,7 +234,7 @@ export default function CompanyPage() {
           </div>
 
           <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
+            <div className="col-span-1 md:col-span-2">
               <label className="block text-label-md mb-2">Prefixo da Proforma</label>
               <input
                 type="text"
@@ -231,20 +245,6 @@ export default function CompanyPage() {
                 placeholder="Ex: PF"
               />
               <p className="text-xs mt-1 text-[var(--color-outline)]">Ex: {formData.quotation_prefix || "PF"}-{new Date().getFullYear()}-0001</p>
-            </div>
-
-            <div>
-              <label className="block text-label-md mb-2">Template (Estilo da Proforma)</label>
-              <select
-                name="pdf_template"
-                value={formData.pdf_template || "classic"}
-                onChange={(e) => setFormData(prev => ({ ...prev, pdf_template: e.target.value as any }))}
-                className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-lg focus:ring-2 focus:ring-[var(--color-primary)] outline-none bg-white cursor-pointer"
-              >
-                <option value="classic">Standard (Clássico)</option>
-                <option value="modern">Moderno (Colorido & Arredondado)</option>
-              </select>
-              <p className="text-xs mt-1 text-[var(--color-outline)]">Escolha o design que melhor representa a sua marca.</p>
             </div>
           </div>
 

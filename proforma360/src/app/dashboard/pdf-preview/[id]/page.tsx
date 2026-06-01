@@ -7,8 +7,6 @@ import { generateQuotationPDF } from "@/lib/pdf/generator";
 import { ArrowLeft, Download, CloudUpload, FileText } from "lucide-react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
-import { uploadPdfToDrive } from "@/lib/google/drive";
-import { initializeDriveWorkspace } from "@/lib/google/setup";
 
 export default function PdfPreviewPage() {
   const params = useParams();
@@ -82,7 +80,7 @@ export default function PdfPreviewPage() {
   };
 
   const handleUploadToDrive = async () => {
-    if (!session?.accessToken || !pdfBytes || !currentDetail) {
+    if (!session || !pdfBytes || !currentDetail) {
       alert("Sessão Google inválida ou PDF não gerado.");
       return;
     }
@@ -91,23 +89,29 @@ export default function PdfPreviewPage() {
     setUploadSuccess(false);
 
     try {
-      // Ensure Drive workspace is initialized and get PDFs folder ID
-      const { pdfsFolderId } = await initializeDriveWorkspace(session as any);
-      
       const fileName = `${currentDetail.quotation.quotation_number}_${currentDetail.quotation.client_name}.pdf`;
       
-      await uploadPdfToDrive(
-        (session as any).accessToken,
-        pdfsFolderId,
-        pdfBytes,
-        fileName
-      );
+      const formData = new FormData();
+      const blob = new Blob([pdfBytes as unknown as BlobPart], { type: "application/pdf" });
+      formData.append("file", blob);
+      formData.append("fileName", fileName);
+
+      const res = await fetch("/api/drive/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Erro desconhecido");
+      }
 
       setUploadSuccess(true);
-      setTimeout(() => setUploadSuccess(false), 3000);
-    } catch (error) {
+      setTimeout(() => setUploadSuccess(false), 5000);
+    } catch (error: any) {
       console.error("Error uploading to Drive", error);
-      alert("Falha ao guardar no Google Drive.");
+      alert(`Falha ao guardar no Google Drive: ${error.message}`);
     } finally {
       setIsUploading(false);
     }
