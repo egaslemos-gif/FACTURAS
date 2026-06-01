@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useCompanyStore } from "@/stores";
 import { Company } from "@/lib/types";
-import { Upload, Save, Building2, FileSignature } from "lucide-react";
+import { Upload, Save, Building2, FileSignature, LayoutTemplate } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export default function CompanyPage() {
@@ -128,23 +128,9 @@ export default function CompanyPage() {
 
         {/* Identidade Visual */}
         <div className="bg-white p-6 md:p-8 rounded-[var(--radius-lg)] elevation-1 border border-[var(--color-outline-variant)]">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-3">
-              <FileSignature className="w-6 h-6 text-[var(--color-primary)]" />
-              <h2 className="text-headline-sm">Identidade Visual & Assinaturas</h2>
-            </div>
-            <div className="flex items-center gap-4 bg-[var(--color-surface-container)] px-4 py-2 rounded-lg border border-[var(--color-outline-variant)]">
-              <label className="text-sm font-semibold text-[var(--color-on-surface)] whitespace-nowrap">Estilo da Proforma:</label>
-              <select
-                name="pdf_template"
-                value={formData.pdf_template || "classic"}
-                onChange={(e) => setFormData(prev => ({ ...prev, pdf_template: e.target.value as any }))}
-                className="bg-white border border-[var(--color-outline-variant)] rounded-md px-3 py-1.5 text-sm font-medium focus:ring-2 focus:ring-[var(--color-primary)] outline-none cursor-pointer"
-              >
-                <option value="classic">Standard (Clássico)</option>
-                <option value="modern">Moderno (Colorido & Arredondado)</option>
-              </select>
-            </div>
+          <div className="flex items-center gap-3 mb-6">
+            <FileSignature className="w-6 h-6 text-[var(--color-primary)]" />
+            <h2 className="text-headline-sm">Identidade Visual & Assinaturas</h2>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -258,6 +244,59 @@ export default function CompanyPage() {
               className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-lg focus:ring-2 focus:ring-[var(--color-primary)] outline-none"
               placeholder="Obrigado por escolher os nossos serviços. Processado por computador."
             />
+          </div>
+        </div>
+
+        {/* Estilo da Proforma */}
+        <div className="bg-white p-6 md:p-8 rounded-[var(--radius-lg)] elevation-1 border border-[var(--color-outline-variant)]">
+          <div className="flex items-center gap-3 mb-6">
+            <LayoutTemplate className="w-6 h-6 text-[var(--color-primary)]" />
+            <h2 className="text-headline-sm">Estilo da Proforma</h2>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <button
+              type="button"
+              onClick={() => setFormData(prev => ({ ...prev, pdf_template: "classic" }))}
+              className={cn(
+                "relative flex flex-col items-center justify-center p-6 border-2 rounded-xl text-center transition-all",
+                formData.pdf_template === "classic" || !formData.pdf_template
+                  ? "border-[var(--color-primary)] bg-[var(--color-primary-container)] ring-2 ring-[var(--color-primary)] ring-offset-2"
+                  : "border-[var(--color-outline-variant)] bg-[var(--color-surface-container-lowest)] hover:border-[var(--color-outline)]"
+              )}
+            >
+              <div className="w-24 h-32 bg-white border border-gray-200 shadow-sm mb-4 flex flex-col p-2">
+                <div className="w-full h-4 bg-gray-200 mb-2"></div>
+                <div className="w-1/2 h-2 bg-gray-100 mb-4"></div>
+                <div className="w-full h-2 bg-gray-100 mb-1"></div>
+                <div className="w-full h-2 bg-gray-100 mb-1"></div>
+                <div className="w-full h-2 bg-gray-100 mb-1"></div>
+              </div>
+              <h3 className="font-bold text-[var(--color-on-surface)]">Standard (Clássico)</h3>
+              <p className="text-xs text-[var(--color-on-surface-variant)] mt-1">Design simples, preto e branco tradicional.</p>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setFormData(prev => ({ ...prev, pdf_template: "modern" }))}
+              className={cn(
+                "relative flex flex-col items-center justify-center p-6 border-2 rounded-xl text-center transition-all",
+                formData.pdf_template === "modern"
+                  ? "border-[var(--color-primary)] bg-[var(--color-primary-container)] ring-2 ring-[var(--color-primary)] ring-offset-2"
+                  : "border-[var(--color-outline-variant)] bg-[var(--color-surface-container-lowest)] hover:border-[var(--color-outline)]"
+              )}
+            >
+              <div className="w-24 h-32 bg-white border border-gray-200 shadow-sm mb-4 flex flex-col rounded-lg overflow-hidden">
+                <div className="w-full h-6 bg-[var(--color-primary)]"></div>
+                <div className="p-2 flex flex-col gap-1 w-full">
+                  <div className="w-1/2 h-2 bg-gray-200 rounded-full mb-2"></div>
+                  <div className="w-full h-3 bg-[var(--color-surface-container)] rounded-md"></div>
+                  <div className="w-full h-3 bg-[var(--color-surface-container)] rounded-md"></div>
+                </div>
+              </div>
+              <h3 className="font-bold text-[var(--color-on-surface)]">Moderno (Colorido)</h3>
+              <p className="text-xs text-[var(--color-on-surface-variant)] mt-1">Design atual com cabeçalhos azuis e arredondados.</p>
+            </button>
           </div>
         </div>
 
