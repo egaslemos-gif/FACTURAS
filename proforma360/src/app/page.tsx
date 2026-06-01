@@ -63,20 +63,26 @@ export default function LandingPage() {
       </div>
 
       <main className="flex-1 -mt-32">
-        <section className="max-w-6xl mx-auto px-6 flex flex-col items-center text-center">
-          {/* 3D Invoices Image */}
-          <div className="w-full max-w-5xl mx-auto rounded-[12px] bg-white p-2 shadow-[0_20px_50px_rgba(8,_112,_184,_0.1)] border border-gray-100 relative overflow-hidden z-10">
+        <section className="max-w-7xl mx-auto px-6 flex flex-col items-center text-center">
+          {/* 3D Invoices Image with Fade-out Mask */}
+          <div 
+            className="w-full max-w-6xl mx-auto relative z-10"
+            style={{ 
+              maskImage: 'linear-gradient(to bottom, black 60%, transparent 100%)',
+              WebkitMaskImage: 'linear-gradient(to bottom, black 60%, transparent 100%)'
+            }}
+          >
              <img 
                src="/hero_invoices_3d.png" 
                alt="Faturas em 3D" 
-               className="w-full h-auto rounded-[8px] object-cover"
+               className="w-full h-auto object-cover"
              />
           </div>
         </section>
 
         {/* Features / Engineered for Velocity */}
-        <section id="funcionalidades" className="bg-[#f8fafc] py-24 border-t border-gray-100">
-          <div className="max-w-6xl mx-auto px-6">
+        <section id="funcionalidades" className="relative -mt-32 pt-40 pb-24 border-t border-gray-100/50 bg-gradient-to-b from-transparent to-[#f8fafc]">
+          <div className="max-w-6xl mx-auto px-6 relative z-20">
             <div className="text-center mb-16">
               <h2 className="text-[32px] font-bold mb-4 text-[#111827]">Desenhado para Velocidade</h2>
               <p className="text-gray-500 max-w-2xl mx-auto text-[16px]">
@@ -107,11 +113,11 @@ export default function LandingPage() {
                   desc: "Mantenha um repositório intocado de dados de clientes, históricos e estruturas de preços especializadas."
                 }
               ].map((feature, i) => (
-                <div key={i} className="p-8 rounded-xl bg-white border border-gray-100 shadow-sm flex flex-col items-start transition-all hover:shadow-md">
-                  <div className="w-10 h-10 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center mb-5">
-                    <feature.icon className="w-5 h-5 stroke-[1.5]" />
+                <div key={i} className="p-8 rounded-[16px] bg-white/60 backdrop-blur-xl border border-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col items-start transition-all hover:shadow-[0_8px_30px_rgba(37,99,235,0.08)] hover:-translate-y-1">
+                  <div className="w-12 h-12 bg-gradient-to-br from-blue-50 to-blue-100/50 border border-blue-100/50 text-blue-600 rounded-xl flex items-center justify-center mb-6 shadow-sm">
+                    <feature.icon className="w-6 h-6 stroke-[1.5]" />
                   </div>
-                  <h3 className="text-[17px] font-semibold mb-2 text-gray-900">{feature.title}</h3>
+                  <h3 className="text-[18px] font-semibold mb-3 text-gray-900">{feature.title}</h3>
                   <p className="text-gray-500 text-[14px] leading-relaxed">
                     {feature.desc}
                   </p>
