@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Edit Company Details - Proforma360</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary-fixed-dim": "#bec6e0",
+                        "surface": "#f7f9fb",
+                        "on-tertiary-fixed": "#002109",
+                        "surface-tint": "#0053db",
+                        "on-error-container": "#93000a",
+                        "primary-container": "#2563eb",
+                        "outline-variant": "#c3c6d7",
+                        "background": "#f7f9fb",
+                        "surface-bright": "#f7f9fb",
+                        "secondary-fixed": "#dae2fd",
+                        "on-error": "#ffffff",
+                        "error": "#ba1a1a",
+                        "secondary-container": "#dae2fd",
+                        "on-secondary-container": "#5c647a",
+                        "primary-fixed-dim": "#b4c5ff",
+                        "outline": "#737686",
+                        "on-primary-container": "#eeefff",
+                        "inverse-primary": "#b4c5ff",
+                        "on-secondary-fixed": "#131b2e",
+                        "on-surface": "#191c1e",
+                        "on-primary": "#ffffff",
+                        "primary-fixed": "#dbe1ff",
+                        "surface-container-lowest": "#ffffff",
+                        "secondary": "#565e74",
+                        "inverse-surface": "#2d3133",
+                        "on-tertiary-fixed-variant": "#005321",
+                        "primary": "#004ac6",
+                        "on-primary-fixed-variant": "#003ea8",
+                        "surface-dim": "#d8dadc",
+                        "surface-container-low": "#f2f4f6",
+                        "on-surface-variant": "#434655",
+                        "on-secondary": "#ffffff",
+                        "on-background": "#191c1e",
+                        "surface-container-highest": "#e0e3e5",
+                        "surface-container-high": "#e6e8ea",
+                        "tertiary-fixed-dim": "#4ae176",
+                        "on-tertiary": "#ffffff",
+                        "surface-variant": "#e0e3e5",
+                        "on-primary-fixed": "#00174b",
+                        "inverse-on-surface": "#eff1f3",
+                        "tertiary-fixed": "#6bff8f",
+                        "on-secondary-fixed-variant": "#3f465c",
+                        "error-container": "#ffdad6",
+                        "tertiary": "#006229",
+                        "tertiary-container": "#007e37",
+                        "surface-container": "#eceef0",
+                        "on-tertiary-container": "#c1ffc5"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "xl": "32px",
+                        "lg": "24px",
+                        "2xl": "48px",
+                        "sm": "8px",
+                        "base": "8px",
+                        "sidebar-width": "260px",
+                        "xs": "4px",
+                        "3xl": "64px",
+                        "sidebar-collapsed": "72px",
+                        "md": "16px",
+                        "container-max": "1280px"
+                    },
+                    "fontFamily": {
+                        "headline-sm": ["Inter"],
+                        "body-md": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "label-sm": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "label-md": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "display-lg": ["Inter"],
+                        "headline-lg-mobile": ["Inter"],
+                        "headline-md": ["Inter"]
+                    },
+                    "fontSize": {
+                        "headline-sm": ["20px", { "lineHeight": "1.4", "fontWeight": "600" }],
+                        "body-md": ["16px", { "lineHeight": "1.5", "fontWeight": "400" }],
+                        "body-sm": ["14px", { "lineHeight": "1.5", "fontWeight": "400" }],
+                        "label-sm": ["12px", { "lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "headline-lg": ["32px", { "lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+                        "label-md": ["14px", { "lineHeight": "1", "fontWeight": "500" }],
+                        "body-lg": ["18px", { "lineHeight": "1.6", "fontWeight": "400" }],
+                        "display-lg": ["48px", { "lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "1.2", "fontWeight": "600" }],
+                        "headline-md": ["24px", { "lineHeight": "1.3", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            -webkit-tap-highlight-color: transparent;
+        }
+        /* Custom input styles for clean, high-contrast look */
+        .proforma-input {
+            @apply w-full bg-surface-container-low border border-outline-variant rounded-DEFAULT px-md py-sm text-on-surface font-body-md transition-colors duration-150 outline-none focus:bg-surface-container-lowest focus:border-primary focus:ring-1 focus:ring-primary;
+        }
+        .proforma-label {
+            @apply block font-label-md text-label-md text-on-surface-variant mb-xs;
+        }
+        
+        /* Floating App Bar shadow separation */
+        .app-bar-shadow {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background font-body-md min-h-screen pb-safe">
+<!-- TopAppBar for Linear/Transactional Flow -->
+<header class="fixed top-0 left-0 w-full z-50 bg-surface app-bar-shadow h-[64px] flex justify-between items-center px-md transition-colors">
+<!-- Back Button - Leading Action -->
+<button aria-label="Go Back" class="w-10 h-10 rounded-full flex items-center justify-center hover:bg-surface-container-high transition-colors active:scale-95 text-on-surface-variant">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">arrow_back</span>
+</button>
+<!-- Headline -->
+<h1 class="font-headline-sm text-headline-sm text-on-surface flex-1 text-center truncate px-md">
+            Edit Company
+        </h1>
+<!-- Save Action - Trailing Action -->
+<button aria-label="Save Changes" class="font-label-md text-label-md text-primary font-semibold hover:bg-primary-container hover:text-on-primary-container px-sm py-xs rounded-DEFAULT transition-colors active:scale-95">
+            Save
+        </button>
+</header>
+<!-- Main Content Canvas -->
+<!-- Padding top accounts for fixed app bar, padding bottom for typical mobile safe areas -->
+<main class="pt-[80px] pb-xl px-md max-w-[600px] mx-auto space-y-lg">
+<!-- Brand Identity Section -->
+<section class="bg-surface rounded-lg p-md border border-outline-variant">
+<h2 class="font-label-sm text-label-sm uppercase text-on-surface-variant mb-md tracking-wider">Brand Identity</h2>
+<div class="flex items-center space-x-md mb-lg">
+<!-- Logo Upload Area -->
+<div class="relative w-24 h-24 rounded-full border-2 border-dashed border-outline-variant bg-surface-container-low flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-container-highest hover:border-primary transition-colors cursor-pointer group">
+<span class="material-symbols-outlined mb-xs text-outline group-hover:text-primary transition-colors" style="font-variation-settings: 'FILL' 0;">upload</span>
+<span class="font-label-sm text-label-sm text-outline group-hover:text-primary transition-colors">Logo</span>
+<!-- Hidden file input for actual functionality -->
+<input accept="image/*" aria-label="Upload Company Logo" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" type="file"/>
+</div>
+<div class="flex-1">
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-xs">Recommended: 512x512px, PNG or SVG.</p>
+<button class="text-primary font-label-md text-label-md hover:underline bg-transparent border-none p-0 cursor-pointer">Remove Logo</button>
+</div>
+</div>
+<!-- Brand Color Input -->
+<div class="space-y-sm">
+<label class="proforma-label" for="brandColor">Primary Brand Color (Hex)</label>
+<div class="flex items-center space-x-sm">
+<!-- Visual color indicator -->
+<div class="w-10 h-10 rounded-DEFAULT border border-outline-variant shadow-sm" style="background-color: #004ac6;"></div>
+<input class="proforma-input flex-1 font-mono uppercase" id="brandColor" name="brandColor" placeholder="#000000" type="text" value="#004ac6"/>
+</div>
+</div>
+</section>
+<!-- Basic Information Section -->
+<section class="bg-surface rounded-lg p-md border border-outline-variant">
+<h2 class="font-label-sm text-label-sm uppercase text-on-surface-variant mb-md tracking-wider">Basic Information</h2>
+<div class="space-y-md">
+<div>
+<label class="proforma-label" for="legalName">Legal Company Name *</label>
+<input class="proforma-input" id="legalName" name="legalName" required="" type="text" value="Acme Financial Services LLC"/>
+</div>
+<div>
+<label class="proforma-label" for="dbaName">Doing Business As (DBA)</label>
+<input class="proforma-input" id="dbaName" name="dbaName" type="text" value="Acme Finance"/>
+</div>
+<div>
+<label class="proforma-label" for="taxId">Tax ID / EIN *</label>
+<input class="proforma-input font-mono" id="taxId" name="taxId" required="" type="text" value="12-3456789"/>
+</div>
+<div>
+<label class="proforma-label" for="entityType">Entity Type</label>
+<div class="relative">
+<select class="proforma-input appearance-none pr-xl cursor-pointer" id="entityType" name="entityType">
+<option selected="" value="llc">Limited Liability Company (LLC)</option>
+<option value="corp">Corporation (C-Corp / S-Corp)</option>
+<option value="sole">Sole Proprietorship</option>
+<option value="partnership">Partnership</option>
+</select>
+<span class="material-symbols-outlined absolute right-md top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none" style="font-variation-settings: 'FILL' 0;">expand_more</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Contact Details Section -->
+<section class="bg-surface rounded-lg p-md border border-outline-variant">
+<h2 class="font-label-sm text-label-sm uppercase text-on-surface-variant mb-md tracking-wider">Contact Details</h2>
+<div class="space-y-md">
+<div>
+<label class="proforma-label" for="supportEmail">Support Email *</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-md top-1/2 -translate-y-1/2 text-on-surface-variant" style="font-variation-settings: 'FILL' 0;">mail</span>
+<input class="proforma-input pl-[44px]" id="supportEmail" name="supportEmail" required="" type="email" value="support@acmefinance.com"/>
+</div>
+</div>
+<div>
+<label class="proforma-label" for="billingEmail">Billing Email</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-md top-1/2 -translate-y-1/2 text-on-surface-variant" style="font-variation-settings: 'FILL' 0;">receipt_long</span>
+<input class="proforma-input pl-[44px]" id="billingEmail" name="billingEmail" type="email" value="billing@acmefinance.com"/>
+</div>
+</div>
+<div>
+<label class="proforma-label" for="businessPhone">Business Phone</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-md top-1/2 -translate-y-1/2 text-on-surface-variant" style="font-variation-settings: 'FILL' 0;">call</span>
+<input class="proforma-input pl-[44px]" id="businessPhone" name="businessPhone" type="tel" value="+1 (555) 019-2834"/>
+</div>
+</div>
+</div>
+</section>
+<!-- Registered Address Section -->
+<section class="bg-surface rounded-lg p-md border border-outline-variant mb-2xl">
+<h2 class="font-label-sm text-label-sm uppercase text-on-surface-variant mb-md tracking-wider">Registered Address</h2>
+<div class="space-y-md">
+<div>
+<label class="proforma-label" for="addressLine1">Street Address *</label>
+<input class="proforma-input" id="addressLine1" name="addressLine1" required="" type="text" value="1200 Corporate Drive"/>
+</div>
+<div>
+<label class="proforma-label" for="addressLine2">Apt, Suite, Bldg. (Optional)</label>
+<input class="proforma-input" id="addressLine2" name="addressLine2" type="text" value="Suite 400"/>
+</div>
+<div class="grid grid-cols-2 gap-md">
+<div>
+<label class="proforma-label" for="city">City *</label>
+<input class="proforma-input" id="city" name="city" required="" type="text" value="San Francisco"/>
+</div>
+<div>
+<label class="proforma-label" for="state">State/Region *</label>
+<input class="proforma-input" id="state" name="state" required="" type="text" value="CA"/>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-md">
+<div>
+<label class="proforma-label" for="zipCode">ZIP / Postal Code *</label>
+<input class="proforma-input" id="zipCode" name="zipCode" required="" type="text" value="94105"/>
+</div>
+<div>
+<label class="proforma-label" for="country">Country *</label>
+<div class="relative">
+<select class="proforma-input appearance-none pr-xl cursor-pointer" id="country" name="country">
+<option selected="" value="US">United States</option>
+<option value="CA">Canada</option>
+<option value="UK">United Kingdom</option>
+</select>
+<span class="material-symbols-outlined absolute right-md top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none" style="font-variation-settings: 'FILL' 0;">expand_more</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Form Action Area (Bottom) -->
+<div class="pt-md border-t border-outline-variant flex justify-end space-x-md">
+<button class="px-lg py-sm rounded-DEFAULT border border-outline-variant text-on-surface bg-surface hover:bg-surface-container-low font-label-md text-label-md transition-colors active:scale-95 shadow-sm" type="button">
+                Cancel
+            </button>
+<button class="px-lg py-sm rounded-DEFAULT bg-primary text-on-primary hover:bg-primary-fixed-variant font-label-md text-label-md transition-colors active:scale-95 shadow-sm flex items-center" type="button">
+<span class="material-symbols-outlined mr-xs text-[18px]" style="font-variation-settings: 'FILL' 1;">save</span>
+                Save Details
+            </button>
+</div>
+</main>
+<!-- Navigation suppressed per logic: This is a linear task-focused flow with explicit back/save actions -->
+<script>
+        // Simple JS for interaction demonstration
+        document.addEventListener('DOMContentLoaded', () => {
+            const hexInput = document.getElementById('brandColor');
+            const colorIndicator = hexInput.previousElementSibling;
+
+            hexInput.addEventListener('input', (e) => {
+                const val = e.target.value;
+                // Basic hex validation before applying
+                if(/^#([0-9A-F]{3}){1,2}$/i.test(val)) {
+                    colorIndicator.style.backgroundColor = val;
+                }
+            });
+        });
+    </script>
+</body></html>

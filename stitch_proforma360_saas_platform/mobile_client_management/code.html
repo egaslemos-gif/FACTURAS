@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>Proforma360 - Client Management</title>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "background": "#f7f9fb",
+                      "secondary": "#565e74",
+                      "outline-variant": "#c3c6d7",
+                      "on-tertiary-container": "#c1ffc5",
+                      "error": "#ba1a1a",
+                      "primary": "#004ac6",
+                      "surface-variant": "#e0e3e5",
+                      "secondary-fixed-dim": "#bec6e0",
+                      "error-container": "#ffdad6",
+                      "on-primary-container": "#eeefff",
+                      "inverse-surface": "#2d3133",
+                      "on-secondary-fixed": "#131b2e",
+                      "on-tertiary-fixed-variant": "#005321",
+                      "surface": "#f7f9fb",
+                      "secondary-fixed": "#dae2fd",
+                      "on-tertiary-fixed": "#002109",
+                      "surface-container-highest": "#e0e3e5",
+                      "primary-fixed-dim": "#b4c5ff",
+                      "outline": "#737686",
+                      "on-secondary-fixed-variant": "#3f465c",
+                      "on-primary-fixed": "#00174b",
+                      "on-background": "#191c1e",
+                      "tertiary": "#006229",
+                      "surface-container-lowest": "#ffffff",
+                      "primary-container": "#2563eb",
+                      "surface-container-high": "#e6e8ea",
+                      "surface-container-low": "#f2f4f6",
+                      "secondary-container": "#dae2fd",
+                      "inverse-on-surface": "#eff1f3",
+                      "tertiary-fixed": "#6bff8f",
+                      "on-secondary-container": "#5c647a",
+                      "on-error": "#ffffff",
+                      "tertiary-container": "#007e37",
+                      "on-surface": "#191c1e",
+                      "surface-container": "#eceef0",
+                      "tertiary-fixed-dim": "#4ae176",
+                      "surface-tint": "#0053db",
+                      "on-secondary": "#ffffff",
+                      "on-primary-fixed-variant": "#003ea8",
+                      "on-primary": "#ffffff",
+                      "on-surface-variant": "#434655",
+                      "surface-dim": "#d8dadc",
+                      "surface-bright": "#f7f9fb",
+                      "primary-fixed": "#dbe1ff",
+                      "on-tertiary": "#ffffff",
+                      "on-error-container": "#93000a",
+                      "inverse-primary": "#b4c5ff"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "lg": "24px",
+                      "base": "8px",
+                      "sm": "8px",
+                      "container-max": "1280px",
+                      "sidebar-width": "260px",
+                      "md": "16px",
+                      "2xl": "48px",
+                      "3xl": "64px",
+                      "xl": "32px",
+                      "xs": "4px",
+                      "sidebar-collapsed": "72px"
+              },
+              "fontFamily": {
+                      "display-lg": ["Inter"],
+                      "label-sm": ["Inter"],
+                      "headline-lg-mobile": ["Inter"],
+                      "body-md": ["Inter"],
+                      "headline-sm": ["Inter"],
+                      "body-sm": ["Inter"],
+                      "label-md": ["Inter"],
+                      "headline-md": ["Inter"],
+                      "headline-lg": ["Inter"],
+                      "body-lg": ["Inter"]
+              },
+              "fontSize": {
+                      "display-lg": ["48px", {"lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                      "label-sm": ["12px", {"lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                      "headline-lg-mobile": ["24px", {"lineHeight": "1.2", "fontWeight": "600"}],
+                      "body-md": ["16px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                      "headline-sm": ["20px", {"lineHeight": "1.4", "fontWeight": "600"}],
+                      "body-sm": ["14px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                      "label-md": ["14px", {"lineHeight": "1", "fontWeight": "500"}],
+                      "headline-md": ["24px", {"lineHeight": "1.3", "fontWeight": "600"}],
+                      "headline-lg": ["32px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+                      "body-lg": ["18px", {"lineHeight": "1.6", "fontWeight": "400"}]
+              }
+      },
+          },
+        }
+      </script>
+<style>
+        /* Safe area padding for mobile PWA */
+        .pb-safe { padding-bottom: env(safe-area-inset-bottom, 20px); }
+        
+        /* Hide scrollbar for a cleaner mobile look but allow scrolling */
+        ::-webkit-scrollbar { width: 0px; background: transparent; }
+      </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background font-body-md antialiased h-screen flex flex-col overflow-hidden">
+<!-- TopAppBar -->
+<header class="w-full top-0 sticky border-b border-outline-variant bg-background flex items-center justify-between px-md h-16 max-w-container-max mx-auto z-40 transition-colors duration-150 ease-in-out shrink-0">
+<button class="text-primary hover:bg-surface-variant/50 p-2 rounded-full transition-colors duration-150 ease-in-out flex items-center justify-center">
+<span class="material-symbols-outlined">menu</span>
+</button>
+<h1 class="font-headline-md text-headline-md font-bold text-primary">Proforma360</h1>
+<button class="text-primary hover:bg-surface-variant/50 p-1 rounded-full transition-colors duration-150 ease-in-out flex items-center justify-center">
+<img alt="User profile avatar" class="w-8 h-8 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBlApr-B8vYqn9NBTYnc2RThvXUOzpDkrIf5ZEn1PPVFEPdfX5qXk_sExWp2rSCdYIMWpWfHoc3WIckEmc_abWtBxojuDLahwufYJBEk0h2eiWqoISC11lMtWMeZwHwaBi1JBlBV3pa9CDeP7KH73kRSdjDhw6MCfsBhXpSAPsLynvTQIDz0HSyTGYU9t0zLxNr9p2GoLMV6_mdTexHiDfVNh0JFv1JNHEalMk3xpygDISEk0JgwXPnzifKYhGmHEAAKSKh-Ffu6NCW"/>
+</button>
+</header>
+<!-- Sticky Search Bar -->
+<div class="sticky top-0 z-30 bg-background/95 backdrop-blur-sm px-md py-sm border-b border-surface-variant shrink-0">
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-secondary pointer-events-none">search</span>
+<input class="w-full pl-10 pr-4 py-2.5 bg-surface-container-lowest border border-outline-variant rounded-lg font-body-md text-body-md text-on-surface focus:ring-2 focus:ring-primary focus:border-primary transition-all shadow-sm outline-none" placeholder="Search clients..." type="text"/>
+</div>
+</div>
+<!-- Main Content (Scrollable List) -->
+<main class="flex-1 overflow-y-auto px-md py-md space-y-md pb-32"> <!-- pb-32 to clear FAB and BottomNav -->
+<div class="flex items-center justify-between mb-2">
+<h2 class="font-label-md text-label-md text-secondary uppercase tracking-wider">All Clients</h2>
+<span class="font-label-sm text-label-sm text-secondary bg-surface-container-high px-2 py-0.5 rounded-full">24</span>
+</div>
+<!-- Client Card: Active -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-md shadow-[0_1px_2px_rgba(0,0,0,0.05)] transition-all active:scale-[0.98] cursor-pointer">
+<div class="flex justify-between items-start mb-3">
+<div>
+<h3 class="font-headline-sm text-headline-sm text-on-background leading-tight">Elevate Partners</h3>
+<p class="font-body-sm text-body-sm text-secondary mt-0.5">Sarah Jenkins</p>
+</div>
+<span class="px-2.5 py-1 rounded-full font-label-sm text-label-sm bg-tertiary-container/10 text-tertiary-container border border-tertiary-container/20">Active</span>
+</div>
+<div class="flex flex-col space-y-2 mt-4 pt-3 border-t border-surface-variant">
+<div class="flex items-center text-secondary">
+<span class="material-symbols-outlined text-[18px] mr-2">mail</span>
+<span class="font-body-sm text-body-sm truncate">s.jenkins@elevate.co</span>
+</div>
+<div class="flex items-center text-secondary">
+<span class="material-symbols-outlined text-[18px] mr-2">phone_iphone</span>
+<span class="font-body-sm text-body-sm">(555) 123-4567</span>
+</div>
+</div>
+</div>
+<!-- Client Card: New -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-md shadow-[0_1px_2px_rgba(0,0,0,0.05)] transition-all active:scale-[0.98] cursor-pointer">
+<div class="flex justify-between items-start mb-3">
+<div>
+<h3 class="font-headline-sm text-headline-sm text-on-background leading-tight">Nova Dynamics</h3>
+<p class="font-body-sm text-body-sm text-secondary mt-0.5">Michael Chen</p>
+</div>
+<span class="px-2.5 py-1 rounded-full font-label-sm text-label-sm bg-primary-container/10 text-primary border border-primary/20">New</span>
+</div>
+<div class="flex flex-col space-y-2 mt-4 pt-3 border-t border-surface-variant">
+<div class="flex items-center text-secondary">
+<span class="material-symbols-outlined text-[18px] mr-2">mail</span>
+<span class="font-body-sm text-body-sm truncate">mchen@novadynamics.io</span>
+</div>
+</div>
+</div>
+<!-- Client Card: Idle -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-md shadow-[0_1px_2px_rgba(0,0,0,0.05)] transition-all active:scale-[0.98] cursor-pointer">
+<div class="flex justify-between items-start mb-3">
+<div>
+<h3 class="font-headline-sm text-headline-sm text-on-background leading-tight">Apex Retail Group</h3>
+<p class="font-body-sm text-body-sm text-secondary mt-0.5">David Ross</p>
+</div>
+<span class="px-2.5 py-1 rounded-full font-label-sm text-label-sm bg-surface-variant text-on-surface-variant border border-outline-variant">Idle</span>
+</div>
+<div class="flex flex-col space-y-2 mt-4 pt-3 border-t border-surface-variant">
+<div class="flex items-center text-secondary">
+<span class="material-symbols-outlined text-[18px] mr-2">mail</span>
+<span class="font-body-sm text-body-sm truncate">dross@apexretail.com</span>
+</div>
+<div class="flex items-center text-secondary">
+<span class="material-symbols-outlined text-[18px] mr-2">domain</span>
+<span class="font-body-sm text-body-sm truncate">12 Invoices • Last active 45d ago</span>
+</div>
+</div>
+</div>
+<!-- Client Card: Active -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-md shadow-[0_1px_2px_rgba(0,0,0,0.05)] transition-all active:scale-[0.98] cursor-pointer">
+<div class="flex justify-between items-start mb-3">
+<div>
+<h3 class="font-headline-sm text-headline-sm text-on-background leading-tight">Nexus Health</h3>
+<p class="font-body-sm text-body-sm text-secondary mt-0.5">Amanda Torres</p>
+</div>
+<span class="px-2.5 py-1 rounded-full font-label-sm text-label-sm bg-tertiary-container/10 text-tertiary-container border border-tertiary-container/20">Active</span>
+</div>
+<div class="flex flex-col space-y-2 mt-4 pt-3 border-t border-surface-variant">
+<div class="flex items-center text-secondary">
+<span class="material-symbols-outlined text-[18px] mr-2">mail</span>
+<span class="font-body-sm text-body-sm truncate">atorres@nexushealth.org</span>
+</div>
+</div>
+</div>
+</main>
+<!-- Floating Action Button -->
+<button class="fixed bottom-24 right-4 z-40 bg-primary text-on-primary w-14 h-14 rounded-2xl shadow-[0_4px_12px_rgba(37,99,235,0.3)] flex items-center justify-center hover:bg-primary-fixed-variant active:scale-95 transition-all duration-200">
+<span class="material-symbols-outlined text-[28px]" style="font-variation-settings: 'FILL' 1;">add</span>
+</button>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 w-full z-50 rounded-t-xl shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] border-t border-outline-variant bg-surface-container-lowest flex justify-around items-center h-20 px-base pb-safe shrink-0">
+<button class="flex flex-col items-center justify-center text-secondary p-2 hover:bg-surface-container-low active:scale-95 transition-transform duration-150 rounded-lg w-16">
+<span class="material-symbols-outlined mb-1">dashboard</span>
+<span class="font-label-sm text-label-sm">Dashboard</span>
+</button>
+<button class="flex flex-col items-center justify-center text-secondary p-2 hover:bg-surface-container-low active:scale-95 transition-transform duration-150 rounded-lg w-16">
+<span class="material-symbols-outlined mb-1">request_quote</span>
+<span class="font-label-sm text-label-sm">Quotes</span>
+</button>
+<!-- Active Tab -->
+<button class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-full px-5 py-1.5 active:scale-95 transition-all duration-150">
+<span class="material-symbols-outlined mb-0.5" style="font-variation-settings: 'FILL' 1;">group</span>
+<span class="font-label-sm text-label-sm">Clients</span>
+</button>
+<button class="flex flex-col items-center justify-center text-secondary p-2 hover:bg-surface-container-low active:scale-95 transition-transform duration-150 rounded-lg w-16">
+<span class="material-symbols-outlined mb-1">settings</span>
+<span class="font-label-sm text-label-sm">Settings</span>
+</button>
+</nav>
+</body></html>

@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Proforma360 - Create Company</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "surface-variant": "#e0e3e5",
+                      "on-secondary-fixed": "#131b2e",
+                      "surface-container-low": "#f2f4f6",
+                      "surface-dim": "#d8dadc",
+                      "on-tertiary": "#ffffff",
+                      "primary-container": "#2563eb",
+                      "on-error-container": "#93000a",
+                      "on-tertiary-fixed-variant": "#005321",
+                      "on-secondary": "#ffffff",
+                      "surface-container-high": "#e6e8ea",
+                      "surface-bright": "#f7f9fb",
+                      "on-primary-fixed-variant": "#003ea8",
+                      "tertiary-container": "#007e37",
+                      "surface-container-lowest": "#ffffff",
+                      "surface-container-highest": "#e0e3e5",
+                      "on-secondary-fixed-variant": "#3f465c",
+                      "primary-fixed": "#dbe1ff",
+                      "tertiary-fixed-dim": "#4ae176",
+                      "on-background": "#191c1e",
+                      "tertiary-fixed": "#6bff8f",
+                      "outline-variant": "#c3c6d7",
+                      "secondary": "#565e74",
+                      "on-secondary-container": "#5c647a",
+                      "on-primary-fixed": "#00174b",
+                      "on-surface": "#191c1e",
+                      "inverse-primary": "#b4c5ff",
+                      "surface-container": "#eceef0",
+                      "on-tertiary-container": "#c1ffc5",
+                      "error": "#ba1a1a",
+                      "surface-tint": "#0053db",
+                      "inverse-surface": "#2d3133",
+                      "on-surface-variant": "#434655",
+                      "on-error": "#ffffff",
+                      "secondary-container": "#dae2fd",
+                      "secondary-fixed-dim": "#bec6e0",
+                      "outline": "#737686",
+                      "error-container": "#ffdad6",
+                      "inverse-on-surface": "#eff1f3",
+                      "primary": "#004ac6",
+                      "primary-fixed-dim": "#b4c5ff",
+                      "on-primary-container": "#eeefff",
+                      "secondary-fixed": "#dae2fd",
+                      "surface": "#f7f9fb",
+                      "tertiary": "#006229",
+                      "background": "#f7f9fb",
+                      "on-tertiary-fixed": "#002109",
+                      "on-primary": "#ffffff"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "2xl": "48px",
+                      "sidebar-width": "260px",
+                      "sidebar-collapsed": "72px",
+                      "3xl": "64px",
+                      "xl": "32px",
+                      "xs": "4px",
+                      "container-max": "1280px",
+                      "sm": "8px",
+                      "md": "16px",
+                      "base": "8px",
+                      "lg": "24px"
+              },
+              "fontFamily": {
+                      "headline-md": ["Inter"],
+                      "label-md": ["Inter"],
+                      "label-sm": ["Inter"],
+                      "display-lg": ["Inter"],
+                      "headline-lg-mobile": ["Inter"],
+                      "headline-lg": ["Inter"],
+                      "body-md": ["Inter"],
+                      "body-lg": ["Inter"],
+                      "headline-sm": ["Inter"],
+                      "body-sm": ["Inter"]
+              },
+              "fontSize": {
+                      "headline-md": ["24px", { "lineHeight": "1.3", "fontWeight": "600" }],
+                      "label-md": ["14px", { "lineHeight": "1", "fontWeight": "500" }],
+                      "label-sm": ["12px", { "lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                      "display-lg": ["48px", { "lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                      "headline-lg-mobile": ["24px", { "lineHeight": "1.2", "fontWeight": "600" }],
+                      "headline-lg": ["32px", { "lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+                      "body-md": ["16px", { "lineHeight": "1.5", "fontWeight": "400" }],
+                      "body-lg": ["18px", { "lineHeight": "1.6", "fontWeight": "400" }],
+                      "headline-sm": ["20px", { "lineHeight": "1.4", "fontWeight": "600" }],
+                      "body-sm": ["14px", { "lineHeight": "1.5", "fontWeight": "400" }]
+              }
+            }
+          }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .icon-fill {
+            font-variation-settings: 'FILL' 1;
+        }
+        
+        /* Custom scrollbar for form area */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #c3c6d7; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #737686; 
+        }
+    </style>
+</head>
+<body class="bg-surface-container-low text-on-surface h-screen w-full overflow-hidden flex flex-col font-body-md antialiased">
+<!-- Task-Focused Top Bar (Navigation Shell Suppressed) -->
+<header class="h-16 bg-surface border-b border-outline-variant flex items-center justify-between px-lg shrink-0 z-10">
+<div class="flex items-center gap-md">
+<button aria-label="Go Back" class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-variant transition-colors text-on-surface-variant">
+<span class="material-symbols-outlined">arrow_back</span>
+</button>
+<div class="h-6 w-px bg-outline-variant mx-sm"></div>
+<h1 class="font-headline-sm text-headline-sm text-on-surface">Create New Company</h1>
+</div>
+<div class="flex items-center gap-sm">
+<button class="px-md py-sm rounded-lg font-label-md text-label-md text-secondary hover:bg-surface-variant transition-colors">
+                Cancel
+            </button>
+<button class="px-md py-sm rounded-lg font-label-md text-label-md bg-primary-container text-on-primary-container hover:bg-primary-container/90 transition-colors flex items-center gap-sm">
+<span class="material-symbols-outlined" style="font-size: 18px;">save</span>
+                Save Company
+            </button>
+</div>
+</header>
+<!-- Main Content Split -->
+<main class="flex flex-1 overflow-hidden">
+<!-- Left: Form Area -->
+<section class="flex-1 overflow-y-auto px-lg md:px-2xl py-xl pb-3xl">
+<div class="max-w-[800px] mx-auto space-y-lg">
+<div class="mb-lg">
+<h2 class="font-headline-md text-headline-md text-on-surface mb-xs">Company Profile</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Set up the brand identity and legal details for this entity.</p>
+</div>
+<!-- Branding Section -->
+<div class="bg-surface border border-outline-variant rounded-xl p-lg md:p-xl shadow-sm">
+<h3 class="font-headline-sm text-headline-sm text-on-surface border-b border-outline-variant pb-sm mb-md">Branding</h3>
+<div class="mb-md">
+<label class="block font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mb-sm">Company Logo</label>
+<div class="border-2 border-dashed border-outline-variant rounded-xl bg-surface-container-lowest p-xl flex flex-col items-center justify-center text-center hover:border-primary transition-colors cursor-pointer group">
+<div class="w-16 h-16 rounded-full bg-surface-container-low flex items-center justify-center mb-md group-hover:bg-primary-fixed transition-colors">
+<span class="material-symbols-outlined text-outline group-hover:text-primary transition-colors" style="font-size: 32px;">cloud_upload</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface mb-xs"><span class="font-semibold text-primary">Click to upload</span> or drag and drop</p>
+<p class="font-body-sm text-body-sm text-on-surface-variant">SVG, PNG, or JPG (max. 800x400px)</p>
+</div>
+</div>
+</div>
+<!-- Basic Info Section -->
+<div class="bg-surface border border-outline-variant rounded-xl p-lg md:p-xl shadow-sm">
+<h3 class="font-headline-sm text-headline-sm text-on-surface border-b border-outline-variant pb-sm mb-md">General Information</h3>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-md">
+<div class="col-span-1 md:col-span-2">
+<label class="block font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mb-sm" for="companyName">Legal Company Name</label>
+<input class="w-full bg-surface-container-lowest border border-outline-variant rounded-lg px-md py-sm font-body-md text-body-md text-on-surface focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-shadow" id="companyName" oninput="updatePreview('companyName', 'previewName')" placeholder="e.g. Acme Corporation Ltd." type="text"/>
+</div>
+<div>
+<label class="block font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mb-sm" for="taxId">Tax ID / VAT Number</label>
+<input class="w-full bg-surface-container-lowest border border-outline-variant rounded-lg px-md py-sm font-body-md text-body-md text-on-surface focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-shadow" id="taxId" oninput="updatePreview('taxId', 'previewTax')" placeholder="e.g. GB123456789" type="text"/>
+</div>
+<div>
+<label class="block font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mb-sm" for="contactEmail">Contact Email</label>
+<input class="w-full bg-surface-container-lowest border border-outline-variant rounded-lg px-md py-sm font-body-md text-body-md text-on-surface focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-shadow" id="contactEmail" placeholder="billing@acmecorp.com" type="email"/>
+</div>
+</div>
+</div>
+<!-- Localization & Address -->
+<div class="bg-surface border border-outline-variant rounded-xl p-lg md:p-xl shadow-sm">
+<h3 class="font-headline-sm text-headline-sm text-on-surface border-b border-outline-variant pb-sm mb-md">Location &amp; Settings</h3>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-md mb-md">
+<div class="col-span-1 md:col-span-2">
+<label class="block font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mb-sm" for="address">Registered Address</label>
+<textarea class="w-full bg-surface-container-lowest border border-outline-variant rounded-lg px-md py-sm font-body-md text-body-md text-on-surface focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-shadow resize-none" id="address" oninput="updatePreview('address', 'previewAddress')" placeholder="123 Business Road
+Suite 100
+London, UK" rows="3"></textarea>
+</div>
+<div>
+<label class="block font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mb-sm" for="currency">Base Currency</label>
+<div class="relative">
+<select class="w-full bg-surface-container-lowest border border-outline-variant rounded-lg px-md py-sm font-body-md text-body-md text-on-surface appearance-none focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-shadow" id="currency">
+<option value="USD">USD - US Dollar</option>
+<option value="EUR">EUR - Euro</option>
+<option value="GBP">GBP - British Pound</option>
+<option value="CAD">CAD - Canadian Dollar</option>
+</select>
+<div class="absolute inset-y-0 right-0 flex items-center px-sm pointer-events-none text-on-surface-variant">
+<span class="material-symbols-outlined">expand_more</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Right: Live Preview Sidebar -->
+<aside class="hidden lg:flex w-[450px] bg-surface border-l border-outline-variant flex-col shrink-0 relative shadow-[-4px_0_24px_-10px_rgba(0,0,0,0.1)]">
+<div class="p-lg border-b border-outline-variant bg-surface-container-low/50 backdrop-blur-sm sticky top-0 z-10 flex items-center justify-between">
+<div>
+<h2 class="font-label-md text-label-md text-on-surface font-semibold flex items-center gap-xs">
+<span class="material-symbols-outlined text-primary" style="font-size: 18px;">visibility</span>
+                        Live Document Preview
+                    </h2>
+<p class="font-label-sm text-label-sm text-on-surface-variant mt-xs">How this brand appears on quotes</p>
+</div>
+</div>
+<div class="flex-1 overflow-y-auto p-lg bg-surface-container-low flex justify-center">
+<!-- Simulated A4 Paper -->
+<div class="w-full max-w-[380px] bg-surface-container-lowest shadow-[0_4px_12px_-2px_rgba(0,0,0,0.1)] rounded-sm min-h-[500px] flex flex-col p-lg border border-outline-variant/30">
+<!-- Document Header Preview -->
+<div class="flex justify-between items-start mb-xl border-b border-outline-variant/50 pb-md">
+<div class="max-w-[60%]">
+<!-- Logo Placeholder Preview -->
+<div class="w-12 h-12 bg-surface-variant rounded flex items-center justify-center mb-sm text-outline">
+<span class="material-symbols-outlined" style="font-size: 20px;">image</span>
+</div>
+<!-- Dynamic Text Previews -->
+<h4 class="font-headline-sm text-headline-sm text-on-surface leading-tight mb-xs break-words" id="previewName">Your Company Name</h4>
+<p class="font-label-sm text-label-sm text-on-surface-variant whitespace-pre-line leading-relaxed mb-xs" id="previewAddress">123 Example Street<br/>City, Country 00000</p>
+<p class="font-label-sm text-label-sm text-on-surface-variant">Tax ID: <span id="previewTax">Pending</span></p>
+</div>
+<!-- Mock Invoice details -->
+<div class="text-right">
+<h5 class="font-headline-md text-headline-md text-on-surface-variant/40 uppercase tracking-widest">Quote</h5>
+<p class="font-label-sm text-label-sm text-on-surface-variant mt-sm">QT-2024-001</p>
+<p class="font-label-sm text-label-sm text-on-surface-variant mt-xs">Oct 24, 2024</p>
+</div>
+</div>
+<!-- Mock Content to make it look like a document -->
+<div class="flex-1">
+<div class="h-4 bg-surface-variant/30 rounded w-1/3 mb-md"></div>
+<div class="h-32 bg-surface-variant/20 rounded border border-outline-variant/20 mb-md"></div>
+<div class="flex justify-end">
+<div class="w-1/2">
+<div class="flex justify-between border-b border-outline-variant/30 py-xs">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Subtotal</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">$0.00</span>
+</div>
+<div class="flex justify-between py-xs pt-sm">
+<span class="font-label-md text-label-md text-on-surface font-bold">Total</span>
+<span class="font-label-md text-label-md text-on-surface font-bold">$0.00</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</aside>
+</main>
+<script>
+        // Simple script to update preview live
+        function updatePreview(inputId, previewId) {
+            const inputVal = document.getElementById(inputId).value;
+            const previewEl = document.getElementById(previewId);
+            
+            if (inputVal.trim() === '') {
+                // Restore defaults if empty
+                if (inputId === 'companyName') previewEl.innerText = 'Your Company Name';
+                if (inputId === 'taxId') previewEl.innerText = 'Pending';
+                if (inputId === 'address') previewEl.innerHTML = '123 Example Street<br>City, Country 00000';
+            } else {
+                if(inputId === 'address') {
+                    // replace newlines with br tags for html rendering
+                    previewEl.innerHTML = inputVal.replace(/\n/g, '<br>');
+                } else {
+                    previewEl.innerText = inputVal;
+                }
+            }
+        }
+    </script>
+</body></html>

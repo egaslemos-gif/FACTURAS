@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Offline Mode &amp; Sync - Proforma360</title>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind Configuration -->
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-variant": "#e0e3e5",
+                    "on-secondary-fixed": "#131b2e",
+                    "surface-container-low": "#f2f4f6",
+                    "surface-dim": "#d8dadc",
+                    "on-tertiary": "#ffffff",
+                    "primary-container": "#2563eb",
+                    "on-error-container": "#93000a",
+                    "on-tertiary-fixed-variant": "#005321",
+                    "on-secondary": "#ffffff",
+                    "surface-container-high": "#e6e8ea",
+                    "surface-bright": "#f7f9fb",
+                    "on-primary-fixed-variant": "#003ea8",
+                    "tertiary-container": "#007e37",
+                    "surface-container-lowest": "#ffffff",
+                    "surface-container-highest": "#e0e3e5",
+                    "on-secondary-fixed-variant": "#3f465c",
+                    "primary-fixed": "#dbe1ff",
+                    "tertiary-fixed-dim": "#4ae176",
+                    "on-background": "#191c1e",
+                    "tertiary-fixed": "#6bff8f",
+                    "outline-variant": "#c3c6d7",
+                    "secondary": "#565e74",
+                    "on-secondary-container": "#5c647a",
+                    "on-primary-fixed": "#00174b",
+                    "on-surface": "#191c1e",
+                    "inverse-primary": "#b4c5ff",
+                    "surface-container": "#eceef0",
+                    "on-tertiary-container": "#c1ffc5",
+                    "error": "#ba1a1a",
+                    "surface-tint": "#0053db",
+                    "inverse-surface": "#2d3133",
+                    "on-surface-variant": "#434655",
+                    "on-error": "#ffffff",
+                    "secondary-container": "#dae2fd",
+                    "secondary-fixed-dim": "#bec6e0",
+                    "outline": "#737686",
+                    "error-container": "#ffdad6",
+                    "inverse-on-surface": "#eff1f3",
+                    "primary": "#004ac6",
+                    "primary-fixed-dim": "#b4c5ff",
+                    "on-primary-container": "#eeefff",
+                    "secondary-fixed": "#dae2fd",
+                    "surface": "#f7f9fb",
+                    "tertiary": "#006229",
+                    "background": "#f7f9fb",
+                    "on-tertiary-fixed": "#002109",
+                    "on-primary": "#ffffff"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "2xl": "48px",
+                    "sidebar-width": "260px",
+                    "sidebar-collapsed": "72px",
+                    "3xl": "64px",
+                    "xl": "32px",
+                    "xs": "4px",
+                    "container-max": "1280px",
+                    "sm": "8px",
+                    "md": "16px",
+                    "base": "8px",
+                    "lg": "24px"
+            },
+            "fontFamily": {
+                    "headline-md": ["Inter"],
+                    "label-md": ["Inter"],
+                    "label-sm": ["Inter"],
+                    "display-lg": ["Inter"],
+                    "headline-lg-mobile": ["Inter"],
+                    "headline-lg": ["Inter"],
+                    "body-md": ["Inter"],
+                    "body-lg": ["Inter"],
+                    "headline-sm": ["Inter"],
+                    "body-sm": ["Inter"]
+            },
+            "fontSize": {
+                    "headline-md": ["24px", {"lineHeight": "1.3", "fontWeight": "600"}],
+                    "label-md": ["14px", {"lineHeight": "1", "fontWeight": "500"}],
+                    "label-sm": ["12px", {"lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                    "display-lg": ["48px", {"lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "headline-lg-mobile": ["24px", {"lineHeight": "1.2", "fontWeight": "600"}],
+                    "headline-lg": ["32px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+                    "body-md": ["16px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                    "body-lg": ["18px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                    "headline-sm": ["20px", {"lineHeight": "1.4", "fontWeight": "600"}],
+                    "body-sm": ["14px", {"lineHeight": "1.5", "fontWeight": "400"}]
+            }
+          }
+        }
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+          font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .icon-fill {
+          font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        /* Custom scrollbar for data tables */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #c3c6d7; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #737686; }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md text-body-md antialiased min-h-screen flex flex-col md:flex-row">
+<!-- Shared Component: SideNavBar -->
+<nav class="hidden md:flex fixed flex-col h-full z-40 docked h-screen w-sidebar-width left-0 top-0 bg-surface shadow-[1px_0_0_0_rgba(195,198,215,0.5)]">
+<!-- Header -->
+<div class="px-md py-lg flex flex-col gap-sm">
+<div class="flex items-center gap-sm">
+<div class="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center">
+<span class="font-headline-sm text-headline-sm font-bold text-on-primary-container">P</span>
+</div>
+<div>
+<h1 class="font-headline-md text-headline-md font-bold text-primary">Proforma360</h1>
+<p class="font-label-sm text-label-sm text-on-surface-variant">Enterprise Finance</p>
+</div>
+</div>
+</div>
+<!-- Navigation Links -->
+<div class="flex-1 px-sm py-sm space-y-1 overflow-y-auto">
+<a class="flex items-center gap-md text-on-surface-variant px-md py-sm rounded-lg hover:bg-surface-container-high transition-colors duration-150" href="#">
+<span class="material-symbols-outlined text-[20px]">dashboard</span>
+<span class="font-label-md text-label-md">Dashboard</span>
+</a>
+<a class="flex items-center gap-md text-on-surface-variant px-md py-sm rounded-lg hover:bg-surface-container-high transition-colors duration-150" href="#">
+<span class="material-symbols-outlined text-[20px]">business</span>
+<span class="font-label-md text-label-md">Companies</span>
+</a>
+<a class="flex items-center gap-md text-on-surface-variant px-md py-sm rounded-lg hover:bg-surface-container-high transition-colors duration-150" href="#">
+<span class="material-symbols-outlined text-[20px]">groups</span>
+<span class="font-label-md text-label-md">Clients</span>
+</a>
+<a class="flex items-center gap-md text-on-surface-variant px-md py-sm rounded-lg hover:bg-surface-container-high transition-colors duration-150" href="#">
+<span class="material-symbols-outlined text-[20px]">inventory_2</span>
+<span class="font-label-md text-label-md">Products</span>
+</a>
+<a class="flex items-center gap-md text-on-surface-variant px-md py-sm rounded-lg hover:bg-surface-container-high transition-colors duration-150" href="#">
+<span class="material-symbols-outlined text-[20px]">request_quote</span>
+<span class="font-label-md text-label-md">Quotations</span>
+</a>
+<!-- Active State: Settings (Mapped to Offline/Sync intent) -->
+<a class="flex items-center gap-md bg-secondary-container text-on-secondary-container rounded-lg px-md py-sm border-l-4 border-primary scale-95 transition-transform duration-150 relative" href="#">
+<span class="material-symbols-outlined text-[20px] icon-fill">settings</span>
+<span class="font-label-md text-label-md font-semibold">Settings</span>
+<!-- Contextual Indicator for Offline items -->
+<span class="absolute right-3 top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-error"></span>
+</a>
+</div>
+<!-- CTA & Footer Tabs -->
+<div class="px-sm pb-lg space-y-xs">
+<button class="w-full mb-md bg-surface-container-low border border-outline-variant text-primary font-label-md text-label-md py-sm rounded-lg hover:bg-surface-container-high transition-colors">
+                Upgrade Plan
+            </button>
+<a class="flex items-center gap-md text-on-surface-variant px-md py-sm rounded-lg hover:bg-surface-container-high transition-colors duration-150" href="#">
+<span class="material-symbols-outlined text-[20px]">help</span>
+<span class="font-label-md text-label-md">Help Center</span>
+</a>
+<a class="flex items-center gap-md text-on-surface-variant px-md py-sm rounded-lg hover:bg-surface-container-high transition-colors duration-150" href="#">
+<span class="material-symbols-outlined text-[20px]">logout</span>
+<span class="font-label-md text-label-md">Logout</span>
+</a>
+</div>
+</nav>
+<!-- Main Content Wrapper -->
+<div class="flex-1 flex flex-col w-full md:ml-sidebar-width min-h-screen">
+<!-- Shared Component: TopNavBar -->
+<header class="sticky top-0 z-30 flex justify-between items-center h-16 px-lg bg-surface/80 backdrop-blur-md shadow-[0_1px_0_0_rgba(195,198,215,0.3)] w-full">
+<div class="flex items-center gap-md flex-1">
+<span class="md:hidden font-headline-sm text-headline-sm font-bold text-primary">Proforma360</span>
+<!-- Search on left as per JSON -->
+<div class="hidden md:flex relative w-64">
+<span class="material-symbols-outlined absolute left-2 top-1/2 -translate-y-1/2 text-on-surface-variant text-[20px]">search</span>
+<input class="w-full bg-surface-container-low border-none rounded-md pl-10 pr-3 py-1.5 font-body-sm text-body-sm text-on-surface focus:ring-2 focus:ring-primary outline-none transition-shadow" placeholder="Search..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-md">
+<button class="hidden md:flex items-center gap-sm bg-primary text-on-primary px-4 py-2 rounded-md font-label-md text-label-md hover:bg-primary-container hover:text-on-primary-container transition-colors shadow-sm">
+<span class="material-symbols-outlined text-[18px]">add</span>
+                    Create New Quote
+                </button>
+<div class="flex items-center gap-xs">
+<button class="p-2 text-on-surface-variant hover:text-primary transition-colors focus-within:ring-2 focus-within:ring-primary rounded-full">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="p-2 text-on-surface-variant hover:text-primary transition-colors focus-within:ring-2 focus-within:ring-primary rounded-full hidden md:block">
+<span class="material-symbols-outlined">help_outline</span>
+</button>
+</div>
+<div class="w-8 h-8 rounded-full bg-surface-variant border border-outline-variant overflow-hidden ml-sm cursor-pointer hover:ring-2 hover:ring-primary transition-all">
+<!-- Placeholder avatar -->
+<div class="w-full h-full bg-secondary-container flex items-center justify-center text-on-secondary-container font-label-sm">US</div>
+</div>
+</div>
+</header>
+<!-- Main Canvas -->
+<main class="flex-1 p-md md:p-xl max-w-container-max mx-auto w-full pb-2xl md:pb-xl">
+<!-- Page Header -->
+<div class="mb-lg">
+<h2 class="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-background mb-xs">Offline Sync Status</h2>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-2xl">Manage your connection and synchronize data created while operating in offline mode. Do not close the application during active synchronization.</p>
+</div>
+<!-- Bento Grid Layout -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-md md:gap-lg">
+<!-- Primary Sync Controller Card (Spans 8 cols on large) -->
+<div class="lg:col-span-8 bg-surface-container-lowest border border-outline-variant rounded-xl p-lg flex flex-col justify-between relative overflow-hidden">
+<!-- Decorative background element for minimal flair -->
+<div class="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/4 pointer-events-none"></div>
+<div class="flex flex-col md:flex-row items-start md:items-center justify-between mb-xl relative z-10">
+<div class="flex items-center gap-md mb-md md:mb-0">
+<!-- Status Icon Container -->
+<div class="w-12 h-12 rounded-full bg-surface-variant flex items-center justify-center relative">
+<!-- Animated Syncing Icon -->
+<span class="material-symbols-outlined text-primary text-[28px] animate-spin" style="animation-duration: 3s;">sync</span>
+</div>
+<div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Syncing Data...</h3>
+<div class="flex items-center gap-xs text-on-surface-variant font-body-sm text-body-sm mt-1">
+<span class="material-symbols-outlined text-[16px]">cloud_upload</span>
+<span>Connecting to secure server</span>
+</div>
+</div>
+</div>
+<div class="text-right">
+<p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Last Successful Sync</p>
+<p class="font-body-md text-body-md text-on-surface mt-1">Oct 24, 2024 • 09:41 AM</p>
+</div>
+</div>
+<!-- Progress Bar Area -->
+<div class="space-y-sm relative z-10">
+<div class="flex justify-between font-label-md text-label-md">
+<span class="text-on-surface">Processing Quotations (3/12)</span>
+<span class="text-primary font-bold">25%</span>
+</div>
+<div class="w-full h-3 bg-surface-container-high rounded-full overflow-hidden">
+<div class="h-full bg-primary rounded-full relative transition-all duration-500 ease-out" style="width: 25%;">
+<!-- Shimmer effect on progress bar -->
+<div class="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full animate-[shimmer_2s_infinite]"></div>
+</div>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant text-right">Estimated time remaining: ~2 mins</p>
+</div>
+<!-- Action Area -->
+<div class="mt-lg flex justify-end gap-md relative z-10 border-t border-outline-variant/50 pt-md">
+<button class="px-4 py-2 border border-outline-variant text-on-surface font-label-md text-label-md rounded-md hover:bg-surface-container-low transition-colors">
+                            Cancel Sync
+                        </button>
+<button class="px-4 py-2 bg-surface-variant text-on-surface-variant font-label-md text-label-md rounded-md cursor-not-allowed opacity-70 flex items-center gap-xs" disabled="">
+<span class="material-symbols-outlined text-[18px]">sync_disabled</span>
+                            Sync Now
+                        </button>
+</div>
+</div>
+<!-- Network Status / Summary Card (Spans 4 cols on large) -->
+<div class="lg:col-span-4 flex flex-col gap-md">
+<!-- Status Chip Card -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-md flex items-center gap-md">
+<div class="w-10 h-10 rounded-full bg-tertiary/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-tertiary">wifi</span>
+</div>
+<div>
+<h4 class="font-label-md text-label-md text-on-surface uppercase tracking-wider">Network Status</h4>
+<p class="font-body-md text-body-md text-tertiary font-medium">Online &amp; Stable</p>
+</div>
+</div>
+<!-- Summary Stats -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-md flex-1">
+<h4 class="font-headline-sm text-headline-sm text-on-surface mb-md">Pending Queue</h4>
+<div class="space-y-4">
+<div class="flex justify-between items-center border-b border-outline-variant/40 pb-2">
+<div class="flex items-center gap-xs text-on-surface-variant">
+<span class="material-symbols-outlined text-[18px]">request_quote</span>
+<span class="font-body-md text-body-md">Quotations</span>
+</div>
+<span class="font-label-md text-label-md bg-secondary-container text-on-secondary-container px-2 py-0.5 rounded-full">12</span>
+</div>
+<div class="flex justify-between items-center border-b border-outline-variant/40 pb-2">
+<div class="flex items-center gap-xs text-on-surface-variant">
+<span class="material-symbols-outlined text-[18px]">groups</span>
+<span class="font-body-md text-body-md">New Clients</span>
+</div>
+<span class="font-label-md text-label-md bg-surface-variant text-on-surface-variant px-2 py-0.5 rounded-full">3</span>
+</div>
+<div class="flex justify-between items-center">
+<div class="flex items-center gap-xs text-on-surface-variant">
+<span class="material-symbols-outlined text-[18px]">inventory_2</span>
+<span class="font-body-md text-body-md">Product Edits</span>
+</div>
+<span class="font-label-md text-label-md bg-surface-variant text-on-surface-variant px-2 py-0.5 rounded-full">0</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Pending Records Data Table (Full width) -->
+<div class="lg:col-span-12 bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden flex flex-col">
+<div class="p-md border-b border-outline-variant flex justify-between items-center bg-surface-bright">
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Offline Records</h3>
+<span class="font-label-sm text-label-sm text-on-surface-variant bg-surface-variant px-3 py-1 rounded-full uppercase tracking-widest">15 Total</span>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse min-w-[600px]">
+<thead>
+<tr class="bg-surface-container-low border-b border-outline-variant">
+<th class="py-3 px-4 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider w-12"></th>
+<th class="py-3 px-4 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Type</th>
+<th class="py-3 px-4 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Identifier / Name</th>
+<th class="py-3 px-4 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Created Offline</th>
+<th class="py-3 px-4 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider text-right">Status</th>
+</tr>
+</thead>
+<tbody class="font-body-sm text-body-sm text-on-surface">
+<!-- Row 1 (Syncing) -->
+<tr class="border-b border-outline-variant/40 hover:bg-surface-container-lowest transition-colors">
+<td class="py-3 px-4 text-center">
+<span class="material-symbols-outlined text-primary text-[18px] animate-spin" style="animation-duration: 2s;">sync</span>
+</td>
+<td class="py-3 px-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px] text-on-surface-variant">request_quote</span>
+                                        Quotation
+                                    </td>
+<td class="py-3 px-4 font-medium text-on-background">Q-2024-8901</td>
+<td class="py-3 px-4 text-on-surface-variant">Oct 24, 10:15 AM</td>
+<td class="py-3 px-4 text-right">
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-primary/10 text-primary">
+                                            Syncing...
+                                        </span>
+</td>
+</tr>
+<!-- Row 2 (Pending) -->
+<tr class="border-b border-outline-variant/40 hover:bg-surface-container-lowest transition-colors">
+<td class="py-3 px-4 text-center">
+<span class="material-symbols-outlined text-on-surface-variant text-[18px]">cloud_off</span>
+</td>
+<td class="py-3 px-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px] text-on-surface-variant">request_quote</span>
+                                        Quotation
+                                    </td>
+<td class="py-3 px-4 font-medium text-on-background">Q-2024-8902</td>
+<td class="py-3 px-4 text-on-surface-variant">Oct 24, 11:30 AM</td>
+<td class="py-3 px-4 text-right">
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-surface-variant text-on-surface-variant">
+                                            Pending
+                                        </span>
+</td>
+</tr>
+<!-- Row 3 (Pending Error/Warning) -->
+<tr class="border-b border-outline-variant/40 hover:bg-surface-container-lowest transition-colors">
+<td class="py-3 px-4 text-center">
+<span class="material-symbols-outlined text-error text-[18px]">error</span>
+</td>
+<td class="py-3 px-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px] text-on-surface-variant">groups</span>
+                                        Client Record
+                                    </td>
+<td class="py-3 px-4 font-medium text-on-background">Acme Corp Logistics</td>
+<td class="py-3 px-4 text-on-surface-variant">Oct 24, 01:45 PM</td>
+<td class="py-3 px-4 text-right">
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-error/10 text-error">
+                                            Conflict Detected
+                                        </span>
+</td>
+</tr>
+<!-- Row 4 (Pending) -->
+<tr class="hover:bg-surface-container-lowest transition-colors">
+<td class="py-3 px-4 text-center">
+<span class="material-symbols-outlined text-on-surface-variant text-[18px]">cloud_off</span>
+</td>
+<td class="py-3 px-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px] text-on-surface-variant">request_quote</span>
+                                        Quotation
+                                    </td>
+<td class="py-3 px-4 font-medium text-on-background">Q-2024-8903</td>
+<td class="py-3 px-4 text-on-surface-variant">Oct 24, 02:10 PM</td>
+<td class="py-3 px-4 text-right">
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-surface-variant text-on-surface-variant">
+                                            Pending
+                                        </span>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</main>
+</div>
+<!-- Shared Component: BottomNavBar (Mobile Only) -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center h-16 md:hidden bg-surface-container-lowest shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] rounded-t-xl pb-safe">
+<a class="flex flex-col items-center justify-center text-on-surface-variant active:bg-surface-variant w-full h-full rounded-tl-xl" href="#">
+<span class="material-symbols-outlined text-[24px]">dashboard</span>
+<span class="font-label-sm text-label-sm mt-1">Dashboard</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant active:bg-surface-variant w-full h-full" href="#">
+<span class="material-symbols-outlined text-[24px]">request_quote</span>
+<span class="font-label-sm text-label-sm mt-1">Quotes</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant active:bg-surface-variant w-full h-full" href="#">
+<span class="material-symbols-outlined text-[24px]">groups</span>
+<span class="font-label-sm text-label-sm mt-1">Clients</span>
+</a>
+<!-- Active Tab: Settings -->
+<a class="flex flex-col items-center justify-center text-primary font-bold active:bg-surface-variant w-full h-full rounded-tr-xl relative scale-95 duration-100" href="#">
+<span class="material-symbols-outlined text-[24px] icon-fill">settings</span>
+<span class="font-label-sm text-label-sm mt-1">Settings</span>
+<span class="absolute top-2 right-6 w-2 h-2 rounded-full bg-error border border-surface-container-lowest"></span>
+</a>
+</nav>
+<!-- Shimmer Animation Keyframes -->
+<style>
+        @keyframes shimmer {
+            100% {
+                transform: translateX(100%);
+            }
+        }
+        /* iOS Safe Area Padding for BottomNav */
+        @supports (padding-bottom: env(safe-area-inset-bottom)) {
+            .pb-safe {
+                padding-bottom: env(safe-area-inset-bottom);
+                height: calc(4rem + env(safe-area-inset-bottom));
+            }
+        }
+    </style>
+</body></html>
