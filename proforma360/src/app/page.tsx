@@ -12,57 +12,58 @@ export default function LandingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[var(--color-surface-container-lowest)] text-[var(--color-on-surface)] flex flex-col font-sans selection:bg-blue-100 selection:text-blue-900">
-      {/* Navbar */}
-      <header className="px-6 py-4 flex items-center justify-between bg-white/80 backdrop-blur-xl fixed top-0 w-full z-50 transition-all border-b border-gray-100">
-        <div className="flex items-center gap-2">
-          <img src="/icon.png" alt="Logo" className="w-8 h-8 rounded-md" />
-          <div className="text-xl font-bold text-[#004ac6] tracking-tight">
-            Proforma360
+    <div className="min-h-screen bg-white text-gray-900 flex flex-col font-sans selection:bg-blue-100 selection:text-blue-900">
+      
+      {/* Top Section with light blue background matching the reference */}
+      <div className="bg-[#f3f5f9] relative w-full pt-4 pb-32">
+        {/* Navbar */}
+        <header className="px-6 py-4 flex items-center justify-between max-w-7xl mx-auto w-full z-50">
+          <div className="flex items-center gap-2">
+            <img src="/icon.svg" alt="Logo" className="w-8 h-8 rounded-md" />
+            <div className="text-[22px] font-bold text-[#004ac6] tracking-tight">
+              Proforma360
+            </div>
           </div>
-        </div>
-        <nav className="hidden md:flex items-center gap-10 text-[14px] font-medium text-gray-600">
-          <a href="#funcionalidades" className="hover:text-black transition-colors">Funcionalidades</a>
-          <a href="#precos" className="hover:text-black transition-colors">Preços</a>
-          <a href="#faq" className="hover:text-black transition-colors">FAQ</a>
-        </nav>
-        <div className="flex items-center gap-6">
-          <Link href="/login" className="text-[14px] font-medium text-gray-600 hover:text-black transition-colors">
-            Entrar
-          </Link>
-          <Link href="/login" className="px-5 py-2.5 bg-[#004ac6] text-white rounded-md text-[14px] font-medium hover:bg-[#003ea8] transition-colors shadow-sm">
-            Começar Grátis
-          </Link>
-        </div>
-      </header>
+          <nav className="hidden md:flex items-center gap-10 text-[15px] font-medium text-gray-600">
+            <a href="#funcionalidades" className="hover:text-black transition-colors">Features</a>
+            <a href="#precos" className="hover:text-black transition-colors">Pricing</a>
+            <a href="#faq" className="hover:text-black transition-colors">FAQ</a>
+          </nav>
+          <div className="flex items-center gap-6">
+            <Link href="/login" className="text-[15px] font-medium text-gray-700 hover:text-black transition-colors">
+              Log In
+            </Link>
+            <Link href="/login" className="px-5 py-2.5 bg-[#2563eb] text-white rounded-[6px] text-[15px] font-medium hover:bg-[#1d4ed8] transition-colors shadow-sm">
+              Start for Free
+            </Link>
+          </div>
+        </header>
 
-      {/* Hero Section */}
-      <main className="flex-1 mt-[80px]">
-        <section className="max-w-6xl mx-auto px-6 pt-24 pb-16 flex flex-col items-center text-center">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-50/50 border border-blue-100 text-blue-700 text-xs font-semibold uppercase tracking-wider mb-8">
-            <span className="w-1.5 h-1.5 rounded-full bg-blue-600"></span>
-            🚀 VERSÃO 2.0 DISPONÍVEL
-          </div>
-          
-          <h1 className="text-[48px] md:text-[64px] font-bold tracking-tight text-[#111827] max-w-4xl mb-6 leading-[1.1]">
-            Faturas e Proformas Profissionais em <span className="text-[#004ac6]">Segundos</span>
+        {/* Hero Section */}
+        <section className="max-w-5xl mx-auto px-6 pt-24 pb-16 flex flex-col items-center text-center">
+          <h1 className="text-[52px] md:text-[68px] font-extrabold tracking-tight text-[#0f172a] max-w-4xl mb-6 leading-[1.05]">
+            Faturas e Proformas Profissionais em <span className="text-[#2563eb]">Segundos</span>
           </h1>
           
-          <p className="text-[18px] md:text-[20px] text-gray-500 max-w-2xl mb-12 leading-relaxed font-light">
-            Otimize o fluxo de trabalho financeiro da sua empresa com ferramentas de precisão construídas para equipas rápidas. Gere, partilhe e monitorize proformas sem fricção.
+          <p className="text-[18px] md:text-[20px] text-[#475569] max-w-2xl mb-12 leading-relaxed font-light">
+            Otimize o fluxo de trabalho financeiro da sua empresa com ferramentas de precisão. Gere, partilhe e monitorize proformas sem fricção.
           </p>
 
-          <div className="flex flex-col sm:flex-row items-center gap-4 mb-20">
-            <Link href="/login" className="w-full sm:w-auto px-8 py-3.5 bg-[#004ac6] hover:bg-[#003ea8] text-white rounded-md text-[15px] font-medium transition-all shadow-sm flex items-center justify-center gap-2">
+          <div className="flex flex-col sm:flex-row items-center gap-4 mb-8">
+            <Link href="/login" className="w-full sm:w-auto px-8 py-3.5 bg-[#2563eb] hover:bg-[#1d4ed8] text-white rounded-[6px] text-[15px] font-medium transition-all shadow-sm flex items-center justify-center gap-2">
               Começar Grátis <ArrowRight className="w-4 h-4" />
             </Link>
-            <Link href="#precos" className="w-full sm:w-auto px-8 py-3.5 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 rounded-md text-[15px] font-medium transition-all shadow-sm flex items-center justify-center">
+            <Link href="#precos" className="w-full sm:w-auto px-8 py-3.5 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 rounded-[6px] text-[15px] font-medium transition-all shadow-sm flex items-center justify-center">
               Ver Preços
             </Link>
           </div>
+        </section>
+      </div>
 
+      <main className="flex-1 -mt-32">
+        <section className="max-w-6xl mx-auto px-6 flex flex-col items-center text-center">
           {/* Dashboard Mockup */}
-          <div className="w-full max-w-5xl mx-auto rounded-[8px] border border-gray-200 bg-gray-50 p-2 shadow-2xl relative overflow-hidden">
+          <div className="w-full max-w-5xl mx-auto rounded-[12px] bg-white p-3 shadow-[0_20px_50px_rgba(8,_112,_184,_0.07)] border border-gray-100 relative overflow-hidden z-10">
              {/* Mac OS Window Controls Mock */}
              <div className="flex items-center gap-1.5 px-3 py-2 border-b border-gray-100/50 absolute top-0 w-full left-0 bg-white/50 z-10">
                 <div className="w-2.5 h-2.5 rounded-full bg-red-400"></div>
