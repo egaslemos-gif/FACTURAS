@@ -2,12 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { useClientsStore } from "@/stores";
-import { Search, Plus, MoreVertical, Building } from "lucide-react";
+import { Search, Plus, Trash2, Edit2, Building } from "lucide-react";
 import { cn, getInitials, formatDate } from "@/lib/utils";
 import Link from "next/link";
 
 export default function ClientsPage() {
-  const { clients, fetchClients, isLoading } = useClientsStore();
+  const { clients, fetchClients, isLoading, deleteClient } = useClientsStore();
   const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
@@ -110,9 +110,18 @@ export default function ClientsPage() {
                       <div className="text-sm text-[var(--color-on-surface-variant)]">{formatDate(client.created_at)}</div>
                     </td>
                     <td className="px-6 py-4 text-right">
-                      <button className="p-2 text-[var(--color-outline)] hover:text-[var(--color-primary)] hover:bg-[var(--color-surface-container)] rounded-full transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100">
-                        <MoreVertical className="w-5 h-5" />
-                      </button>
+                      <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Link href={`/dashboard/clients/${client.id}/edit`} className="p-2 text-[var(--color-outline)] hover:text-blue-600 hover:bg-blue-50 rounded-full transition-colors">
+                          <Edit2 className="w-5 h-5" />
+                        </Link>
+                        <button onClick={() => {
+                          if (confirm('Tem certeza que deseja apagar este cliente?')) {
+                            deleteClient(client.id);
+                          }
+                        }} className="p-2 text-[var(--color-outline)] hover:text-red-600 hover:bg-red-50 rounded-full transition-colors">
+                          <Trash2 className="w-5 h-5" />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}

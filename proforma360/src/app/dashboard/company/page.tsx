@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useCompanyStore } from "@/stores";
 import { Company } from "@/lib/types";
 import { Upload, Save, Building2, FileSignature, LayoutTemplate } from "lucide-react";
+import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
 export default function CompanyPage() {
@@ -30,8 +31,10 @@ export default function CompanyPage() {
     setIsSaving(true);
     try {
       await updateCompany(formData);
+      toast.success("Definições da empresa guardadas com sucesso!");
     } catch (error) {
       console.error(error);
+      toast.error("Erro ao guardar as definições.");
     } finally {
       setIsSaving(false);
     }

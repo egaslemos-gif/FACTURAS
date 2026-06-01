@@ -1,16 +1,18 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import { useRouter, useParams } from "next/navigation";
 import { useClientsStore } from "@/stores";
 import { ArrowLeft, Save, User } from "lucide-react";
 import { toast } from "sonner";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 
-export default function NewClientPage() {
+export default function EditClientPage() {
   const router = useRouter();
-  const { addClient } = useClientsStore();
+  const params = useParams();
+  const id = params.id as string;
+  const { clients, fetchClients, updateClient } = useClientsStore();
   const [isSaving, setIsSaving] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
@@ -22,6 +24,25 @@ export default function NewClientPage() {
     status: "active" as const,
   });
 
+  useEffect(() => {
+    fetchClients();
+  }, [fetchClients]);
+
+  useEffect(() => {
+    const client = clients.find((c) => c.id === id);
+    if (client) {
+      setFormData({
+        name: client.name || "",
+        email: client.email || "",
+        phone: client.phone || "",
+        tax_number: client.tax_number || "",
+        address: client.address || "",
+        notes: client.notes || "",
+        status: (client.status as any) || "active",
+      });
+    }
+  }, [clients, id]);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
@@ -30,12 +51,12 @@ export default function NewClientPage() {
     e.preventDefault();
     setIsSaving(true);
     try {
-      await addClient(formData);
-      toast.success("Cliente adicionado com sucesso!");
+      await updateClient(id, formData);
+      toast.success("Cliente atualizado com sucesso!");
       router.push("/dashboard/clients");
     } catch (error) {
       console.error(error);
-      toast.error("Erro ao adicionar cliente.");
+      toast.error("Erro ao atualizar cliente.");
       setIsSaving(false);
     }
   };
@@ -47,9 +68,9 @@ export default function NewClientPage() {
           <ArrowLeft className="w-6 h-6" />
         </Link>
         <div>
-          <h1 className="text-headline-lg text-[var(--color-on-surface)]">Novo Cliente</h1>
+          <h1 className="text-headline-lg text-[var(--color-on-surface)]">Editar Cliente</h1>
           <p className="text-body-md text-[var(--color-on-surface-variant)] mt-1">
-            Adicionar um novo cliente à sua carteira
+            Atualize as informações do cliente
           </p>
         </div>
       </div>
@@ -155,7 +176,7 @@ export default function NewClientPage() {
             ) : (
               <Save className="w-5 h-5" />
             )}
-            {isSaving ? "A guardar..." : "Guardar Cliente"}
+            {isSaving ? "A guardar..." : "Salvar Alterações"}
           </button>
         </div>
       </form>

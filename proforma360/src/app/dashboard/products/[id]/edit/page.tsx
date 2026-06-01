@@ -1,16 +1,18 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import { useRouter, useParams } from "next/navigation";
 import { useProductsStore } from "@/stores";
-import { Save, ArrowLeft, Package, Tag, FileText, Layers, Scale } from "lucide-react";
+import { Save, ArrowLeft, Package } from "lucide-react";
 import { toast } from "sonner";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 
-export default function NewProductPage() {
+export default function EditProductPage() {
   const router = useRouter();
-  const { addProduct } = useProductsStore();
+  const params = useParams();
+  const id = params.id as string;
+  const { products, fetchProducts, updateProduct } = useProductsStore();
   const [isSaving, setIsSaving] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
@@ -18,9 +20,28 @@ export default function NewProductPage() {
     description: "",
     category: "Geral",
     price: 0,
-    vat: 16, // Default VAT for Mozambique is 16% (historicamente 17%, atualizar conforme necessidade)
+    vat: 16,
     unit: "un",
   });
+
+  useEffect(() => {
+    fetchProducts();
+  }, [fetchProducts]);
+
+  useEffect(() => {
+    const product = products.find((p) => p.id === id);
+    if (product) {
+      setFormData({
+        name: product.name || "",
+        code: product.code || "",
+        description: product.description || "",
+        category: product.category || "Geral",
+        price: product.price || 0,
+        vat: product.vat || 16,
+        unit: product.unit || "un",
+      });
+    }
+  }, [products, id]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
@@ -34,16 +55,16 @@ export default function NewProductPage() {
     e.preventDefault();
     setIsSaving(true);
     try {
-      await addProduct({
+      await updateProduct(id, {
         ...formData,
         price: Number(formData.price),
         vat: Number(formData.vat),
       });
-      toast.success("Produto adicionado com sucesso!");
+      toast.success("Produto atualizado com sucesso!");
       router.push("/dashboard/products");
     } catch (error) {
       console.error(error);
-      toast.error("Erro ao adicionar produto.");
+      toast.error("Erro ao atualizar produto.");
       setIsSaving(false);
     }
   };
@@ -55,9 +76,9 @@ export default function NewProductPage() {
           <ArrowLeft className="w-6 h-6" />
         </Link>
         <div>
-          <h1 className="text-headline-lg text-[var(--color-on-surface)]">Novo Produto / Serviço</h1>
+          <h1 className="text-headline-lg text-[var(--color-on-surface)]">Editar Produto / Serviço</h1>
           <p className="text-body-md text-[var(--color-on-surface-variant)] mt-1">
-            Adicionar um item ao seu catálogo
+            Atualize as informações do item
           </p>
         </div>
       </div>
@@ -188,7 +209,7 @@ export default function NewProductPage() {
             ) : (
               <Save className="w-5 h-5" />
             )}
-            {isSaving ? "A guardar..." : "Guardar Produto"}
+            {isSaving ? "A guardar..." : "Salvar Alterações"}
           </button>
         </div>
       </form>

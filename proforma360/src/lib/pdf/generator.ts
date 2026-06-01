@@ -255,6 +255,13 @@ async function renderModernTemplate(params: any) {
     page.drawText(`NUIT: ${company.tax_number}`, { x: 40, y: cursorY, size: 9, font: fontRegular, color: rgb(1,1,1) });
     cursorY -= 12;
   }
+  if (company.address) {
+    const addressLines = company.address.split("\n");
+    addressLines.forEach((line: string) => {
+      page.drawText(line, { x: 40, y: cursorY, size: 9, font: fontRegular, color: rgb(1,1,1) });
+      cursorY -= 12;
+    });
+  }
   if (company.email || company.phone) {
     const contact = [company.email, company.phone].filter(Boolean).join(" | ");
     page.drawText(contact, { x: 40, y: cursorY, size: 9, font: fontRegular, color: rgb(1,1,1) });

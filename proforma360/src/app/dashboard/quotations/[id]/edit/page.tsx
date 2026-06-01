@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
+import { toast } from "sonner";
 import { useQuotationsStore, useClientsStore, useProductsStore, useCompanyStore } from "@/stores";
 import { ArrowLeft, Save, Plus, Trash2 } from "lucide-react";
 import Link from "next/link";
@@ -147,11 +148,11 @@ export default function EditQuotationPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!headerData.client_id) {
-      alert("Por favor, selecione um cliente.");
+      toast.error("Por favor, selecione um cliente.");
       return;
     }
     if (items.length === 0) {
-      alert("Por favor, adicione pelo menos um item à proforma.");
+      toast.error("Por favor, adicione pelo menos um item à proforma.");
       return;
     }
 
@@ -174,11 +175,12 @@ export default function EditQuotationPage() {
         } as any,
         items.map(({ id, ...item }, index) => ({ ...item, sort_order: index })) as any
       );
+      toast.success("Proforma guardada com sucesso!");
       router.push(`/dashboard/quotations/${quotationId}`);
     } catch (error) {
       console.error(error);
       setIsSaving(false);
-      alert("Erro ao guardar as alterações.");
+      toast.error("Erro ao guardar as alterações.");
     }
   };
 

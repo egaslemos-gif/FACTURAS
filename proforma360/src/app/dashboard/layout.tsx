@@ -25,6 +25,7 @@ import {
   CloudDownload,
   RefreshCw
 } from "lucide-react";
+import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { useSyncStore } from "@/stores";
 import { dbClient } from "@/lib/db/client";
@@ -69,9 +70,9 @@ export default function DashboardLayout({
       setHasUnsyncedChanges(false);
       setLastSyncDate(new Date().toISOString());
       setIsSyncMenuOpen(false);
-      alert("Backup guardado com sucesso na Cloud!");
+      toast.success("Backup guardado com sucesso na Cloud!");
     } catch (e: any) {
-      alert("Erro ao fazer backup: " + e.message);
+      toast.error("Erro ao fazer backup: " + e.message);
     } finally {
       setIsSyncing(false);
     }
@@ -95,10 +96,10 @@ export default function DashboardLayout({
       if (backupDate) setLastSyncDate(backupDate);
       
       setIsSyncMenuOpen(false);
-      alert("Backup restaurado com sucesso! A página será atualizada.");
-      window.location.reload();
+      toast.success("Backup restaurado com sucesso! A página será atualizada.");
+      setTimeout(() => window.location.reload(), 1500);
     } catch (e: any) {
-      alert("Erro ao restaurar: " + e.message);
+      toast.error("Erro ao restaurar: " + e.message);
     } finally {
       setIsSyncing(false);
     }

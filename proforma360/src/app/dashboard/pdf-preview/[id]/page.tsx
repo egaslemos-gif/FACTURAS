@@ -7,6 +7,7 @@ import { generateQuotationPDF } from "@/lib/pdf/generator";
 import { ArrowLeft, Download, CloudUpload, FileText } from "lucide-react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
+import { toast } from "sonner";
 
 export default function PdfPreviewPage() {
   const params = useParams();
@@ -81,7 +82,7 @@ export default function PdfPreviewPage() {
 
   const handleUploadToDrive = async () => {
     if (!session || !pdfBytes || !currentDetail) {
-      alert("Sessão Google inválida ou PDF não gerado.");
+      toast.error("Sessão Google inválida ou PDF não gerado.");
       return;
     }
 
@@ -108,10 +109,11 @@ export default function PdfPreviewPage() {
       }
 
       setUploadSuccess(true);
+      toast.success("Documento guardado com sucesso no Google Drive!");
       setTimeout(() => setUploadSuccess(false), 5000);
     } catch (error: any) {
       console.error("Error uploading to Drive", error);
-      alert(`Falha ao guardar no Google Drive: ${error.message}`);
+      toast.error(`Falha ao guardar no Google Drive: ${error.message}`);
     } finally {
       setIsUploading(false);
     }

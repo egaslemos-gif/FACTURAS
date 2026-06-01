@@ -86,13 +86,13 @@ export default function QuotationDetailPage() {
           </div>
         </div>
 
-        <div className="flex items-center gap-3 overflow-x-auto hide-scrollbar pb-2 md:pb-0">
-          <button title="Imprimir" className="flex items-center gap-2 p-2.5 md:px-4 md:py-2 border border-[var(--color-outline-variant)] bg-white hover:bg-gray-50 rounded-lg text-sm font-medium transition-colors whitespace-nowrap">
-            <Printer className="w-4 h-4" /> <span className="hidden md:inline">Imprimir</span>
+        <div className="flex items-center gap-2 overflow-x-auto hide-scrollbar pb-2 md:pb-0">
+          <button title="Imprimir" className="flex items-center justify-center p-2.5 border border-[var(--color-outline-variant)] bg-white hover:bg-gray-50 rounded-lg transition-colors shrink-0">
+            <Printer className="w-5 h-5 text-gray-700" />
           </button>
           
-          <Link href={`/dashboard/pdf-preview/${quotation.id}`} title="Gerar PDF" className="flex items-center gap-2 p-2.5 md:px-4 md:py-2 border border-[var(--color-primary)] text-[var(--color-primary)] hover:bg-[var(--color-primary-container)] rounded-lg text-sm font-medium transition-colors whitespace-nowrap">
-            <FileText className="w-4 h-4" /> <span className="hidden md:inline">Gerar PDF</span>
+          <Link href={`/dashboard/pdf-preview/${quotation.id}`} title="Gerar PDF" className="flex items-center justify-center p-2.5 border border-[var(--color-primary)] bg-[var(--color-primary-container)] hover:bg-[var(--color-primary)] hover:text-white text-[var(--color-primary)] rounded-lg transition-colors shrink-0">
+            <FileText className="w-5 h-5" />
           </Link>
 
           {quotation.status === 'draft' && (
@@ -100,9 +100,9 @@ export default function QuotationDetailPage() {
               onClick={() => handleStatusChange('sent')}
               disabled={isUpdatingStatus}
               title="Marcar como Enviada"
-              className="flex items-center gap-2 p-2.5 md:px-4 md:py-2 bg-[var(--color-primary)] hover:bg-[#003ea8] text-white rounded-lg text-sm font-medium transition-colors whitespace-nowrap"
+              className="flex items-center justify-center p-2.5 bg-[var(--color-primary)] hover:bg-[#003ea8] text-white rounded-lg transition-colors shrink-0 disabled:opacity-50"
             >
-              <Send className="w-4 h-4" /> <span className="hidden md:inline">Marcar como Enviada</span>
+              <Send className="w-5 h-5" />
             </button>
           )}
 
@@ -111,14 +111,14 @@ export default function QuotationDetailPage() {
               onClick={() => handleStatusChange('approved')}
               disabled={isUpdatingStatus}
               title="Aprovar"
-              className="flex items-center gap-2 p-2.5 md:px-4 md:py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium transition-colors whitespace-nowrap"
+              className="flex items-center justify-center p-2.5 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors shrink-0 disabled:opacity-50"
             >
-              <CheckCircle2 className="w-4 h-4" /> <span className="hidden md:inline">Aprovar</span>
+              <CheckCircle2 className="w-5 h-5" />
             </button>
           )}
 
-          <Link href={`/dashboard/quotations/${quotation.id}/edit`} title="Editar" className="flex items-center gap-2 p-2.5 md:px-4 md:py-2 border border-gray-300 bg-white hover:bg-gray-50 text-gray-700 rounded-lg text-sm font-medium transition-colors whitespace-nowrap">
-            <Edit2 className="w-4 h-4" /> <span className="hidden md:inline">Editar</span>
+          <Link href={`/dashboard/quotations/${quotation.id}/edit`} title="Editar" className="flex items-center justify-center p-2.5 border border-gray-300 bg-white hover:bg-gray-50 text-gray-700 rounded-lg transition-colors shrink-0">
+            <Edit2 className="w-5 h-5" />
           </Link>
 
           {quotation.status !== 'rejected' && quotation.status !== 'approved' && (
@@ -126,9 +126,9 @@ export default function QuotationDetailPage() {
               onClick={() => handleStatusChange('rejected')} 
               disabled={isUpdatingStatus}
               title="Rejeitar"
-              className="flex items-center gap-2 p-2.5 md:px-4 md:py-2 border border-red-200 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg text-sm font-medium transition-colors whitespace-nowrap"
+              className="flex items-center justify-center p-2.5 border border-red-200 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg transition-colors shrink-0 disabled:opacity-50"
             >
-              <XCircle className="w-4 h-4" /> <span className="hidden md:inline">Rejeitar</span>
+              <XCircle className="w-5 h-5" />
             </button>
           )}
 
@@ -137,9 +137,9 @@ export default function QuotationDetailPage() {
               onClick={() => handleStatusChange('draft')} 
               disabled={isUpdatingStatus}
               title="Reverter (Rascunho)"
-              className="flex items-center gap-2 p-2.5 md:px-4 md:py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition-colors whitespace-nowrap"
+              className="flex items-center justify-center p-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors shrink-0 disabled:opacity-50"
             >
-              <Clock className="w-4 h-4" /> <span className="hidden md:inline">Reverter (Rascunho)</span>
+              <Clock className="w-5 h-5" />
             </button>
           )}
         </div>
