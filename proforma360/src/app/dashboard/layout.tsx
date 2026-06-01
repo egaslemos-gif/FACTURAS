@@ -21,7 +21,7 @@ import {
   Search,
   Bell,
   HelpCircle,
-  CloudArrowUp
+  CloudUpload
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -119,7 +119,7 @@ export default function DashboardLayout({
         <div className="p-4 border-t border-[var(--color-outline-variant)] shrink-0 space-y-2">
           {!isSidebarCollapsed && (
             <button className="w-full flex items-center justify-center py-2.5 px-4 mb-4 bg-[var(--color-surface-container)] text-[var(--color-primary)] font-semibold text-sm rounded-lg border border-[var(--color-outline-variant)] hover:bg-[var(--color-surface-container-highest)] transition-colors">
-              <CloudArrowUp className="w-4 h-4 mr-2" />
+              <CloudUpload className="w-4 h-4 mr-2" />
               Upgrade Plan
             </button>
           )}
