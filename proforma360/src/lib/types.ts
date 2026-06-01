@@ -15,6 +15,7 @@ export interface Company {
   stamp_url: string | null;
   footer_text: string | null;
   quotation_prefix: string;
+  pdf_template: "classic" | "modern" | "corporate";
   created_at: string;
   updated_at: string;
 }

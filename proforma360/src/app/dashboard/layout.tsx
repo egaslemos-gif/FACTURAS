@@ -153,14 +153,44 @@ export default function DashboardLayout({
       <header className="md:hidden fixed top-0 w-full h-16 bg-white border-b border-[var(--color-outline-variant)] flex items-center justify-between px-4 z-30">
         <div className="text-lg font-bold text-[var(--color-primary)]">Proforma360</div>
         
-        <div className="flex items-center gap-2">
-           {session.user?.image ? (
-              <img src={session.user.image} alt="User" referrerPolicy="no-referrer" className="w-8 h-8 rounded-full border border-[var(--color-outline-variant)]" />
-            ) : (
-              <div className="w-8 h-8 rounded-full bg-[var(--color-secondary-container)] text-[var(--color-on-secondary-container)] flex items-center justify-center font-bold text-xs">
-                {userInitials}
-              </div>
-            )}
+        <div className="flex items-center gap-2 relative">
+           <button 
+             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+             className="focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] rounded-full"
+           >
+             {session.user?.image ? (
+                <img src={session.user.image} alt="User" referrerPolicy="no-referrer" className="w-8 h-8 rounded-full border border-[var(--color-outline-variant)] object-cover" />
+              ) : (
+                <div className="w-8 h-8 rounded-full bg-[var(--color-secondary-container)] text-[var(--color-on-secondary-container)] flex items-center justify-center font-bold text-xs">
+                  {userInitials}
+                </div>
+              )}
+           </button>
+
+           {isMobileMenuOpen && (
+             <>
+               <div 
+                 className="fixed inset-0 z-40" 
+                 onClick={() => setIsMobileMenuOpen(false)}
+               ></div>
+               <div className="absolute top-10 right-0 mt-2 w-56 bg-white rounded-xl shadow-lg border border-[var(--color-outline-variant)] overflow-hidden z-50 animate-fade-in">
+                 <div className="p-4 border-b border-[var(--color-outline-variant)] bg-[var(--color-surface-container-lowest)]">
+                   <p className="text-sm font-semibold text-[var(--color-on-surface)] truncate">{session.user?.name}</p>
+                   <p className="text-xs text-[var(--color-on-surface-variant)] truncate">{session.user?.email}</p>
+                 </div>
+                 <Link href="/dashboard/company" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-[var(--color-on-surface-variant)] hover:bg-[var(--color-surface-container)] hover:text-[var(--color-primary)] transition-colors">
+                   <Building2 className="w-4 h-4" /> Perfil da Empresa
+                 </Link>
+                 <Link href="/dashboard/settings" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-[var(--color-on-surface-variant)] hover:bg-[var(--color-surface-container)] hover:text-[var(--color-primary)] transition-colors">
+                   <Settings className="w-4 h-4" /> Definições
+                 </Link>
+                 <div className="border-t border-[var(--color-outline-variant)]"></div>
+                 <button onClick={() => signOut({ callbackUrl: "/login" })} className="flex items-center gap-3 w-full text-left px-4 py-3 text-sm font-medium text-red-600 hover:bg-red-50 transition-colors">
+                   <LogOut className="w-4 h-4" /> Terminar Sessão
+                 </button>
+               </div>
+             </>
+           )}
         </div>
       </header>
 

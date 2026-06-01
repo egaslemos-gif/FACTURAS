@@ -9,15 +9,15 @@
 
 @theme inline {
   /* --- Colors: Surface Hierarchy --- */
-  --color-surface: #f7f9fb;
-  --color-surface-dim: #d8dadc;
-  --color-surface-bright: #f7f9fb;
-  --color-surface-container-lowest: #ffffff;
-  --color-surface-container-low: #f2f4f6;
-  --color-surface-container: #eceef0;
-  --color-surface-container-high: #e6e8ea;
-  --color-surface-container-highest: #e0e3e5;
-  --color-surface-variant: #e0e3e5;
+  --color-surface: #f4f7ff;
+  --color-surface-dim: #dbe1ff;
+  --color-surface-bright: #f4f7ff;
+  --color-surface-container-lowest: #f4f7ff;
+  --color-surface-container-low: #edf2ff;
+  --color-surface-container: #e6edff;
+  --color-surface-container-high: #e0e8ff;
+  --color-surface-container-highest: #dbe1ff;
+  --color-surface-variant: #dbe1ff;
   --color-surface-tint: #0053db;
 
   /* --- Colors: Primary --- */

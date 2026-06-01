@@ -135,24 +135,116 @@ export default function CompanyPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* Logo */}
-            <div className="flex flex-col items-center p-6 border-2 border-dashed border-[var(--color-outline-variant)] rounded-lg bg-[var(--color-surface-container-low)]">
-              <Upload className="w-8 h-8 text-[var(--color-outline)] mb-3" />
-              <span className="text-label-sm text-[var(--color-on-surface-variant)] mb-1">LOGOTIPO</span>
-              <p className="text-xs text-center text-[var(--color-outline)]">PNG transparente (Máx 2MB)</p>
-            </div>
+            <label className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-[var(--color-outline-variant)] rounded-lg bg-[var(--color-surface-container-low)] cursor-pointer hover:bg-[var(--color-surface-container)] transition-colors relative overflow-hidden group">
+              <input 
+                type="file" 
+                accept="image/png, image/jpeg" 
+                className="hidden" 
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    const reader = new FileReader();
+                    reader.onloadend = () => {
+                      setFormData(prev => ({ ...prev, logo_url: reader.result as string }));
+                    };
+                    reader.readAsDataURL(file);
+                  }
+                }}
+              />
+              {formData.logo_url ? (
+                <img src={formData.logo_url} alt="Logo" className="absolute inset-0 w-full h-full object-contain p-2" />
+              ) : (
+                <>
+                  <Upload className="w-8 h-8 text-[var(--color-outline)] mb-3 group-hover:text-[var(--color-primary)] transition-colors" />
+                  <span className="text-label-sm text-[var(--color-on-surface-variant)] mb-1">LOGOTIPO</span>
+                  <p className="text-xs text-center text-[var(--color-outline)]">PNG transparente (Máx 2MB)</p>
+                </>
+              )}
+            </label>
 
             {/* Carimbo */}
-            <div className="flex flex-col items-center p-6 border-2 border-dashed border-[var(--color-outline-variant)] rounded-lg bg-[var(--color-surface-container-low)]">
-              <Upload className="w-8 h-8 text-[var(--color-outline)] mb-3" />
-              <span className="text-label-sm text-[var(--color-on-surface-variant)] mb-1">CARIMBO</span>
-              <p className="text-xs text-center text-[var(--color-outline)]">PNG transparente (Máx 2MB)</p>
-            </div>
+            <label className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-[var(--color-outline-variant)] rounded-lg bg-[var(--color-surface-container-low)] cursor-pointer hover:bg-[var(--color-surface-container)] transition-colors relative overflow-hidden group">
+              <input 
+                type="file" 
+                accept="image/png, image/jpeg" 
+                className="hidden" 
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    const reader = new FileReader();
+                    reader.onloadend = () => {
+                      setFormData(prev => ({ ...prev, stamp_url: reader.result as string }));
+                    };
+                    reader.readAsDataURL(file);
+                  }
+                }}
+              />
+              {formData.stamp_url ? (
+                <img src={formData.stamp_url} alt="Carimbo" className="absolute inset-0 w-full h-full object-contain p-2" />
+              ) : (
+                <>
+                  <Upload className="w-8 h-8 text-[var(--color-outline)] mb-3 group-hover:text-[var(--color-primary)] transition-colors" />
+                  <span className="text-label-sm text-[var(--color-on-surface-variant)] mb-1">CARIMBO</span>
+                  <p className="text-xs text-center text-[var(--color-outline)]">PNG transparente (Máx 2MB)</p>
+                </>
+              )}
+            </label>
 
             {/* Assinatura */}
-            <div className="flex flex-col items-center p-6 border-2 border-dashed border-[var(--color-outline-variant)] rounded-lg bg-[var(--color-surface-container-low)]">
-              <Upload className="w-8 h-8 text-[var(--color-outline)] mb-3" />
-              <span className="text-label-sm text-[var(--color-on-surface-variant)] mb-1">ASSINATURA</span>
-              <p className="text-xs text-center text-[var(--color-outline)]">PNG transparente (Máx 2MB)</p>
+            <label className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-[var(--color-outline-variant)] rounded-lg bg-[var(--color-surface-container-low)] cursor-pointer hover:bg-[var(--color-surface-container)] transition-colors relative overflow-hidden group">
+              <input 
+                type="file" 
+                accept="image/png, image/jpeg" 
+                className="hidden" 
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    const reader = new FileReader();
+                    reader.onloadend = () => {
+                      setFormData(prev => ({ ...prev, signature_url: reader.result as string }));
+                    };
+                    reader.readAsDataURL(file);
+                  }
+                }}
+              />
+              {formData.signature_url ? (
+                <img src={formData.signature_url} alt="Assinatura" className="absolute inset-0 w-full h-full object-contain p-2" />
+              ) : (
+                <>
+                  <Upload className="w-8 h-8 text-[var(--color-outline)] mb-3 group-hover:text-[var(--color-primary)] transition-colors" />
+                  <span className="text-label-sm text-[var(--color-on-surface-variant)] mb-1">ASSINATURA</span>
+                  <p className="text-xs text-center text-[var(--color-outline)]">PNG transparente (Máx 2MB)</p>
+                </>
+              )}
+            </label>
+          </div>
+
+          <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label className="block text-label-md mb-2">Prefixo da Proforma</label>
+              <input
+                type="text"
+                name="quotation_prefix"
+                value={formData.quotation_prefix || "PF"}
+                onChange={handleChange}
+                className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-lg focus:ring-2 focus:ring-[var(--color-primary)] outline-none font-mono"
+                placeholder="Ex: PF"
+              />
+              <p className="text-xs mt-1 text-[var(--color-outline)]">Ex: {formData.quotation_prefix || "PF"}-{new Date().getFullYear()}-0001</p>
+            </div>
+
+            <div>
+              <label className="block text-label-md mb-2">Template (Estilo da Proforma)</label>
+              <select
+                name="pdf_template"
+                value={formData.pdf_template || "classic"}
+                onChange={(e) => setFormData(prev => ({ ...prev, pdf_template: e.target.value as any }))}
+                className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-lg focus:ring-2 focus:ring-[var(--color-primary)] outline-none bg-white cursor-pointer"
+              >
+                <option value="classic">Standard (Clássico)</option>
+                <option value="modern">Moderno (Colorido & Arredondado)</option>
+              </select>
+              <p className="text-xs mt-1 text-[var(--color-outline)]">Escolha o design que melhor representa a sua marca.</p>
             </div>
           </div>
 
@@ -166,19 +258,6 @@ export default function CompanyPage() {
               className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-lg focus:ring-2 focus:ring-[var(--color-primary)] outline-none"
               placeholder="Obrigado por escolher os nossos serviços. Processado por computador."
             />
-          </div>
-
-          <div className="mt-6">
-            <label className="block text-label-md mb-2">Prefixo da Proforma</label>
-            <input
-              type="text"
-              name="quotation_prefix"
-              value={formData.quotation_prefix || "PF"}
-              onChange={handleChange}
-              className="w-full md:w-1/3 px-4 py-2 border border-[var(--color-outline-variant)] rounded-lg focus:ring-2 focus:ring-[var(--color-primary)] outline-none font-mono"
-              placeholder="Ex: PF"
-            />
-            <p className="text-xs mt-1 text-[var(--color-outline)]">O número gerado será: {formData.quotation_prefix || "PF"}-{new Date().getFullYear()}-0001</p>
           </div>
         </div>
 

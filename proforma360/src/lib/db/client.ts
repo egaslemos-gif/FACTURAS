@@ -46,6 +46,14 @@ class DatabaseClient {
         // Load existing
         this.db = new SQL.Database(savedData);
         console.log("Database loaded from IndexedDB.");
+        
+        // Run migrations for existing DBs
+        try {
+          this.db.run("ALTER TABLE companies ADD COLUMN pdf_template TEXT DEFAULT 'classic'");
+          await this.save();
+        } catch (e) {
+          // Column might already exist, ignore
+        }
       } else {
         // Create new
         this.db = new SQL.Database();
@@ -79,6 +87,7 @@ class DatabaseClient {
         stamp_url TEXT,
         footer_text TEXT,
         quotation_prefix TEXT DEFAULT 'PF',
+        pdf_template TEXT DEFAULT 'classic',
         created_at TEXT,
         updated_at TEXT
       );
