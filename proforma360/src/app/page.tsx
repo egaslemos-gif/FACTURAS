@@ -18,8 +18,8 @@ export default function LandingPage() {
       <header className="fixed top-0 w-full z-50 bg-white/70 backdrop-blur-lg border-b border-gray-100/50 transition-all">
         <div className="px-6 py-4 flex items-center justify-between max-w-7xl mx-auto w-full">
           <div className="flex items-center gap-2">
-            <img src="/icon.svg" alt="Logo" className="w-8 h-8 rounded-md" />
-            <div className="text-[22px] font-bold text-[#004ac6] tracking-tight">
+            <img src="/icon.svg" alt="Logo" className="w-7 h-7 sm:w-8 sm:h-8 rounded-md" />
+            <div className="text-[18px] sm:text-[22px] font-bold text-[#004ac6] tracking-tight">
               Proforma360
             </div>
           </div>
@@ -28,11 +28,11 @@ export default function LandingPage() {
             <a href="#precos" className="hover:text-black transition-colors">Preços</a>
             <a href="#faq" className="hover:text-black transition-colors">FAQ</a>
           </nav>
-          <div className="flex items-center gap-6">
-            <Link href="/login" className="text-[15px] font-medium text-gray-700 hover:text-black transition-colors">
+          <div className="flex items-center gap-3 sm:gap-6 shrink-0">
+            <Link href="/login" className="hidden sm:block text-[15px] font-medium text-gray-700 hover:text-black transition-colors">
               Entrar
             </Link>
-            <Link href="/login" className="px-5 py-2.5 bg-[#2563eb] text-white rounded-[6px] text-[15px] font-medium hover:bg-[#1d4ed8] transition-colors shadow-sm">
+            <Link href="/login" className="px-4 py-2 sm:px-5 sm:py-2.5 bg-[#2563eb] text-white rounded-[6px] text-[13px] sm:text-[15px] font-medium hover:bg-[#1d4ed8] transition-colors shadow-sm whitespace-nowrap">
               Começar Grátis
             </Link>
           </div>
