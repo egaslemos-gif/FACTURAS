@@ -14,10 +14,9 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen bg-white text-gray-900 flex flex-col font-sans selection:bg-blue-100 selection:text-blue-900">
       
-      {/* Top Section with light blue background matching the reference */}
-      <div className="bg-[#f3f5f9] relative w-full pt-4 pb-32">
-        {/* Navbar */}
-        <header className="px-6 py-4 flex items-center justify-between max-w-7xl mx-auto w-full z-50">
+      {/* Fixed Glass Navbar */}
+      <header className="fixed top-0 w-full z-50 bg-white/70 backdrop-blur-lg border-b border-gray-100/50 transition-all">
+        <div className="px-6 py-4 flex items-center justify-between max-w-7xl mx-auto w-full">
           <div className="flex items-center gap-2">
             <img src="/icon.svg" alt="Logo" className="w-8 h-8 rounded-md" />
             <div className="text-[22px] font-bold text-[#004ac6] tracking-tight">
@@ -25,27 +24,30 @@ export default function LandingPage() {
             </div>
           </div>
           <nav className="hidden md:flex items-center gap-10 text-[15px] font-medium text-gray-600">
-            <a href="#funcionalidades" className="hover:text-black transition-colors">Features</a>
-            <a href="#precos" className="hover:text-black transition-colors">Pricing</a>
+            <a href="#funcionalidades" className="hover:text-black transition-colors">Funcionalidades</a>
+            <a href="#precos" className="hover:text-black transition-colors">Preços</a>
             <a href="#faq" className="hover:text-black transition-colors">FAQ</a>
           </nav>
           <div className="flex items-center gap-6">
             <Link href="/login" className="text-[15px] font-medium text-gray-700 hover:text-black transition-colors">
-              Log In
+              Entrar
             </Link>
             <Link href="/login" className="px-5 py-2.5 bg-[#2563eb] text-white rounded-[6px] text-[15px] font-medium hover:bg-[#1d4ed8] transition-colors shadow-sm">
-              Start for Free
+              Começar Grátis
             </Link>
           </div>
-        </header>
+        </div>
+      </header>
 
+      {/* Top Section with light blue background matching the reference */}
+      <div className="bg-[#f3f5f9] relative w-full pt-32 pb-32">
         {/* Hero Section */}
-        <section className="max-w-5xl mx-auto px-6 pt-24 pb-16 flex flex-col items-center text-center">
-          <h1 className="text-[52px] md:text-[68px] font-extrabold tracking-tight text-[#0f172a] max-w-4xl mb-6 leading-[1.05]">
+        <section className="max-w-5xl mx-auto px-6 flex flex-col items-center text-center">
+          <h1 className="text-[40px] md:text-[56px] font-extrabold tracking-tight text-[#0f172a] max-w-4xl mb-6 leading-[1.1]">
             Faturas e Proformas Profissionais em <span className="text-[#2563eb]">Segundos</span>
           </h1>
           
-          <p className="text-[18px] md:text-[20px] text-[#475569] max-w-2xl mb-12 leading-relaxed font-light">
+          <p className="text-[17px] md:text-[19px] text-[#475569] max-w-2xl mb-12 leading-relaxed font-light">
             Otimize o fluxo de trabalho financeiro da sua empresa com ferramentas de precisão. Gere, partilhe e monitorize proformas sem fricção.
           </p>
 
@@ -62,19 +64,12 @@ export default function LandingPage() {
 
       <main className="flex-1 -mt-32">
         <section className="max-w-6xl mx-auto px-6 flex flex-col items-center text-center">
-          {/* Dashboard Mockup */}
-          <div className="w-full max-w-5xl mx-auto rounded-[12px] bg-white p-3 shadow-[0_20px_50px_rgba(8,_112,_184,_0.07)] border border-gray-100 relative overflow-hidden z-10">
-             {/* Mac OS Window Controls Mock */}
-             <div className="flex items-center gap-1.5 px-3 py-2 border-b border-gray-100/50 absolute top-0 w-full left-0 bg-white/50 z-10">
-                <div className="w-2.5 h-2.5 rounded-full bg-red-400"></div>
-                <div className="w-2.5 h-2.5 rounded-full bg-yellow-400"></div>
-                <div className="w-2.5 h-2.5 rounded-full bg-green-400"></div>
-             </div>
+          {/* 3D Invoices Image */}
+          <div className="w-full max-w-5xl mx-auto rounded-[12px] bg-white p-2 shadow-[0_20px_50px_rgba(8,_112,_184,_0.1)] border border-gray-100 relative overflow-hidden z-10">
              <img 
-               src="/dashboard_mockup.png" 
-               alt="Proforma360 Dashboard Interface" 
-               className="w-full h-auto rounded-[4px] object-cover mt-8"
-               style={{ border: '1px solid rgba(0,0,0,0.05)' }}
+               src="/hero_invoices_3d.png" 
+               alt="Faturas em 3D" 
+               className="w-full h-auto rounded-[8px] object-cover"
              />
           </div>
         </section>
