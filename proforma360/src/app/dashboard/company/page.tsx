@@ -265,12 +265,8 @@ export default function CompanyPage() {
                   : "border-[var(--color-outline-variant)] bg-[var(--color-surface-container-lowest)] hover:border-[var(--color-outline)]"
               )}
             >
-              <div className="w-24 h-32 bg-white border border-gray-200 shadow-sm mb-4 flex flex-col p-2">
-                <div className="w-full h-4 bg-gray-200 mb-2"></div>
-                <div className="w-1/2 h-2 bg-gray-100 mb-4"></div>
-                <div className="w-full h-2 bg-gray-100 mb-1"></div>
-                <div className="w-full h-2 bg-gray-100 mb-1"></div>
-                <div className="w-full h-2 bg-gray-100 mb-1"></div>
+              <div className="w-24 h-32 bg-white border border-gray-200 shadow-sm mb-4 flex flex-col rounded-md overflow-hidden">
+                <img src="/template_classic.png" alt="Classic Template" className="w-full h-full object-cover" />
               </div>
               <h3 className="font-bold text-[var(--color-on-surface)]">Standard (Clássico)</h3>
               <p className="text-xs text-[var(--color-on-surface-variant)] mt-1">Design simples, preto e branco tradicional.</p>
@@ -286,13 +282,8 @@ export default function CompanyPage() {
                   : "border-[var(--color-outline-variant)] bg-[var(--color-surface-container-lowest)] hover:border-[var(--color-outline)]"
               )}
             >
-              <div className="w-24 h-32 bg-white border border-gray-200 shadow-sm mb-4 flex flex-col rounded-lg overflow-hidden">
-                <div className="w-full h-6 bg-[var(--color-primary)]"></div>
-                <div className="p-2 flex flex-col gap-1 w-full">
-                  <div className="w-1/2 h-2 bg-gray-200 rounded-full mb-2"></div>
-                  <div className="w-full h-3 bg-[var(--color-surface-container)] rounded-md"></div>
-                  <div className="w-full h-3 bg-[var(--color-surface-container)] rounded-md"></div>
-                </div>
+              <div className="w-24 h-32 bg-white border border-gray-200 shadow-sm mb-4 flex flex-col rounded-md overflow-hidden">
+                <img src="/template_modern.png" alt="Modern Template" className="w-full h-full object-cover" />
               </div>
               <h3 className="font-bold text-[var(--color-on-surface)]">Moderno (Colorido)</h3>
               <p className="text-xs text-[var(--color-on-surface-variant)] mt-1">Design atual com cabeçalhos azuis e arredondados.</p>

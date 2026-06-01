@@ -21,9 +21,13 @@ import {
   Search,
   Bell,
   HelpCircle,
-  CloudUpload
+  CloudUpload,
+  CloudDownload,
+  RefreshCw
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useSyncStore } from "@/stores";
+import { dbClient } from "@/lib/db/client";
 
 const NAV_ITEMS = [
   { name: "Dashboard", href: "/dashboard", icon: Home },
@@ -43,12 +47,66 @@ export default function DashboardLayout({
 }) {
   const { data: session, status } = useSession();
   const pathname = usePathname();
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
+  const [isSyncMenuOpen, setIsSyncMenuOpen] = useState(false);
+  const [isSyncing, setIsSyncing] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  
+  const { hasUnsyncedChanges, lastSyncDate, setHasUnsyncedChanges, setLastSyncDate } = useSyncStore();
+
+  const handleBackup = async () => {
+    try {
+      setIsSyncing(true);
+      const dbFile = await dbClient.getDatabaseFile();
+      if (!dbFile) throw new Error("Base de dados vazia.");
+      
+      const formData = new FormData();
+      formData.append("file", new Blob([dbFile as unknown as BlobPart]), "proforma360.db");
+      
+      const res = await fetch("/api/drive/backup", { method: "POST", body: formData });
+      if (!res.ok) throw new Error("Falha no upload.");
+      
+      setHasUnsyncedChanges(false);
+      setLastSyncDate(new Date().toISOString());
+      setIsSyncMenuOpen(false);
+      alert("Backup guardado com sucesso na Cloud!");
+    } catch (e: any) {
+      alert("Erro ao fazer backup: " + e.message);
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+
+  const handleRestore = async () => {
+    if (hasUnsyncedChanges) {
+      if (!confirm("Tem alterações locais não guardadas. Restaurar da Cloud vai apagar estas alterações. Deseja continuar?")) return;
+    }
+    
+    try {
+      setIsSyncing(true);
+      const res = await fetch("/api/drive/restore");
+      if (!res.ok) throw new Error("Nenhum backup encontrado.");
+      
+      const buffer = await res.arrayBuffer();
+      await dbClient.restoreDatabaseFile(new Uint8Array(buffer));
+      
+      setHasUnsyncedChanges(false);
+      const backupDate = res.headers.get("X-Backup-Date");
+      if (backupDate) setLastSyncDate(backupDate);
+      
+      setIsSyncMenuOpen(false);
+      alert("Backup restaurado com sucesso! A página será atualizada.");
+      window.location.reload();
+    } catch (e: any) {
+      alert("Erro ao restaurar: " + e.message);
+    } finally {
+      setIsSyncing(false);
+    }
+  };
 
   useEffect(() => {
     if (status === "unauthenticated") {
-      redirect("/login");
+      redirect("/");
     }
   }, [status]);
 
@@ -136,7 +194,7 @@ export default function DashboardLayout({
           </button>
 
           <button 
-            onClick={() => signOut({ callbackUrl: "/login" })}
+            onClick={() => signOut({ callbackUrl: "/" })}
             className={cn(
               "flex items-center gap-3 w-full px-3 py-2 text-sm font-medium text-[var(--color-on-surface-variant)] hover:bg-[var(--color-surface-container)] hover:text-[var(--color-on-surface)] rounded-lg transition-colors",
               isSidebarCollapsed && "justify-center px-0"
@@ -154,8 +212,69 @@ export default function DashboardLayout({
         <div className="text-lg font-bold text-[var(--color-primary)]">Proforma360</div>
         
         <div className="flex items-center gap-2 relative">
+           <div className="relative">
+             <button 
+               onClick={() => setIsSyncMenuOpen(!isSyncMenuOpen)}
+               className={cn(
+                 "p-2 rounded-full transition-colors relative focus:outline-none",
+                 hasUnsyncedChanges 
+                   ? "bg-amber-50 text-amber-600 hover:bg-amber-100 ring-2 ring-amber-400 ring-offset-2" 
+                   : "bg-blue-50 text-[var(--color-primary)] hover:bg-blue-100"
+               )}
+               title="Sincronização Cloud"
+             >
+               <Cloud className="w-5 h-5" />
+               {hasUnsyncedChanges && (
+                 <span className="absolute top-0 right-0 flex h-3 w-3">
+                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                   <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500 border-2 border-white"></span>
+                 </span>
+               )}
+             </button>
+
+             {isSyncMenuOpen && (
+               <>
+                 <div 
+                   className="fixed inset-0 z-40" 
+                   onClick={() => setIsSyncMenuOpen(false)}
+                 ></div>
+                 <div className="absolute top-12 right-0 mt-2 w-72 bg-white rounded-xl shadow-lg border border-[var(--color-outline-variant)] overflow-hidden z-50 animate-fade-in">
+                   <div className="p-4 border-b border-[var(--color-outline-variant)] bg-[var(--color-surface-container-lowest)]">
+                     <p className="text-sm font-semibold text-[var(--color-on-surface)]">Sincronização Google Drive</p>
+                     <p className="text-xs text-[var(--color-on-surface-variant)] mt-1">
+                       {lastSyncDate ? `Última sincronização: ${new Date(lastSyncDate).toLocaleString('pt-PT')}` : "Nunca sincronizado"}
+                     </p>
+                     {hasUnsyncedChanges && (
+                       <div className="mt-2 text-xs font-medium text-amber-700 bg-amber-50 p-2 rounded border border-amber-200">
+                         Existem alterações locais que ainda não guardadas na Cloud.
+                       </div>
+                     )}
+                   </div>
+                   <div className="p-2 space-y-1">
+                     <button 
+                       onClick={handleBackup} 
+                       disabled={isSyncing}
+                       className="flex items-center gap-3 w-full text-left px-3 py-2.5 text-sm font-medium text-[var(--color-on-surface)] hover:bg-[var(--color-surface-container)] hover:text-[var(--color-primary)] rounded-lg transition-colors disabled:opacity-50"
+                     >
+                       {isSyncing ? <RefreshCw className="w-4 h-4 animate-spin" /> : <CloudUpload className="w-4 h-4 text-green-600" />}
+                       Fazer Backup
+                     </button>
+                     <button 
+                       onClick={handleRestore} 
+                       disabled={isSyncing}
+                       className="flex items-center gap-3 w-full text-left px-3 py-2.5 text-sm font-medium text-[var(--color-on-surface)] hover:bg-[var(--color-surface-container)] hover:text-[var(--color-primary)] rounded-lg transition-colors disabled:opacity-50"
+                     >
+                       {isSyncing ? <RefreshCw className="w-4 h-4 animate-spin" /> : <CloudDownload className="w-4 h-4 text-blue-600" />}
+                       Restaurar
+                     </button>
+                   </div>
+                 </div>
+               </>
+             )}
+           </div>
+
            <button 
-             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+             onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
              className="focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] rounded-full"
            >
              {session.user?.image ? (
@@ -167,25 +286,25 @@ export default function DashboardLayout({
               )}
            </button>
 
-           {isMobileMenuOpen && (
+           {isProfileMenuOpen && (
              <>
                <div 
                  className="fixed inset-0 z-40" 
-                 onClick={() => setIsMobileMenuOpen(false)}
+                 onClick={() => setIsProfileMenuOpen(false)}
                ></div>
                <div className="absolute top-10 right-0 mt-2 w-56 bg-white rounded-xl shadow-lg border border-[var(--color-outline-variant)] overflow-hidden z-50 animate-fade-in">
                  <div className="p-4 border-b border-[var(--color-outline-variant)] bg-[var(--color-surface-container-lowest)]">
                    <p className="text-sm font-semibold text-[var(--color-on-surface)] truncate">{session.user?.name}</p>
                    <p className="text-xs text-[var(--color-on-surface-variant)] truncate">{session.user?.email}</p>
                  </div>
-                 <Link href="/dashboard/company" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-[var(--color-on-surface-variant)] hover:bg-[var(--color-surface-container)] hover:text-[var(--color-primary)] transition-colors">
+                 <Link href="/dashboard/company" onClick={() => setIsProfileMenuOpen(false)} className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-[var(--color-on-surface-variant)] hover:bg-[var(--color-surface-container)] hover:text-[var(--color-primary)] transition-colors">
                    <Building2 className="w-4 h-4" /> Perfil da Empresa
                  </Link>
-                 <Link href="/dashboard/settings" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-[var(--color-on-surface-variant)] hover:bg-[var(--color-surface-container)] hover:text-[var(--color-primary)] transition-colors">
+                 <Link href="/dashboard/settings" onClick={() => setIsProfileMenuOpen(false)} className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-[var(--color-on-surface-variant)] hover:bg-[var(--color-surface-container)] hover:text-[var(--color-primary)] transition-colors">
                    <Settings className="w-4 h-4" /> Definições
                  </Link>
                  <div className="border-t border-[var(--color-outline-variant)]"></div>
-                 <button onClick={() => signOut({ callbackUrl: "/login" })} className="flex items-center gap-3 w-full text-left px-4 py-3 text-sm font-medium text-red-600 hover:bg-red-50 transition-colors">
+                 <button onClick={() => signOut({ callbackUrl: "/" })} className="flex items-center gap-3 w-full text-left px-4 py-3 text-sm font-medium text-red-600 hover:bg-red-50 transition-colors">
                    <LogOut className="w-4 h-4" /> Terminar Sessão
                  </button>
                </div>
@@ -223,11 +342,65 @@ export default function DashboardLayout({
                Nova Proforma
              </Link>
 
-             <div className="flex items-center gap-2 px-3 py-1.5 bg-green-50 rounded-full border border-green-100" title="Dados sincronizados em tempo real (Local & Cloud)">
-               <div className="relative flex items-center justify-center w-4 h-4">
-                 <Cloud className="w-4 h-4 text-green-600 absolute" />
-                 <div className="w-2 h-2 rounded-full bg-green-500 border border-white absolute bottom-[-2px] right-[-2px]"></div>
-               </div>
+             <div className="relative">
+               <button 
+                 onClick={() => setIsSyncMenuOpen(!isSyncMenuOpen)}
+                 className={cn(
+                   "p-2 rounded-full transition-colors relative focus:outline-none",
+                   hasUnsyncedChanges 
+                     ? "bg-amber-50 text-amber-600 hover:bg-amber-100 ring-2 ring-amber-400 ring-offset-2" 
+                     : "bg-blue-50 text-[var(--color-primary)] hover:bg-blue-100"
+                 )}
+                 title="Sincronização Cloud"
+               >
+                 <Cloud className="w-5 h-5" />
+                 {hasUnsyncedChanges && (
+                   <span className="absolute top-0 right-0 flex h-3 w-3">
+                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                     <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500 border-2 border-white"></span>
+                   </span>
+                 )}
+               </button>
+
+               {isSyncMenuOpen && (
+                 <>
+                   <div 
+                     className="fixed inset-0 z-40" 
+                     onClick={() => setIsSyncMenuOpen(false)}
+                   ></div>
+                   <div className="absolute top-12 right-0 mt-2 w-72 bg-white rounded-xl shadow-lg border border-[var(--color-outline-variant)] overflow-hidden z-50 animate-fade-in">
+                     <div className="p-4 border-b border-[var(--color-outline-variant)] bg-[var(--color-surface-container-lowest)]">
+                       <p className="text-sm font-semibold text-[var(--color-on-surface)]">Sincronização Google Drive</p>
+                       <p className="text-xs text-[var(--color-on-surface-variant)] mt-1">
+                         {lastSyncDate ? `Última sincronização: ${new Date(lastSyncDate).toLocaleString('pt-PT')}` : "Nunca sincronizado"}
+                       </p>
+                       {hasUnsyncedChanges && (
+                         <div className="mt-2 text-xs font-medium text-amber-700 bg-amber-50 p-2 rounded border border-amber-200">
+                           Existem alterações locais que ainda não foram guardadas na Cloud.
+                         </div>
+                       )}
+                     </div>
+                     <div className="p-2 space-y-1">
+                       <button 
+                         onClick={handleBackup} 
+                         disabled={isSyncing}
+                         className="flex items-center gap-3 w-full text-left px-3 py-2.5 text-sm font-medium text-[var(--color-on-surface)] hover:bg-[var(--color-surface-container)] hover:text-[var(--color-primary)] rounded-lg transition-colors disabled:opacity-50"
+                       >
+                         {isSyncing ? <RefreshCw className="w-4 h-4 animate-spin" /> : <CloudUpload className="w-4 h-4 text-green-600" />}
+                         Fazer Backup para Cloud
+                       </button>
+                       <button 
+                         onClick={handleRestore} 
+                         disabled={isSyncing}
+                         className="flex items-center gap-3 w-full text-left px-3 py-2.5 text-sm font-medium text-[var(--color-on-surface)] hover:bg-[var(--color-surface-container)] hover:text-[var(--color-primary)] rounded-lg transition-colors disabled:opacity-50"
+                       >
+                         {isSyncing ? <RefreshCw className="w-4 h-4 animate-spin" /> : <CloudDownload className="w-4 h-4 text-blue-600" />}
+                         Restaurar da Cloud
+                       </button>
+                     </div>
+                   </div>
+                 </>
+               )}
              </div>
 
              <div className="flex items-center gap-2 text-[var(--color-on-surface-variant)]">
@@ -242,14 +415,44 @@ export default function DashboardLayout({
 
              <div className="h-8 w-px bg-[var(--color-outline-variant)] mx-2"></div>
 
-             <div className="flex items-center cursor-pointer">
-               {session.user?.image ? (
-                  <img src={session.user.image} alt="User" referrerPolicy="no-referrer" className="w-9 h-9 rounded-full border border-[var(--color-outline-variant)] hover:ring-2 hover:ring-[var(--color-primary)] transition-all object-cover" />
-                ) : (
-                  <div className="w-9 h-9 rounded-full bg-[var(--color-secondary-container)] text-[var(--color-on-secondary-container)] flex items-center justify-center font-bold text-sm hover:ring-2 hover:ring-[var(--color-primary)] transition-all">
-                    {userInitials}
-                  </div>
-                )}
+             <div className="flex items-center cursor-pointer relative">
+               <button 
+                 onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
+                 className="focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] rounded-full"
+               >
+                 {session.user?.image ? (
+                    <img src={session.user.image} alt="User" referrerPolicy="no-referrer" className="w-9 h-9 rounded-full border border-[var(--color-outline-variant)] hover:ring-2 hover:ring-[var(--color-primary)] transition-all object-cover" />
+                  ) : (
+                    <div className="w-9 h-9 rounded-full bg-[var(--color-secondary-container)] text-[var(--color-on-secondary-container)] flex items-center justify-center font-bold text-sm hover:ring-2 hover:ring-[var(--color-primary)] transition-all">
+                      {userInitials}
+                    </div>
+                  )}
+               </button>
+
+               {isProfileMenuOpen && (
+                 <>
+                   <div 
+                     className="fixed inset-0 z-40 hidden md:block" 
+                     onClick={() => setIsProfileMenuOpen(false)}
+                   ></div>
+                   <div className="absolute top-12 right-0 mt-2 w-56 bg-white rounded-xl shadow-lg border border-[var(--color-outline-variant)] overflow-hidden z-50 animate-fade-in hidden md:block">
+                     <div className="p-4 border-b border-[var(--color-outline-variant)] bg-[var(--color-surface-container-lowest)]">
+                       <p className="text-sm font-semibold text-[var(--color-on-surface)] truncate">{session.user?.name}</p>
+                       <p className="text-xs text-[var(--color-on-surface-variant)] truncate">{session.user?.email}</p>
+                     </div>
+                     <Link href="/dashboard/company" onClick={() => setIsProfileMenuOpen(false)} className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-[var(--color-on-surface-variant)] hover:bg-[var(--color-surface-container)] hover:text-[var(--color-primary)] transition-colors">
+                       <Building2 className="w-4 h-4" /> Perfil da Empresa
+                     </Link>
+                     <Link href="/dashboard/settings" onClick={() => setIsProfileMenuOpen(false)} className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-[var(--color-on-surface-variant)] hover:bg-[var(--color-surface-container)] hover:text-[var(--color-primary)] transition-colors">
+                       <Settings className="w-4 h-4" /> Definições
+                     </Link>
+                     <div className="border-t border-[var(--color-outline-variant)]"></div>
+                     <button onClick={() => signOut({ callbackUrl: "/" })} className="flex items-center gap-3 w-full text-left px-4 py-3 text-sm font-medium text-red-600 hover:bg-red-50 transition-colors">
+                       <LogOut className="w-4 h-4" /> Terminar Sessão
+                     </button>
+                   </div>
+                 </>
+               )}
              </div>
           </div>
         </header>

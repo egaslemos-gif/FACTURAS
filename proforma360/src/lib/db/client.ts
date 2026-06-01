@@ -2,6 +2,7 @@ import initSqlJs, { Database } from "sql.js";
 
 // Import IndexedDB wrapper to persist the SQLite file in browser
 import { openDB, IDBPDatabase } from "idb";
+import { useSyncStore } from "@/stores/sync";
 
 const DB_NAME = "proforma360_db";
 const STORE_NAME = "sqlite_file";
@@ -179,6 +180,9 @@ class DatabaseClient {
     try {
       this.db.run(query, params);
       await this.save();
+      
+      // Notify sync store that changes happened
+      useSyncStore.getState().setHasUnsyncedChanges(true);
     } catch (error) {
       console.error("Execute write error:", error);
       throw error;
