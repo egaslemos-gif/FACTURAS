@@ -23,6 +23,10 @@ export async function ensureFolder(
   );
 
   const searchData = await searchRes.json();
+  if (searchData.error) {
+    console.error("Google Drive API Error (Search Folder):", searchData.error);
+    throw new Error(`Drive API Error: ${searchData.error.message || JSON.stringify(searchData.error)}`);
+  }
 
   if (searchData.files && searchData.files.length > 0) {
     return searchData.files[0].id;
@@ -48,6 +52,10 @@ export async function ensureFolder(
   });
 
   const createData = await createRes.json();
+  if (createData.error) {
+    console.error("Google Drive API Error (Create Folder):", createData.error);
+    throw new Error(`Drive API Error: ${createData.error.message || JSON.stringify(createData.error)}`);
+  }
   return createData.id;
 }
 
