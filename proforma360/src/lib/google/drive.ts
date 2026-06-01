@@ -51,7 +51,7 @@ async function multipartUpload(
       Authorization: `Bearer ${accessToken}`,
       "Content-Type": `multipart/related; boundary=${boundary}`,
     },
-    body,
+    body: body as any,
   });
 
   return res.json();
@@ -72,7 +72,7 @@ async function multipartUpdate(
       Authorization: `Bearer ${accessToken}`,
       "Content-Type": contentType,
     },
-    body: fileContent,
+    body: fileContent as any,
   });
 
   return res.json();
@@ -200,7 +200,7 @@ export async function uploadPdfToDrive(
       Authorization: `Bearer ${accessToken}`,
       "Content-Type": `multipart/related; boundary=${boundary}`,
     },
-    body,
+    body: body as any,
   });
 
   return res.json();

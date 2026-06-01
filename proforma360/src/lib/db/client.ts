@@ -187,7 +187,7 @@ class DatabaseClient {
         stmt.bind(params);
       }
 
-      const results = [];
+      const results: any[] = [];
       while (stmt.step()) {
         results.push(stmt.getAsObject());
       }
