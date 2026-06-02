@@ -6,11 +6,12 @@ import { Search, Plus, MoreVertical, FileText, CheckCircle2, Send, Clock, XCircl
 import { cn, formatCurrency, formatDate } from "@/lib/utils";
 import Link from "next/link";
 
-const statusConfig = {
+const statusConfig: Record<string, { label: string; icon: any; className: string }> = {
   draft: { label: "Rascunho", icon: Clock, className: "chip-draft" },
   sent: { label: "Enviada", icon: Send, className: "chip-sent" },
   approved: { label: "Aprovada", icon: CheckCircle2, className: "chip-approved" },
   rejected: { label: "Rejeitada", icon: XCircle, className: "chip-rejected" },
+  expired: { label: "Expirada", icon: XCircle, className: "chip-rejected" },
 };
 
 export default function QuotationsPage() {
