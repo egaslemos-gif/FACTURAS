@@ -15,7 +15,13 @@ export interface Company {
   stamp_url: string | null;
   footer_text: string | null;
   quotation_prefix: string;
-  pdf_template: "classic" | "modern" | "corporate";
+  pdf_template: "minimal" | "modern" | "corporate";
+  bank_name?: string | null;
+  account_holder?: string | null;
+  account_number?: string | null;
+  nib_iban?: string | null;
+  mpesa?: string | null;
+  emola?: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -29,6 +35,8 @@ export interface Client {
   phone: string;
   address: string;
   notes: string | null;
+  origin?: string | null;
+  tags?: string[] | null;
   status: "active" | "idle" | "new";
   created_at: string;
   updated_at: string;
@@ -49,7 +57,7 @@ export interface Product {
 }
 
 // --- Quotation ---
-export type QuotationStatus = "draft" | "sent" | "approved" | "rejected";
+export type QuotationStatus = "draft" | "sent" | "approved" | "rejected" | "expired";
 
 export interface Quotation {
   id: string;
@@ -113,7 +121,7 @@ export interface AppSettings {
   backups_folder_id: string | null;
   last_backup_at: string | null;
   last_backup_drive_id: string | null;
-  pdf_template: "classic" | "modern" | "corporate";
+  pdf_template: "minimal" | "modern" | "corporate";
   quotation_prefix: string;
   auto_backup: boolean;
   setup_completed: boolean;
@@ -127,7 +135,7 @@ export interface NavItem {
 }
 
 // --- PDF Template ---
-export type PDFTemplate = "classic" | "modern" | "corporate";
+export type PDFTemplate = "minimal" | "modern" | "corporate";
 
 // --- Form State ---
 export interface FormState {

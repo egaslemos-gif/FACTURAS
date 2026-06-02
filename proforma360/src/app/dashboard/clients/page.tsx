@@ -92,7 +92,9 @@ export default function ClientsPage() {
                           {getInitials(client.name)}
                         </div>
                         <div>
-                          <div className="font-semibold text-[var(--color-on-surface)]">{client.name}</div>
+                          <Link href={`/dashboard/clients/${client.id}`} className="font-semibold text-[var(--color-primary)] hover:underline">
+                            {client.name}
+                          </Link>
                           <div className="text-xs text-[var(--color-on-surface-variant)] hidden md:block">
                             {client.address || "Sem endereço"}
                           </div>
@@ -111,7 +113,10 @@ export default function ClientsPage() {
                     </td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <Link href={`/dashboard/clients/${client.id}/edit`} className="p-2 text-[var(--color-outline)] hover:text-blue-600 hover:bg-blue-50 rounded-full transition-colors">
+                        <Link href={`/dashboard/clients/${client.id}`} className="p-2 text-[var(--color-outline)] hover:text-[var(--color-primary)] hover:bg-blue-50 rounded-full transition-colors" title="Ver Detalhes">
+                          <Building className="w-5 h-5" />
+                        </Link>
+                        <Link href={`/dashboard/clients/${client.id}/edit`} className="p-2 text-[var(--color-outline)] hover:text-blue-600 hover:bg-blue-50 rounded-full transition-colors" title="Editar">
                           <Edit2 className="w-5 h-5" />
                         </Link>
                         <button onClick={() => {

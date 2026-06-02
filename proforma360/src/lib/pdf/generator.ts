@@ -52,12 +52,12 @@ export async function generateQuotationPDF(data: PDFData): Promise<Uint8Array> {
   const stampImage = await embedImage(pdfDoc, company.stamp_url);
   const sigImage = await embedImage(pdfDoc, company.signature_url);
 
-  const template = company.pdf_template || 'classic';
+  const template = company.pdf_template || 'minimal';
   
   if (template === 'modern') {
     await renderModernTemplate({ page, width, height, fontRegular, fontBold, data, logoImage, stampImage, sigImage });
   } else {
-    await renderClassicTemplate({ page, width, height, fontRegular, fontBold, data, logoImage, stampImage, sigImage });
+    await renderMinimalTemplate({ page, width, height, fontRegular, fontBold, data, logoImage, stampImage, sigImage });
   }
 
   // Footer text for all templates
@@ -75,9 +75,9 @@ export async function generateQuotationPDF(data: PDFData): Promise<Uint8Array> {
 }
 
 // ==========================================
-// CLASSIC TEMPLATE
+// MINIMAL TEMPLATE
 // ==========================================
-async function renderClassicTemplate(params: any) {
+async function renderMinimalTemplate(params: any) {
   const { page, width, height, fontRegular, fontBold, data, logoImage, stampImage, sigImage } = params;
   const { company, client, quotation, items } = data;
 
@@ -215,7 +215,9 @@ async function renderClassicTemplate(params: any) {
   page.drawText(formatCurrency(quotation.grand_total), { x: summaryX + 80, y: cursorY, size: 12, font: fontBold, color: primaryColor });
 
   cursorY -= 40;
-  renderNotesAndTerms(page, cursorY, quotation, fontRegular, fontBold, textColor);
+  cursorY = renderNotesAndTerms(page, cursorY, quotation, fontRegular, fontBold, textColor);
+  cursorY -= 10;
+  cursorY = renderFinancialInfo(page, cursorY, company, fontRegular, fontBold, textColor);
   
   // Signatures
   renderSignatures(page, width, height, stampImage, sigImage);
@@ -367,7 +369,9 @@ async function renderModernTemplate(params: any) {
   page.drawText(formatCurrency(quotation.grand_total), { x: sumX + 80, y: sumY, size: 12, font: fontBold, color: primaryColor });
 
   cursorY -= 90;
-  renderNotesAndTerms(page, cursorY, quotation, fontRegular, fontBold, textColor);
+  cursorY = renderNotesAndTerms(page, cursorY, quotation, fontRegular, fontBold, textColor);
+  cursorY -= 10;
+  cursorY = renderFinancialInfo(page, cursorY, company, fontRegular, fontBold, textColor);
   
   // Signatures
   renderSignatures(page, width, height, stampImage, sigImage);
@@ -395,6 +399,34 @@ function renderNotesAndTerms(page: PDFPage, cursorY: number, quotation: Quotatio
       cursorY -= 12;
     }
   }
+  return cursorY;
+}
+
+function renderFinancialInfo(page: PDFPage, cursorY: number, company: Company, fontRegular: PDFFont, fontBold: PDFFont, textColor: any) {
+  const hasFinancial = company.bank_name || company.account_number || company.nib_iban || company.mpesa || company.emola;
+  if (!hasFinancial) return cursorY;
+
+  cursorY -= 15;
+  page.drawText("Dados para Pagamento:", { x: 50, y: cursorY, size: 10, font: fontBold, color: textColor });
+  cursorY -= 15;
+
+  if (company.bank_name || company.account_number || company.nib_iban) {
+    let bankInfo = `Banco: ${company.bank_name || "N/A"} | Conta: ${company.account_number || "N/A"}`;
+    if (company.nib_iban) bankInfo += ` | NIB/IBAN: ${company.nib_iban}`;
+    if (company.account_holder) bankInfo += ` | Titular: ${company.account_holder}`;
+    page.drawText(bankInfo, { x: 50, y: cursorY, size: 9, font: fontRegular, color: textColor });
+    cursorY -= 12;
+  }
+  
+  if (company.mpesa || company.emola) {
+    let mobileInfo = [];
+    if (company.mpesa) mobileInfo.push(`M-Pesa: ${company.mpesa}`);
+    if (company.emola) mobileInfo.push(`e-Mola: ${company.emola}`);
+    page.drawText(mobileInfo.join(" | "), { x: 50, y: cursorY, size: 9, font: fontRegular, color: textColor });
+    cursorY -= 12;
+  }
+  
+  return cursorY;
 }
 
 function renderSignatures(page: PDFPage, width: number, height: number, stampImage: any, sigImage: any) {

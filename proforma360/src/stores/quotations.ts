@@ -38,7 +38,17 @@ export const useQuotationsStore = create<QuotationsState>((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       const quotations = await quotationsRepo.getAll();
-      set({ quotations, isLoading: false });
+      const today = new Date().toISOString().split("T")[0];
+      
+      const updatedQuotations = await Promise.all(quotations.map(async (q) => {
+        if ((q.status === 'sent' || q.status === 'draft') && q.expiry_date < today) {
+          await quotationsRepo.updateStatus(q.id, 'expired', 'Expirada automaticamente pela data de validade');
+          return { ...q, status: 'expired' as QuotationStatus };
+        }
+        return q;
+      }));
+      
+      set({ quotations: updatedQuotations, isLoading: false });
     } catch (error) {
       set({ error: (error as Error).message, isLoading: false });
     }
@@ -47,7 +57,14 @@ export const useQuotationsStore = create<QuotationsState>((set, get) => ({
   fetchQuotationDetail: async (id) => {
     set({ isLoading: true, error: null });
     try {
-      const detail = await quotationsRepo.getById(id);
+      let detail = await quotationsRepo.getById(id);
+      const today = new Date().toISOString().split("T")[0];
+      
+      if (detail && (detail.quotation.status === 'sent' || detail.quotation.status === 'draft') && detail.quotation.expiry_date < today) {
+        await quotationsRepo.updateStatus(detail.quotation.id, 'expired', 'Expirada automaticamente pela data de validade');
+        detail.quotation.status = 'expired';
+      }
+      
       set({ currentDetail: detail, isLoading: false });
     } catch (error) {
       set({ error: (error as Error).message, isLoading: false });

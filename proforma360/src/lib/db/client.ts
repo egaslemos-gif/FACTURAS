@@ -50,10 +50,24 @@ class DatabaseClient {
         
         // Run migrations for existing DBs
         try {
-          this.db.run("ALTER TABLE companies ADD COLUMN pdf_template TEXT DEFAULT 'classic'");
+          // Migration 1: pdf_template
+          this.db.run("ALTER TABLE companies ADD COLUMN pdf_template TEXT DEFAULT 'minimal'");
+          // Migration 2: Financial fields
+          this.db.run("ALTER TABLE companies ADD COLUMN bank_name TEXT");
+          this.db.run("ALTER TABLE companies ADD COLUMN account_holder TEXT");
+          this.db.run("ALTER TABLE companies ADD COLUMN account_number TEXT");
+          this.db.run("ALTER TABLE companies ADD COLUMN nib_iban TEXT");
+          this.db.run("ALTER TABLE companies ADD COLUMN mpesa TEXT");
+          this.db.run("ALTER TABLE companies ADD COLUMN emola TEXT");
+          // Migration 3: Client fields
+          this.db.run("ALTER TABLE clients ADD COLUMN origin TEXT");
+          this.db.run("ALTER TABLE clients ADD COLUMN tags TEXT");
+          // Migration 4: Rename classic to minimal in existing rows
+          this.db.run("UPDATE companies SET pdf_template = 'minimal' WHERE pdf_template = 'classic'");
           await this.save();
         } catch (e) {
-          // Column might already exist, ignore
+          // Columns might already exist, ignore error but ensure save
+          await this.save();
         }
       } else {
         // Create new
@@ -88,7 +102,13 @@ class DatabaseClient {
         stamp_url TEXT,
         footer_text TEXT,
         quotation_prefix TEXT DEFAULT 'PF',
-        pdf_template TEXT DEFAULT 'classic',
+        pdf_template TEXT DEFAULT 'minimal',
+        bank_name TEXT,
+        account_holder TEXT,
+        account_number TEXT,
+        nib_iban TEXT,
+        mpesa TEXT,
+        emola TEXT,
         created_at TEXT,
         updated_at TEXT
       );
@@ -101,6 +121,8 @@ class DatabaseClient {
         phone TEXT,
         address TEXT,
         notes TEXT,
+        origin TEXT,
+        tags TEXT,
         status TEXT DEFAULT 'active',
         created_at TEXT,
         updated_at TEXT

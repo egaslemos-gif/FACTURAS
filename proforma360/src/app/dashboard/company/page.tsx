@@ -129,6 +129,88 @@ export default function CompanyPage() {
           </div>
         </div>
 
+        {/* Informações Financeiras */}
+        <div className="bg-white p-6 md:p-8 rounded-[var(--radius-lg)] elevation-1 border border-[var(--color-outline-variant)]">
+          <div className="flex items-center gap-3 mb-6">
+            <Building2 className="w-6 h-6 text-[var(--color-primary)]" />
+            <h2 className="text-headline-sm">Informações Financeiras</h2>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label className="block text-label-md mb-2">Nome do Banco</label>
+              <input
+                type="text"
+                name="bank_name"
+                value={formData.bank_name || ""}
+                onChange={handleChange}
+                className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-lg focus:ring-2 focus:ring-[var(--color-primary)] outline-none"
+                placeholder="Ex: Millennium BIM"
+              />
+            </div>
+
+            <div>
+              <label className="block text-label-md mb-2">Titular da Conta</label>
+              <input
+                type="text"
+                name="account_holder"
+                value={formData.account_holder || ""}
+                onChange={handleChange}
+                className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-lg focus:ring-2 focus:ring-[var(--color-primary)] outline-none"
+                placeholder="Ex: Proforma360 Lda"
+              />
+            </div>
+
+            <div>
+              <label className="block text-label-md mb-2">Número da Conta</label>
+              <input
+                type="text"
+                name="account_number"
+                value={formData.account_number || ""}
+                onChange={handleChange}
+                className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-lg focus:ring-2 focus:ring-[var(--color-primary)] outline-none"
+                placeholder="Ex: 123456789"
+              />
+            </div>
+
+            <div>
+              <label className="block text-label-md mb-2">NIB / IBAN</label>
+              <input
+                type="text"
+                name="nib_iban"
+                value={formData.nib_iban || ""}
+                onChange={handleChange}
+                className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-lg focus:ring-2 focus:ring-[var(--color-primary)] outline-none"
+                placeholder="Ex: 000100000012345678912"
+              />
+            </div>
+
+            <div>
+              <label className="block text-label-md mb-2">Número M-Pesa</label>
+              <input
+                type="text"
+                name="mpesa"
+                value={formData.mpesa || ""}
+                onChange={handleChange}
+                className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-lg focus:ring-2 focus:ring-[var(--color-primary)] outline-none"
+                placeholder="Ex: 84 123 4567"
+              />
+            </div>
+
+            <div>
+              <label className="block text-label-md mb-2">Número e-Mola</label>
+              <input
+                type="text"
+                name="emola"
+                value={formData.emola || ""}
+                onChange={handleChange}
+                className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-lg focus:ring-2 focus:ring-[var(--color-primary)] outline-none"
+                placeholder="Ex: 86 123 4567"
+              />
+            </div>
+          </div>
+        </div>
+
         {/* Identidade Visual */}
         <div className="bg-white p-6 md:p-8 rounded-[var(--radius-lg)] elevation-1 border border-[var(--color-outline-variant)]">
           <div className="flex items-center gap-3 mb-6">
@@ -260,18 +342,18 @@ export default function CompanyPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <button
               type="button"
-              onClick={() => setFormData(prev => ({ ...prev, pdf_template: "classic" }))}
+              onClick={() => setFormData(prev => ({ ...prev, pdf_template: "minimal" }))}
               className={cn(
                 "relative flex flex-col items-center justify-center p-6 border-2 rounded-xl text-center transition-all",
-                formData.pdf_template === "classic" || !formData.pdf_template
+                formData.pdf_template === "minimal" || !formData.pdf_template
                   ? "border-[var(--color-primary)] bg-[var(--color-primary-container)] ring-2 ring-[var(--color-primary)] ring-offset-2"
                   : "border-[var(--color-outline-variant)] bg-[var(--color-surface-container-lowest)] hover:border-[var(--color-outline)]"
               )}
             >
               <div className="w-24 h-32 bg-white border border-gray-200 shadow-sm mb-4 flex flex-col rounded-md overflow-hidden">
-                <img src="/template_classic.png" alt="Classic Template" className="w-full h-full object-cover" />
+                <img src="/template_classic.png" alt="Minimal Template" className="w-full h-full object-cover" />
               </div>
-              <h3 className="font-bold text-[var(--color-on-surface)]">Standard (Clássico)</h3>
+              <h3 className="font-bold text-[var(--color-on-surface)]">Minimal (Clássico)</h3>
               <p className="text-xs text-[var(--color-on-surface-variant)] mt-1">Design simples, preto e branco tradicional.</p>
             </button>
 
@@ -290,6 +372,24 @@ export default function CompanyPage() {
               </div>
               <h3 className="font-bold text-[var(--color-on-surface)]">Moderno (Colorido)</h3>
               <p className="text-xs text-[var(--color-on-surface-variant)] mt-1">Design atual com cabeçalhos azuis e arredondados.</p>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setFormData(prev => ({ ...prev, pdf_template: "corporate" }))}
+              className={cn(
+                "relative flex flex-col items-center justify-center p-6 border-2 rounded-xl text-center transition-all md:col-span-2 lg:col-span-1",
+                formData.pdf_template === "corporate"
+                  ? "border-[var(--color-primary)] bg-[var(--color-primary-container)] ring-2 ring-[var(--color-primary)] ring-offset-2"
+                  : "border-[var(--color-outline-variant)] bg-[var(--color-surface-container-lowest)] hover:border-[var(--color-outline)]"
+              )}
+            >
+              <div className="w-24 h-32 bg-white border border-gray-200 shadow-sm mb-4 flex flex-col rounded-md overflow-hidden">
+                <div className="w-full h-8 bg-gray-800"></div>
+                <div className="flex-1 p-2"><div className="w-full h-1 bg-gray-200 mb-1"></div><div className="w-2/3 h-1 bg-gray-200"></div></div>
+              </div>
+              <h3 className="font-bold text-[var(--color-on-surface)]">Corporativo</h3>
+              <p className="text-xs text-[var(--color-on-surface-variant)] mt-1">Design sério e estruturado para empresas de grande porte.</p>
             </button>
           </div>
         </div>

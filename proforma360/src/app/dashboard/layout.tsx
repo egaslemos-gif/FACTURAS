@@ -27,7 +27,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import { useSyncStore } from "@/stores";
+import { useSyncStore, useClientsStore, useProductsStore, useQuotationsStore } from "@/stores";
 import { dbClient } from "@/lib/db/client";
 
 const NAV_ITEMS = [
@@ -54,6 +54,30 @@ export default function DashboardLayout({
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   
   const { hasUnsyncedChanges, lastSyncDate, setHasUnsyncedChanges, setLastSyncDate } = useSyncStore();
+  const { clients, fetchClients } = useClientsStore();
+  const { products, fetchProducts } = useProductsStore();
+  const { quotations, fetchQuotations } = useQuotationsStore();
+
+  const [searchQuery, setSearchQuery] = useState("");
+  const [showSearchResults, setShowSearchResults] = useState(false);
+
+  useEffect(() => {
+    // Fetch data for global search if not already fetched
+    if (clients.length === 0) fetchClients();
+    if (products.length === 0) fetchProducts();
+    if (quotations.length === 0) fetchQuotations();
+  }, [fetchClients, fetchProducts, fetchQuotations]);
+
+  const searchResults = () => {
+    if (!searchQuery) return { clients: [], products: [], quotations: [], total: 0 };
+    const q = searchQuery.toLowerCase();
+    const c = clients.filter(c => c.name.toLowerCase().includes(q) || c.email?.toLowerCase().includes(q) || c.tax_number?.includes(q)).slice(0, 3);
+    const p = products.filter(p => p.name.toLowerCase().includes(q) || p.code?.toLowerCase().includes(q)).slice(0, 3);
+    const quo = quotations.filter(quo => quo.quotation_number.toLowerCase().includes(q) || quo.client_name?.toLowerCase().includes(q)).slice(0, 3);
+    return { clients: c, products: p, quotations: quo, total: c.length + p.length + quo.length };
+  };
+
+  const results = searchResults();
 
   const handleBackup = async () => {
     try {
@@ -324,13 +348,63 @@ export default function DashboardLayout({
         <header className="hidden md:flex h-20 bg-[var(--color-surface)]/80 backdrop-blur-md items-center justify-between px-8 sticky top-0 z-10">
           <div className="flex-1 flex items-center gap-4">
             {/* Search Bar */}
-            <div className="flex items-center gap-3 px-4 py-2.5 bg-white border border-[var(--color-outline-variant)] rounded-xl w-full max-w-md focus-within:ring-2 focus-within:ring-[var(--color-primary)] transition-all shadow-sm">
-              <Search className="w-4 h-4 text-[var(--color-outline)]" />
-              <input 
-                type="text" 
-                placeholder="Pesquisar proformas, clientes..." 
-                className="bg-transparent border-none outline-none text-sm w-full text-[var(--color-on-surface)]"
-              />
+            <div className="relative w-full max-w-md">
+              <div className="flex items-center gap-3 px-4 py-2.5 bg-white border border-[var(--color-outline-variant)] rounded-xl w-full focus-within:ring-2 focus-within:ring-[var(--color-primary)] transition-all shadow-sm">
+                <Search className="w-4 h-4 text-[var(--color-outline)]" />
+                <input 
+                  type="text" 
+                  placeholder="Pesquisar proformas, clientes, produtos..." 
+                  className="bg-transparent border-none outline-none text-sm w-full text-[var(--color-on-surface)]"
+                  value={searchQuery}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                    setShowSearchResults(true);
+                  }}
+                  onFocus={() => setShowSearchResults(true)}
+                  onBlur={() => setTimeout(() => setShowSearchResults(false), 200)}
+                />
+              </div>
+
+              {showSearchResults && searchQuery && (
+                <div className="absolute top-12 left-0 w-full bg-white rounded-xl shadow-lg border border-[var(--color-outline-variant)] overflow-hidden z-50 animate-fade-in max-h-96 overflow-y-auto">
+                  {results.total === 0 ? (
+                    <div className="p-4 text-sm text-[var(--color-on-surface-variant)] text-center">Nenhum resultado encontrado.</div>
+                  ) : (
+                    <div className="py-2">
+                      {results.quotations.length > 0 && (
+                        <div>
+                          <div className="px-4 py-1 text-xs font-semibold text-[var(--color-outline)] uppercase tracking-wider bg-[var(--color-surface-container-lowest)]">Proformas</div>
+                          {results.quotations.map(q => (
+                            <Link key={q.id} href={`/dashboard/quotations/${q.id}`} className="block px-4 py-2 hover:bg-blue-50 text-sm">
+                              <span className="font-medium text-[var(--color-primary)]">{q.quotation_number}</span> - {q.client_name}
+                            </Link>
+                          ))}
+                        </div>
+                      )}
+                      {results.clients.length > 0 && (
+                        <div>
+                          <div className="px-4 py-1 text-xs font-semibold text-[var(--color-outline)] uppercase tracking-wider bg-[var(--color-surface-container-lowest)]">Clientes</div>
+                          {results.clients.map(c => (
+                            <Link key={c.id} href={`/dashboard/clients/${c.id}`} className="block px-4 py-2 hover:bg-blue-50 text-sm">
+                              <span className="font-medium">{c.name}</span> {c.tax_number && <span className="text-gray-500 text-xs ml-2">NUIT: {c.tax_number}</span>}
+                            </Link>
+                          ))}
+                        </div>
+                      )}
+                      {results.products.length > 0 && (
+                        <div>
+                          <div className="px-4 py-1 text-xs font-semibold text-[var(--color-outline)] uppercase tracking-wider bg-[var(--color-surface-container-lowest)]">Produtos</div>
+                          {results.products.map(p => (
+                            <Link key={p.id} href={`/dashboard/products/${p.id}/edit`} className="block px-4 py-2 hover:bg-blue-50 text-sm">
+                              <span className="font-medium">{p.name}</span> {p.code && <span className="text-gray-500 text-xs ml-2">[{p.code}]</span>}
+                            </Link>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </div>
           

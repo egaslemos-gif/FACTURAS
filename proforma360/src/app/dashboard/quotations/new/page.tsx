@@ -17,6 +17,8 @@ interface LineItem {
   unit_price: number;
   vat_rate: number;
   total: number;
+  search_query?: string;
+  show_results?: boolean;
 }
 
 export default function NewQuotationPage() {
@@ -67,6 +69,28 @@ export default function NewQuotationPage() {
         unit_price: 0,
         vat_rate: 16,
         total: 0,
+        search_query: "",
+        show_results: false,
+      },
+    ]);
+  };
+
+  const addSpecificProduct = (productId: string) => {
+    const product = products.find(p => p.id === productId);
+    if (!product) return;
+    
+    setItems([
+      ...items,
+      {
+        id: crypto.randomUUID(),
+        product_id: product.id,
+        description: product.name + (product.description ? `\n${product.description}` : ""),
+        quantity: 1,
+        unit_price: product.price,
+        vat_rate: product.vat,
+        total: product.price,
+        search_query: product.name,
+        show_results: false,
       },
     ]);
   };
@@ -276,17 +300,51 @@ export default function NewQuotationPage() {
                   </button>
 
                   <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
-                    <div className="md:col-span-12 mb-2">
-                      <select
-                        value={item.product_id || ""}
-                        onChange={(e) => updateLineItem(item.id, "product_id", e.target.value)}
-                        className="w-full px-3 py-1.5 text-sm border border-[var(--color-outline-variant)] rounded focus:ring-2 focus:ring-[var(--color-primary)] outline-none bg-white"
-                      >
-                        <option value="">-- Produto Personalizado (Escrever abaixo) --</option>
-                        {products.map(p => (
-                          <option key={p.id} value={p.id}>{p.code ? `[${p.code}] ` : ''}{p.name}</option>
-                        ))}
-                      </select>
+                    <div className="md:col-span-12 mb-2 relative">
+                      <div className="relative">
+                        <input
+                          type="text"
+                          value={item.search_query !== undefined ? item.search_query : (products.find(p => p.id === item.product_id)?.name || "")}
+                          onChange={(e) => {
+                            updateLineItem(item.id, "search_query", e.target.value);
+                            updateLineItem(item.id, "show_results", true);
+                          }}
+                          onFocus={() => updateLineItem(item.id, "show_results", true)}
+                          onBlur={() => setTimeout(() => updateLineItem(item.id, "show_results", false), 200)}
+                          placeholder="Pesquisar produto/serviço ou escreva para item personalizado..."
+                          className="w-full px-3 py-1.5 text-sm border border-[var(--color-outline-variant)] rounded focus:ring-2 focus:ring-[var(--color-primary)] outline-none bg-white"
+                        />
+                        {item.show_results && (
+                          <div className="absolute z-10 w-full mt-1 bg-white border border-[var(--color-outline-variant)] rounded-md shadow-lg max-h-48 overflow-y-auto">
+                            <div 
+                              className="px-3 py-2 text-sm cursor-pointer hover:bg-gray-100 italic text-gray-500"
+                              onClick={() => {
+                                updateLineItem(item.id, "product_id", "");
+                                updateLineItem(item.id, "show_results", false);
+                                updateLineItem(item.id, "description", item.search_query || "");
+                              }}
+                            >
+                              + Usar como item personalizado
+                            </div>
+                            {products
+                              .filter(p => !item.search_query || p.name.toLowerCase().includes(item.search_query.toLowerCase()) || p.code?.toLowerCase().includes(item.search_query.toLowerCase()))
+                              .map(p => (
+                                <div 
+                                  key={p.id} 
+                                  className="px-3 py-2 text-sm cursor-pointer hover:bg-blue-50 border-t border-gray-100"
+                                  onClick={() => {
+                                    updateLineItem(item.id, "product_id", p.id);
+                                    updateLineItem(item.id, "search_query", p.name);
+                                    updateLineItem(item.id, "show_results", false);
+                                  }}
+                                >
+                                  <div className="font-medium">{p.code ? `[${p.code}] ` : ''}{p.name}</div>
+                                  <div className="text-xs text-gray-500">{formatCurrency(p.price)}</div>
+                                </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
                     </div>
 
                     <div className="md:col-span-6">
@@ -355,6 +413,25 @@ export default function NewQuotationPage() {
               <Plus className="w-5 h-5" />
               Adicionar Nova Linha
             </button>
+
+            {products.length > 0 && (
+              <div className="mt-6 pt-4 border-t border-[var(--color-outline-variant)]">
+                <h3 className="text-label-sm text-[var(--color-on-surface-variant)] mb-3">Produtos Adicionados Recentemente</h3>
+                <div className="flex flex-wrap gap-2">
+                  {products.slice(0, 5).map(product => (
+                    <button
+                      key={`recent-${product.id}`}
+                      type="button"
+                      onClick={() => addSpecificProduct(product.id)}
+                      className="px-3 py-1.5 bg-[var(--color-surface-container-low)] hover:bg-[var(--color-surface-container-high)] text-[var(--color-on-surface)] text-xs rounded-full border border-[var(--color-outline-variant)] transition-colors flex items-center gap-1"
+                    >
+                      <Plus className="w-3 h-3" />
+                      {product.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
           
           {/* Notes & Terms */}

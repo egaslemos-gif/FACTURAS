@@ -19,6 +19,8 @@ export default function NewClientPage() {
     tax_number: "",
     address: "",
     notes: "",
+    origin: "",
+    tagsInput: "",
     status: "active" as const,
   });
 
@@ -30,7 +32,12 @@ export default function NewClientPage() {
     e.preventDefault();
     setIsSaving(true);
     try {
-      await addClient(formData);
+      const { tagsInput, ...rest } = formData;
+      const payload = {
+        ...rest,
+        tags: tagsInput.split(',').map(t => t.trim()).filter(Boolean)
+      };
+      await addClient(payload);
       toast.success("Cliente adicionado com sucesso!");
       router.push("/dashboard/clients");
     } catch (error) {
@@ -131,6 +138,35 @@ export default function NewClientPage() {
               rows={2}
               className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-lg focus:ring-2 focus:ring-[var(--color-primary)] outline-none resize-none"
               placeholder="Informação adicional sobre este cliente..."
+            />
+          </div>
+
+          <div>
+            <label className="block text-label-md mb-2">Origem do Cliente</label>
+            <select
+              name="origin"
+              value={formData.origin}
+              onChange={(e) => setFormData({ ...formData, origin: e.target.value })}
+              className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-lg focus:ring-2 focus:ring-[var(--color-primary)] outline-none bg-white"
+            >
+              <option value="">Selecione...</option>
+              <option value="website">Website</option>
+              <option value="referral">Recomendação</option>
+              <option value="social">Redes Sociais</option>
+              <option value="direct">Contacto Direto</option>
+              <option value="other">Outro</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-label-md mb-2">Tags (Separadas por vírgula)</label>
+            <input
+              type="text"
+              name="tagsInput"
+              value={formData.tagsInput}
+              onChange={handleChange}
+              className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-lg focus:ring-2 focus:ring-[var(--color-primary)] outline-none"
+              placeholder="Ex: VIP, Retalho, B2B"
             />
           </div>
         </div>

@@ -2,16 +2,18 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { useQuotationsStore } from "@/stores";
-import { ArrowLeft, FileText, Send, CheckCircle2, XCircle, Printer, Download, Clock, History, FileDown, Edit2 } from "lucide-react";
+import { useQuotationsStore, useCompanyStore } from "@/stores";
+import { ArrowLeft, FileText, Send, CheckCircle2, XCircle, Printer, Download, Clock, History, FileDown, Edit2, Copy } from "lucide-react";
 import Link from "next/link";
-import { cn, formatCurrency, formatDate, formatDateTime } from "@/lib/utils";
+import { cn, formatCurrency, formatDate, formatDateTime, generateQuotationNumber } from "@/lib/utils";
+import { toast } from "sonner";
 
 const statusConfig = {
   draft: { label: "Rascunho", icon: Clock, className: "bg-gray-100 text-gray-700 border-gray-200" },
   sent: { label: "Enviada", icon: Send, className: "bg-blue-100 text-blue-700 border-blue-200" },
   approved: { label: "Aprovada", icon: CheckCircle2, className: "bg-green-100 text-green-700 border-green-200" },
   rejected: { label: "Rejeitada", icon: XCircle, className: "bg-red-100 text-red-700 border-red-200" },
+  expired: { label: "Expirada", icon: Clock, className: "bg-orange-100 text-orange-700 border-orange-200" },
 };
 
 export default function QuotationDetailPage() {
@@ -19,8 +21,14 @@ export default function QuotationDetailPage() {
   const router = useRouter();
   const id = params.id as string;
   
-  const { currentDetail, fetchQuotationDetail, updateStatus, isLoading } = useQuotationsStore();
+  const { currentDetail, fetchQuotationDetail, updateStatus, isLoading, createQuotation, quotations } = useQuotationsStore();
+  const { company, fetchCompany } = useCompanyStore();
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
+  const [isDuplicating, setIsDuplicating] = useState(false);
+
+  useEffect(() => {
+    fetchCompany();
+  }, [fetchCompany]);
 
   useEffect(() => {
     if (id) {
@@ -62,6 +70,39 @@ export default function QuotationDetailPage() {
     }
   };
 
+  const handleDuplicate = async () => {
+    setIsDuplicating(true);
+    try {
+      const latestQuotation = quotations.length > 0 ? quotations[0].quotation_number : null;
+      const newNumber = generateQuotationNumber(latestQuotation, company?.quotation_prefix || "PF");
+      
+      const newItems = items.map(({id, quotation_id, ...rest}, index) => ({...rest, sort_order: index})) as any;
+      
+      const newDate = new Date().toISOString().split("T")[0];
+      const expiryDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split("T")[0];
+
+      const { id: _id, quotation_number, status, date, expiry_date, created_at, updated_at, client_name, pdf_url, pdf_drive_id, ...quotationDataToCopy } = quotation as any;
+
+      const newId = await createQuotation({
+        ...quotationDataToCopy,
+        quotation_number: newNumber,
+        date: newDate,
+        expiry_date: expiryDate,
+        status: 'draft',
+        pdf_url: null,
+        pdf_drive_id: null,
+      }, newItems);
+      
+      toast.success("Proforma duplicada com sucesso!");
+      router.push(`/dashboard/quotations/${newId}`);
+    } catch (error) {
+      console.error(error);
+      toast.error("Erro ao duplicar proforma.");
+    } finally {
+      setIsDuplicating(false);
+    }
+  };
+
   return (
     <div className="max-w-5xl mx-auto animate-fade-in pb-20">
       {/* Header */}
@@ -94,6 +135,15 @@ export default function QuotationDetailPage() {
           <Link href={`/dashboard/pdf-preview/${quotation.id}`} title="Gerar PDF" className="flex items-center justify-center p-2.5 border border-[var(--color-primary)] bg-[var(--color-primary-container)] hover:bg-[var(--color-primary)] hover:text-white text-[var(--color-primary)] rounded-lg transition-colors shrink-0">
             <FileText className="w-5 h-5" />
           </Link>
+
+          <button 
+            onClick={handleDuplicate}
+            disabled={isDuplicating}
+            title="Duplicar Proforma"
+            className="flex items-center justify-center p-2.5 border border-gray-300 bg-white hover:bg-gray-50 text-gray-700 rounded-lg transition-colors shrink-0 disabled:opacity-50"
+          >
+            {isDuplicating ? <div className="w-5 h-5 border-2 border-gray-400 border-t-transparent rounded-full animate-spin"></div> : <Copy className="w-5 h-5" />}
+          </button>
 
           {quotation.status === 'draft' && (
             <button 

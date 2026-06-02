@@ -5,12 +5,19 @@ import { generateId, now } from "../../utils";
 export const clientsRepo = {
   async getAll(): Promise<Client[]> {
     const data = await dbClient.query("SELECT * FROM clients ORDER BY name ASC");
-    return data as Client[];
+    return data.map(client => ({
+      ...client,
+      tags: client.tags ? JSON.parse(client.tags) : null
+    })) as Client[];
   },
 
   async getById(id: string): Promise<Client | null> {
     const data = await dbClient.getOne("SELECT * FROM clients WHERE id = ?", [id]);
-    return data as Client | null;
+    if (!data) return null;
+    return {
+      ...data,
+      tags: data.tags ? JSON.parse(data.tags) : null
+    } as Client;
   },
 
   async create(clientData: Omit<Client, "id" | "created_at" | "updated_at">): Promise<Client> {
@@ -18,6 +25,7 @@ export const clientsRepo = {
     const newClient = {
       id: generateId(),
       ...clientData,
+      tags: clientData.tags ? JSON.stringify(clientData.tags) : null,
       created_at: timestamp,
       updated_at: timestamp,
     };
@@ -40,7 +48,11 @@ export const clientsRepo = {
     Object.entries(clientData).forEach(([key, value]) => {
       if (key !== "id" && key !== "created_at" && key !== "updated_at") {
         updates.push(`${key} = ?`);
-        values.push(value);
+        if (key === "tags" && value) {
+          values.push(JSON.stringify(value));
+        } else {
+          values.push(value);
+        }
       }
     });
 

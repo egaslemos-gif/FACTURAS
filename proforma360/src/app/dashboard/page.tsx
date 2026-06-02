@@ -38,6 +38,25 @@ export default function DashboardHome() {
   const totalPendingValue = pendingQuotations.reduce((acc, q) => acc + q.grand_total, 0);
 
   const recentQuotations = quotations.slice(0, 5); // top 5 most recent
+  
+  const now = new Date();
+  const nextWeek = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString().split("T")[0];
+  const todayStr = now.toISOString().split("T")[0];
+  
+  const pendingActions = [
+    ...quotations.filter(q => q.status === 'draft').map(q => ({
+      id: q.id,
+      title: `Proforma Rascunho`,
+      desc: `${q.quotation_number} - Terminar e enviar`,
+      priority: 'normal'
+    })),
+    ...quotations.filter(q => q.status === 'sent' && q.expiry_date >= todayStr && q.expiry_date <= nextWeek).map(q => ({
+      id: q.id,
+      title: `Proforma a expirar`,
+      desc: `${q.quotation_number} expira em breve`,
+      priority: 'high'
+    }))
+  ].slice(0, 4);
 
   return (
     <div className="max-w-6xl mx-auto animate-fade-in">
@@ -151,8 +170,34 @@ export default function DashboardHome() {
           </div>
         </div>
 
-        {/* Sync Status Sidebar */}
-        <div className="lg:col-span-1">
+        {/* Sidebar */}
+        <div className="lg:col-span-1 space-y-6">
+          
+          {/* Pending Actions */}
+          <div className="bg-white rounded-[var(--radius-lg)] elevation-1 border border-[var(--color-outline-variant)] p-6">
+            <h2 className="text-headline-sm text-[var(--color-on-surface)] mb-4">Ações Pendentes</h2>
+            {pendingActions.length === 0 ? (
+              <p className="text-sm text-[var(--color-on-surface-variant)] italic">Nenhuma ação pendente no momento.</p>
+            ) : (
+              <div className="space-y-3">
+                {pendingActions.map((action, i) => (
+                  <Link key={`${action.id}-${i}`} href={`/dashboard/quotations/${action.id}`} className="block p-3 rounded-lg border border-[var(--color-outline-variant)] hover:bg-[var(--color-surface-container-lowest)] transition-colors">
+                    <div className="flex items-center gap-2 mb-1">
+                      {action.priority === 'high' ? (
+                        <div className="w-2 h-2 rounded-full bg-red-500"></div>
+                      ) : (
+                        <div className="w-2 h-2 rounded-full bg-blue-500"></div>
+                      )}
+                      <p className="text-sm font-medium text-[var(--color-on-surface)]">{action.title}</p>
+                    </div>
+                    <p className="text-xs text-[var(--color-on-surface-variant)] ml-4">{action.desc}</p>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Sync Status Sidebar */}
           <div className="bg-[var(--color-primary-container)] rounded-[var(--radius-lg)] p-6 border border-[var(--color-primary-fixed-dim)]">
             <h2 className="text-headline-sm text-[var(--color-on-primary-container)] mb-4">Estado da Sincronização</h2>
             
