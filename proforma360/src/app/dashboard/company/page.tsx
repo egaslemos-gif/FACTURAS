@@ -384,9 +384,32 @@ export default function CompanyPage() {
                   : "border-[var(--color-outline-variant)] bg-[var(--color-surface-container-lowest)] hover:border-[var(--color-outline)]"
               )}
             >
-              <div className="w-24 h-32 bg-white border border-gray-200 shadow-sm mb-4 flex flex-col rounded-md overflow-hidden">
-                <div className="w-full h-8 bg-gray-800"></div>
-                <div className="flex-1 p-2"><div className="w-full h-1 bg-gray-200 mb-1"></div><div className="w-2/3 h-1 bg-gray-200"></div></div>
+              <div className="w-24 h-32 bg-white border border-gray-200 shadow-sm mb-4 flex flex-col rounded-md overflow-hidden relative">
+                {/* Header */}
+                <div className="w-full p-2 flex justify-between items-start border-b border-gray-100">
+                  <div className="w-4 h-4 rounded-full bg-gray-300"></div>
+                  <div className="flex flex-col items-end gap-1">
+                    <div className="w-8 h-1 bg-gray-800 rounded"></div>
+                    <div className="w-6 h-1 bg-gray-300 rounded"></div>
+                  </div>
+                </div>
+                {/* Client / Info Box */}
+                <div className="flex p-2 gap-2 border-b border-gray-100">
+                  <div className="flex-1 h-6 border border-gray-200 rounded-sm bg-gray-50"></div>
+                  <div className="w-8 h-6 border border-gray-200 rounded-sm bg-gray-50"></div>
+                </div>
+                {/* Table Header */}
+                <div className="w-[calc(100%-16px)] mx-auto mt-2 h-2 bg-gray-200 rounded-sm"></div>
+                {/* Table Rows */}
+                <div className="flex-1 w-[calc(100%-16px)] mx-auto mt-1 flex flex-col gap-1">
+                  <div className="w-full h-1 bg-gray-100 border-b border-gray-200"></div>
+                  <div className="w-full h-1 bg-gray-100 border-b border-gray-200"></div>
+                  <div className="w-full h-1 bg-gray-100 border-b border-gray-200"></div>
+                </div>
+                {/* Footer Total */}
+                <div className="w-[calc(100%-16px)] mx-auto mb-2 flex justify-end">
+                  <div className="w-10 h-3 border border-gray-200 bg-gray-50 rounded-sm"></div>
+                </div>
               </div>
               <h3 className="font-bold text-[var(--color-on-surface)]">Corporativo</h3>
               <p className="text-xs text-[var(--color-on-surface-variant)] mt-1">Design sério e estruturado para empresas de grande porte.</p>

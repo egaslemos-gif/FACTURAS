@@ -56,6 +56,8 @@ export async function generateQuotationPDF(data: PDFData): Promise<Uint8Array> {
   
   if (template === 'modern') {
     await renderModernTemplate({ page, width, height, fontRegular, fontBold, data, logoImage, stampImage, sigImage });
+  } else if (template === 'corporate') {
+    await renderCorporateTemplate({ page, width, height, fontRegular, fontBold, data, logoImage, stampImage, sigImage });
   } else {
     await renderMinimalTemplate({ page, width, height, fontRegular, fontBold, data, logoImage, stampImage, sigImage });
   }
@@ -454,4 +456,167 @@ function renderSignatures(page: PDFPage, width: number, height: number, stampIma
       height: sDims.height * scaleFactor,
     });
   }
+}
+
+// ==========================================
+// CORPORATE TEMPLATE
+// ==========================================
+async function renderCorporateTemplate(params: any) {
+  const { page, width, height, fontRegular, fontBold, data, logoImage, stampImage, sigImage } = params;
+  const { company, client, quotation, items } = data;
+
+  const darkGray = rgb(0.2, 0.2, 0.2);
+  const midGray = rgb(0.5, 0.5, 0.5);
+  const lightGray = rgb(0.95, 0.95, 0.95);
+  const borderColor = rgb(0.7, 0.7, 0.7);
+
+  let cursorY = height - 40;
+
+  // Header Left: Logo & Company Info
+  if (logoImage) {
+    const dims = logoImage.scale(0.5);
+    const scaleFactor = Math.min(150 / dims.width, 60 / dims.height, 1);
+    page.drawImage(logoImage, {
+      x: 40, y: cursorY - (dims.height * scaleFactor) + 15, width: dims.width * scaleFactor, height: dims.height * scaleFactor,
+    });
+    cursorY -= (dims.height * scaleFactor) + 10;
+  } else {
+    page.drawText(company.name.toUpperCase(), { x: 40, y: cursorY, size: 20, font: fontBold, color: darkGray });
+    cursorY -= 20;
+  }
+  
+  if (company.tax_number) {
+    page.drawText(`NUIT: ${company.tax_number}`, { x: 40, y: cursorY, size: 9, font: fontRegular, color: midGray });
+    cursorY -= 12;
+  }
+  if (company.address) {
+    const addressLines = company.address.split("\n");
+    addressLines.forEach((line: string) => {
+      page.drawText(line, { x: 40, y: cursorY, size: 9, font: fontRegular, color: midGray });
+      cursorY -= 12;
+    });
+  }
+  if (company.email || company.phone) {
+    const contact = [company.email, company.phone].filter(Boolean).join(" | ");
+    page.drawText(contact, { x: 40, y: cursorY, size: 9, font: fontRegular, color: midGray });
+  }
+
+  // Header Right: Proforma Info
+  let rightCursorY = height - 40;
+  page.drawText("PROFORMA", { x: width - 200, y: rightCursorY, size: 24, font: fontBold, color: darkGray });
+  
+  // Right Box for Proforma details
+  page.drawRectangle({ x: width - 200, y: rightCursorY - 60, width: 160, height: 50, borderColor: borderColor, borderWidth: 1, color: lightGray });
+  
+  rightCursorY -= 25;
+  page.drawText(`Nº Doc:`, { x: width - 190, y: rightCursorY, size: 9, font: fontBold, color: darkGray });
+  page.drawText(quotation.quotation_number, { x: width - 110, y: rightCursorY, size: 9, font: fontRegular, color: darkGray });
+  
+  rightCursorY -= 15;
+  page.drawText(`Data:`, { x: width - 190, y: rightCursorY, size: 9, font: fontBold, color: darkGray });
+  page.drawText(formatDate(quotation.date), { x: width - 110, y: rightCursorY, size: 9, font: fontRegular, color: darkGray });
+  
+  rightCursorY -= 15;
+  page.drawText(`Validade:`, { x: width - 190, y: rightCursorY, size: 9, font: fontBold, color: darkGray });
+  page.drawText(formatDate(quotation.expiry_date), { x: width - 110, y: rightCursorY, size: 9, font: fontRegular, color: darkGray });
+
+  cursorY = Math.min(cursorY, rightCursorY - 20) - 20;
+
+  // Client Info Area
+  page.drawText("FATURAR A:", { x: 40, y: cursorY, size: 10, font: fontBold, color: darkGray });
+  cursorY -= 5;
+  page.drawLine({ start: { x: 40, y: cursorY }, end: { x: 300, y: cursorY }, thickness: 1, color: borderColor });
+  cursorY -= 15;
+  
+  page.drawText(client.name, { x: 40, y: cursorY, size: 11, font: fontBold, color: darkGray });
+  if (client.tax_number) {
+    cursorY -= 15;
+    page.drawText(`NUIT: ${client.tax_number}`, { x: 40, y: cursorY, size: 10, font: fontRegular, color: darkGray });
+  }
+  if (client.address) {
+    cursorY -= 15;
+    page.drawText(client.address.replace(/\n/g, ", "), { x: 40, y: cursorY, size: 10, font: fontRegular, color: darkGray });
+  }
+
+  cursorY -= 40;
+
+  // Corporate Table Header
+  page.drawRectangle({ x: 40, y: cursorY - 5, width: width - 80, height: 20, borderColor: borderColor, borderWidth: 1, color: lightGray });
+  
+  const textY = cursorY;
+  page.drawText("Descrição", { x: 50, y: textY, size: 9, font: fontBold, color: darkGray });
+  page.drawText("Qtd", { x: 320, y: textY, size: 9, font: fontBold, color: darkGray });
+  page.drawText("Preço", { x: 370, y: textY, size: 9, font: fontBold, color: darkGray });
+  page.drawText("IVA", { x: 440, y: textY, size: 9, font: fontBold, color: darkGray });
+  page.drawText("Total", { x: 490, y: textY, size: 9, font: fontBold, color: darkGray });
+
+  cursorY -= 20;
+
+  // Table Rows (with borders)
+  for (const item of items) {
+    const descLines = item.description.split("\n");
+    const rowHeight = descLines.length * 15 + 10;
+    
+    // Draw row bottom border
+    page.drawLine({ start: { x: 40, y: cursorY - rowHeight + 10 }, end: { x: width - 40, y: cursorY - rowHeight + 10 }, thickness: 0.5, color: borderColor });
+
+    // Draw vertical separators
+    page.drawLine({ start: { x: 40, y: cursorY + 15 }, end: { x: 40, y: cursorY - rowHeight + 10 }, thickness: 1, color: borderColor });
+    page.drawLine({ start: { x: 310, y: cursorY + 15 }, end: { x: 310, y: cursorY - rowHeight + 10 }, thickness: 0.5, color: borderColor });
+    page.drawLine({ start: { x: 360, y: cursorY + 15 }, end: { x: 360, y: cursorY - rowHeight + 10 }, thickness: 0.5, color: borderColor });
+    page.drawLine({ start: { x: 430, y: cursorY + 15 }, end: { x: 430, y: cursorY - rowHeight + 10 }, thickness: 0.5, color: borderColor });
+    page.drawLine({ start: { x: 480, y: cursorY + 15 }, end: { x: 480, y: cursorY - rowHeight + 10 }, thickness: 0.5, color: borderColor });
+    page.drawLine({ start: { x: width - 40, y: cursorY + 15 }, end: { x: width - 40, y: cursorY - rowHeight + 10 }, thickness: 1, color: borderColor });
+
+    for (let i = 0; i < descLines.length; i++) {
+      page.drawText(descLines[i], { x: 45, y: cursorY, size: 9, font: fontRegular, color: darkGray });
+      
+      if (i === 0) {
+        page.drawText(item.quantity.toString(), { x: 315, y: cursorY, size: 9, font: fontRegular, color: darkGray });
+        page.drawText(formatCurrency(item.unit_price).replace("MZN", "").trim(), { x: 365, y: cursorY, size: 9, font: fontRegular, color: darkGray });
+        page.drawText(`${item.vat_rate}%`, { x: 435, y: cursorY, size: 9, font: fontRegular, color: darkGray });
+        page.drawText(formatCurrency(item.total).replace("MZN", "").trim(), { x: 485, y: cursorY, size: 9, font: fontRegular, color: darkGray });
+      }
+      cursorY -= 15;
+    }
+    cursorY -= 5;
+  }
+
+  cursorY -= 20;
+
+  // Summary Totals in a strict Box
+  const summaryBoxY = cursorY - 70;
+  page.drawRectangle({ x: width - 240, y: summaryBoxY, width: 200, height: 80, borderColor: borderColor, borderWidth: 1, color: lightGray });
+  
+  let sumY = cursorY - 10;
+  const sumX = width - 220;
+  
+  page.drawText("Subtotal:", { x: sumX, y: sumY, size: 9, font: fontRegular, color: darkGray });
+  page.drawText(formatCurrency(quotation.subtotal), { x: sumX + 80, y: sumY, size: 9, font: fontRegular, color: darkGray });
+
+  if (quotation.discount > 0) {
+    sumY -= 15;
+    page.drawText("Desconto:", { x: sumX, y: sumY, size: 9, font: fontRegular, color: darkGray });
+    const discVal = quotation.discount_type === "percentage" ? quotation.subtotal * (quotation.discount / 100) : quotation.discount;
+    page.drawText(`-${formatCurrency(discVal)}`, { x: sumX + 80, y: sumY, size: 9, font: fontRegular, color: darkGray });
+  }
+
+  sumY -= 15;
+  page.drawText("Total IVA:", { x: sumX, y: sumY, size: 9, font: fontRegular, color: darkGray });
+  page.drawText(formatCurrency(quotation.vat_total), { x: sumX + 80, y: sumY, size: 9, font: fontRegular, color: darkGray });
+
+  sumY -= 10;
+  page.drawLine({ start: { x: sumX - 20, y: sumY }, end: { x: width - 40, y: sumY }, thickness: 1, color: borderColor });
+  sumY -= 15;
+
+  page.drawText("TOTAL FINAL:", { x: sumX, y: sumY, size: 10, font: fontBold, color: darkGray });
+  page.drawText(formatCurrency(quotation.grand_total), { x: sumX + 80, y: sumY, size: 11, font: fontBold, color: darkGray });
+
+  cursorY -= 100;
+  cursorY = renderNotesAndTerms(page, cursorY, quotation, fontRegular, fontBold, darkGray);
+  cursorY -= 10;
+  cursorY = renderFinancialInfo(page, cursorY, company, fontRegular, fontBold, darkGray);
+  
+  // Signatures
+  renderSignatures(page, width, height, stampImage, sigImage);
 }
