@@ -359,7 +359,7 @@ export default function DashboardLayout({
 
       {/* Main Content Area */}
       <main className={cn(
-        "flex-1 min-h-screen pt-16 md:pt-0 pb-20 md:pb-0 transition-all duration-300",
+        "flex-1 min-w-0 min-h-screen pt-16 md:pt-0 pb-20 md:pb-0 transition-all duration-300",
         isSidebarCollapsed ? "md:ml-20" : "md:ml-64"
       )}>
         
