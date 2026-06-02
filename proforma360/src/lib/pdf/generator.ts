@@ -270,14 +270,26 @@ async function renderModernTemplate(params: any) {
   const textColor = rgb(0.15, 0.15, 0.15);
   const lightText = rgb(0.4, 0.4, 0.4);
 
-  // Modern Header Background
-  let headerHeight = 120;
+  let logoHeight = 15;
+  let logoDims = { width: 0, height: 0 };
+  let logoScale = 1;
+  
+  if (logoImage) {
+    logoDims = logoImage.scale(0.5);
+    logoScale = Math.min(150 / logoDims.width, 60 / logoDims.height, 1);
+    logoHeight = logoDims.height * logoScale;
+  }
+
+  let calculatedHeaderHeight = 40 + logoHeight + 5;
+  if (company.tax_number) calculatedHeaderHeight += 12;
   if (company.address) {
     const addressLines = company.address.split("\n").map((l: string) => wrapText(l, 250, fontRegular, 9)).flat().length;
-    if (addressLines > 2) {
-      headerHeight += (addressLines - 2) * 12;
-    }
+    calculatedHeaderHeight += addressLines * 12;
   }
+  if (company.email || company.phone) calculatedHeaderHeight += 12;
+  calculatedHeaderHeight += 20; // bottom padding
+
+  const headerHeight = Math.max(120, calculatedHeaderHeight);
   
   page.drawRectangle({ x: 0, y: height - headerHeight, width: width, height: headerHeight, color: primaryColor });
 
@@ -285,12 +297,10 @@ async function renderModernTemplate(params: any) {
 
   // Header: Company Logo & Info (White text)
   if (logoImage) {
-    const dims = logoImage.scale(0.5);
-    const scaleFactor = Math.min(150 / dims.width, 60 / dims.height, 1);
     page.drawImage(logoImage, {
-      x: 40, y: cursorY - (dims.height * scaleFactor) + 15, width: dims.width * scaleFactor, height: dims.height * scaleFactor,
+      x: 40, y: cursorY - logoHeight + 15, width: logoDims.width * logoScale, height: logoHeight,
     });
-    cursorY -= (dims.height * scaleFactor);
+    cursorY -= logoHeight;
   } else {
     page.drawText(company.name.toUpperCase(), { x: 40, y: cursorY, size: 22, font: fontBold, color: rgb(1,1,1) });
     cursorY -= 15;
