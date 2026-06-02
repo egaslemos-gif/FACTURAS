@@ -36,6 +36,26 @@ async function embedImage(pdfDoc: PDFDocument, base64Url: string | null | undefi
   }
 }
 
+// Helper to wrap text
+function wrapText(text: string, maxWidth: number, font: PDFFont, fontSize: number): string[] {
+  const words = text.split(" ");
+  const lines: string[] = [];
+  let currentLine = words[0] || "";
+
+  for (let i = 1; i < words.length; i++) {
+    const word = words[i];
+    const width = font.widthOfTextAtSize(`${currentLine} ${word}`, fontSize);
+    if (width < maxWidth) {
+      currentLine += ` ${word}`;
+    } else {
+      lines.push(currentLine);
+      currentLine = word;
+    }
+  }
+  if (currentLine) lines.push(currentLine);
+  return lines;
+}
+
 export async function generateQuotationPDF(data: PDFData): Promise<Uint8Array> {
   const { company, client, quotation, items } = data;
 
@@ -115,10 +135,13 @@ async function renderMinimalTemplate(params: any) {
   }
   
   if (company.address) {
-    const addressLines = company.address.split("\n");
-    addressLines.forEach((line: string) => {
-      page.drawText(line, { x: 50, y: cursorY, size: 10, font: fontRegular, color: textColor });
-      cursorY -= 15;
+    const lines = company.address.split("\n");
+    lines.forEach((line: string) => {
+      const wrapped = wrapText(line, 250, fontRegular, 10);
+      wrapped.forEach((wLine: string) => {
+        page.drawText(wLine, { x: 50, y: cursorY, size: 10, font: fontRegular, color: textColor });
+        cursorY -= 15;
+      });
     });
   }
 
@@ -154,7 +177,12 @@ async function renderMinimalTemplate(params: any) {
   }
   if (client.address) {
     cursorY -= 15;
-    page.drawText(client.address.replace(/\n/g, ", "), { x: 60, y: cursorY, size: 10, font: fontRegular, color: textColor });
+    const wrapped = wrapText(client.address.replace(/\n/g, ", "), 250, fontRegular, 10);
+    wrapped.forEach((line: string) => {
+      page.drawText(line, { x: 60, y: cursorY, size: 10, font: fontRegular, color: textColor });
+      cursorY -= 15;
+    });
+    cursorY += 15; // compensate last sub
   }
 
   cursorY -= 40;
@@ -260,10 +288,13 @@ async function renderModernTemplate(params: any) {
     cursorY -= 12;
   }
   if (company.address) {
-    const addressLines = company.address.split("\n");
-    addressLines.forEach((line: string) => {
-      page.drawText(line, { x: 40, y: cursorY, size: 9, font: fontRegular, color: rgb(1,1,1) });
-      cursorY -= 12;
+    const lines = company.address.split("\n");
+    lines.forEach((line: string) => {
+      const wrapped = wrapText(line, 250, fontRegular, 9);
+      wrapped.forEach((wLine: string) => {
+        page.drawText(wLine, { x: 40, y: cursorY, size: 9, font: fontRegular, color: rgb(1,1,1) });
+        cursorY -= 12;
+      });
     });
   }
   if (company.email || company.phone) {
@@ -294,7 +325,11 @@ async function renderModernTemplate(params: any) {
   }
   if (client.address) {
     leftY -= 15;
-    page.drawText(client.address.replace(/\n/g, ", "), { x: 50, y: leftY, size: 10, font: fontRegular, color: textColor });
+    const wrapped = wrapText(client.address.replace(/\n/g, ", "), 200, fontRegular, 10);
+    wrapped.forEach((line: string) => {
+      page.drawText(line, { x: 50, y: leftY, size: 10, font: fontRegular, color: textColor });
+      leftY -= 15;
+    });
   }
 
   // Info Box
@@ -490,10 +525,13 @@ async function renderCorporateTemplate(params: any) {
     cursorY -= 12;
   }
   if (company.address) {
-    const addressLines = company.address.split("\n");
-    addressLines.forEach((line: string) => {
-      page.drawText(line, { x: 40, y: cursorY, size: 9, font: fontRegular, color: midGray });
-      cursorY -= 12;
+    const lines = company.address.split("\n");
+    lines.forEach((line: string) => {
+      const wrapped = wrapText(line, 250, fontRegular, 9);
+      wrapped.forEach((wLine: string) => {
+        page.drawText(wLine, { x: 40, y: cursorY, size: 9, font: fontRegular, color: midGray });
+        cursorY -= 12;
+      });
     });
   }
   if (company.email || company.phone) {
@@ -535,7 +573,12 @@ async function renderCorporateTemplate(params: any) {
   }
   if (client.address) {
     cursorY -= 15;
-    page.drawText(client.address.replace(/\n/g, ", "), { x: 40, y: cursorY, size: 10, font: fontRegular, color: darkGray });
+    const wrapped = wrapText(client.address.replace(/\n/g, ", "), 250, fontRegular, 10);
+    wrapped.forEach((line: string) => {
+      page.drawText(line, { x: 40, y: cursorY, size: 10, font: fontRegular, color: darkGray });
+      cursorY -= 15;
+    });
+    cursorY += 15;
   }
 
   cursorY -= 40;

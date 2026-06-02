@@ -58,7 +58,7 @@ export default function RootLayout({
         <link rel="icon" href="/icon.svg" type="image/svg+xml" />
         <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
       </head>
-      <body className="min-h-full antialiased" suppressHydrationWarning>
+      <body className="min-h-full antialiased overflow-x-hidden bg-[var(--color-surface)] text-[var(--color-on-surface)]" suppressHydrationWarning>
         <Providers>
           {children}
           <Toaster position="top-right" richColors />
