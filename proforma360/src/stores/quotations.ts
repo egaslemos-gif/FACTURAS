@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { Quotation, QuotationItem, QuotationHistory } from "../lib/types";
+import { Quotation, QuotationItem, QuotationHistory, QuotationStatus } from "../lib/types";
 import { quotationsRepo } from "../lib/db";
 
 interface QuotationDetail {
