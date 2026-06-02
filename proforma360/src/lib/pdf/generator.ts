@@ -205,7 +205,12 @@ async function renderMinimalTemplate(params: any) {
 
   // Table Rows
   for (const item of items) {
-    const descLines = item.description.split("\n");
+    const rawLines = item.description.split("\n");
+    let descLines: string[] = [];
+    rawLines.forEach((l: string) => {
+      descLines = descLines.concat(wrapText(l, 230, fontRegular, 9));
+    });
+
     for (let i = 0; i < descLines.length; i++) {
       page.drawText(descLines[i], { x: 55, y: cursorY, size: 9, font: fontRegular, color: textColor });
       
@@ -265,8 +270,16 @@ async function renderModernTemplate(params: any) {
   const textColor = rgb(0.15, 0.15, 0.15);
   const lightText = rgb(0.4, 0.4, 0.4);
 
-  // Modern Header Box
-  page.drawRectangle({ x: 0, y: height - 120, width: width, height: 120, color: primaryColor });
+  // Modern Header Background
+  let headerHeight = 120;
+  if (company.address) {
+    const addressLines = company.address.split("\n").map((l: string) => wrapText(l, 250, fontRegular, 9)).flat().length;
+    if (addressLines > 2) {
+      headerHeight += (addressLines - 2) * 12;
+    }
+  }
+  
+  page.drawRectangle({ x: 0, y: height - headerHeight, width: width, height: headerHeight, color: primaryColor });
 
   let cursorY = height - 40;
 
@@ -356,7 +369,11 @@ async function renderModernTemplate(params: any) {
   // Table Rows (Alternating colors)
   let rowIndex = 0;
   for (const item of items) {
-    const descLines = item.description.split("\n");
+    const rawLines = item.description.split("\n");
+    let descLines: string[] = [];
+    rawLines.forEach((l: string) => {
+      descLines = descLines.concat(wrapText(l, 250, fontRegular, 9));
+    });
     const rowHeight = descLines.length * 15 + 10;
     
     if (rowIndex % 2 !== 0) {
@@ -597,7 +614,11 @@ async function renderCorporateTemplate(params: any) {
 
   // Table Rows (with borders)
   for (const item of items) {
-    const descLines = item.description.split("\n");
+    const rawLines = item.description.split("\n");
+    let descLines: string[] = [];
+    rawLines.forEach((l: string) => {
+      descLines = descLines.concat(wrapText(l, 250, fontRegular, 9));
+    });
     const rowHeight = descLines.length * 15 + 10;
     
     // Draw row bottom border

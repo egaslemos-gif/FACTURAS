@@ -52,7 +52,8 @@ export default function PdfPreviewPage() {
           // Create blob URL for iframe preview
           const blob = new Blob([bytes as any], { type: "application/pdf" });
           const url = URL.createObjectURL(blob);
-          setPdfUrl(url);
+          setPdfUrl(`${url}#toolbar=0`);
+          document.title = `${currentDetail.quotation.quotation_number}_${currentDetail.quotation.client_name}.pdf`;
         } catch (error) {
           console.error("Error generating PDF", error);
         } finally {
