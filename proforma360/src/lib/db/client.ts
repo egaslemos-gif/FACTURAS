@@ -49,26 +49,30 @@ class DatabaseClient {
         console.log("Database loaded from IndexedDB.");
         
         // Run migrations for existing DBs
-        try {
-          // Migration 1: pdf_template
-          this.db.run("ALTER TABLE companies ADD COLUMN pdf_template TEXT DEFAULT 'minimal'");
-          // Migration 2: Financial fields
-          this.db.run("ALTER TABLE companies ADD COLUMN bank_name TEXT");
-          this.db.run("ALTER TABLE companies ADD COLUMN account_holder TEXT");
-          this.db.run("ALTER TABLE companies ADD COLUMN account_number TEXT");
-          this.db.run("ALTER TABLE companies ADD COLUMN nib_iban TEXT");
-          this.db.run("ALTER TABLE companies ADD COLUMN mpesa TEXT");
-          this.db.run("ALTER TABLE companies ADD COLUMN emola TEXT");
-          // Migration 3: Client fields
-          this.db.run("ALTER TABLE clients ADD COLUMN origin TEXT");
-          this.db.run("ALTER TABLE clients ADD COLUMN tags TEXT");
-          // Migration 4: Rename classic to minimal in existing rows
-          this.db.run("UPDATE companies SET pdf_template = 'minimal' WHERE pdf_template = 'classic'");
-          await this.save();
-        } catch (e) {
-          // Columns might already exist, ignore error but ensure save
-          await this.save();
-        }
+        const safeRun = (query: string) => {
+          try {
+            this.db?.run(query);
+          } catch (e) {
+            // Ignore column exists errors
+          }
+        };
+
+        // Migration 1: pdf_template
+        safeRun("ALTER TABLE companies ADD COLUMN pdf_template TEXT DEFAULT 'minimal'");
+        // Migration 2: Financial fields
+        safeRun("ALTER TABLE companies ADD COLUMN bank_name TEXT");
+        safeRun("ALTER TABLE companies ADD COLUMN account_holder TEXT");
+        safeRun("ALTER TABLE companies ADD COLUMN account_number TEXT");
+        safeRun("ALTER TABLE companies ADD COLUMN nib_iban TEXT");
+        safeRun("ALTER TABLE companies ADD COLUMN mpesa TEXT");
+        safeRun("ALTER TABLE companies ADD COLUMN emola TEXT");
+        // Migration 3: Client fields
+        safeRun("ALTER TABLE clients ADD COLUMN origin TEXT");
+        safeRun("ALTER TABLE clients ADD COLUMN tags TEXT");
+        // Migration 4: Rename classic to minimal in existing rows
+        safeRun("UPDATE companies SET pdf_template = 'minimal' WHERE pdf_template = 'classic'");
+        
+        await this.save();
       } else {
         // Create new
         this.db = new SQL.Database();
