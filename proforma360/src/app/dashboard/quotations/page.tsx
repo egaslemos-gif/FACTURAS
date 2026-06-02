@@ -100,12 +100,12 @@ export default function QuotationsPage() {
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-[var(--color-surface-container-low)] text-[var(--color-on-surface-variant)] text-label-sm border-b border-[var(--color-outline-variant)]">
-                  <th className="px-6 py-4 font-semibold uppercase">Documento</th>
-                  <th className="px-6 py-4 font-semibold uppercase">Cliente</th>
-                  <th className="px-6 py-4 font-semibold uppercase hidden md:table-cell">Data</th>
-                  <th className="px-6 py-4 font-semibold uppercase text-right">Total</th>
-                  <th className="px-6 py-4 font-semibold uppercase text-center hidden sm:table-cell">Estado</th>
-                  <th className="px-6 py-4 text-right">Ações</th>
+                  <th className="px-4 md:px-6 py-3 md:py-4 font-semibold uppercase">Documento</th>
+                  <th className="px-4 md:px-6 py-3 md:py-4 font-semibold uppercase">Cliente</th>
+                  <th className="px-4 md:px-6 py-3 md:py-4 font-semibold uppercase hidden md:table-cell">Data</th>
+                  <th className="px-4 md:px-6 py-3 md:py-4 font-semibold uppercase text-right">Total</th>
+                  <th className="px-4 md:px-6 py-3 md:py-4 font-semibold uppercase text-center hidden sm:table-cell">Estado</th>
+                  <th className="px-4 md:px-6 py-3 md:py-4 text-right">Ações</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[var(--color-outline-variant)]">
@@ -115,29 +115,29 @@ export default function QuotationsPage() {
 
                   return (
                     <tr key={q.id} className="hover:bg-[var(--color-surface-container-lowest)] transition-colors group cursor-pointer">
-                      <td className="px-6 py-4">
-                        <div className="font-mono font-semibold text-[var(--color-primary)]">
+                      <td className="px-4 md:px-6 py-3 md:py-4">
+                        <div className="font-mono font-semibold text-[var(--color-primary)] text-sm md:text-base">
                           <Link href={`/dashboard/quotations/${q.id}`} className="hover:underline">
                             {q.quotation_number}
                           </Link>
                         </div>
                       </td>
-                      <td className="px-6 py-4">
-                        <div className="font-medium text-[var(--color-on-surface)] truncate max-w-[200px]">
+                      <td className="px-4 md:px-6 py-3 md:py-4">
+                        <div className="font-medium text-[var(--color-on-surface)] truncate max-w-[120px] sm:max-w-[200px]">
                           {q.client_name || "Cliente Eliminado"}
                         </div>
                       </td>
-                      <td className="px-6 py-4 hidden md:table-cell">
+                      <td className="px-4 md:px-6 py-3 md:py-4 hidden md:table-cell">
                         <div className="text-sm text-[var(--color-on-surface-variant)]">
                           {formatDate(q.date)}
                         </div>
                       </td>
-                      <td className="px-6 py-4 text-right">
-                        <div className="font-semibold text-[var(--color-on-surface)]">
+                      <td className="px-4 md:px-6 py-3 md:py-4 text-right">
+                        <div className="font-semibold text-[var(--color-on-surface)] text-sm md:text-base">
                           {formatCurrency(q.grand_total)}
                         </div>
                       </td>
-                      <td className="px-6 py-4 text-center hidden sm:table-cell">
+                      <td className="px-4 md:px-6 py-3 md:py-4 text-center hidden sm:table-cell">
                         <span className={cn(
                           "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium",
                           status.className
@@ -146,14 +146,14 @@ export default function QuotationsPage() {
                           {status.label}
                         </span>
                       </td>
-                      <td className="px-6 py-4 text-right">
-                        <div className="flex items-center justify-end gap-2">
+                      <td className="px-4 md:px-6 py-3 md:py-4 text-right">
+                        <div className="flex items-center justify-end gap-1 md:gap-2">
                           {/* Estado Mobile (Visível apenas em telemóvel para não perder a info) */}
-                          <div className="sm:hidden mr-2">
+                          <div className="sm:hidden mr-1">
                              <StatusIcon className={cn("w-4 h-4", status.className.replace("bg-", "text-").replace("rgba", "").split(" ")[0])} />
                           </div>
                           <Link href={`/dashboard/quotations/${q.id}`}>
-                            <button className="p-2 text-[var(--color-outline)] hover:text-[var(--color-primary)] hover:bg-[var(--color-surface-container)] rounded-full transition-colors">
+                            <button className="p-1.5 md:p-2 text-[var(--color-outline)] hover:text-[var(--color-primary)] hover:bg-[var(--color-surface-container)] rounded-full transition-colors">
                               <MoreVertical className="w-5 h-5" />
                             </button>
                           </Link>

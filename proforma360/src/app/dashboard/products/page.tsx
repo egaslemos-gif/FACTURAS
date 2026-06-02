@@ -76,19 +76,19 @@ export default function ProductsPage() {
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-[var(--color-surface-container-low)] text-[var(--color-on-surface-variant)] text-label-sm border-b border-[var(--color-outline-variant)]">
-                  <th className="px-6 py-4 font-semibold uppercase">Produto / Serviço</th>
-                  <th className="px-6 py-4 font-semibold uppercase hidden md:table-cell">Categoria</th>
-                  <th className="px-6 py-4 font-semibold uppercase text-right">Preço Unit.</th>
-                  <th className="px-6 py-4 font-semibold uppercase text-right hidden sm:table-cell">IVA (%)</th>
-                  <th className="px-6 py-4 text-right">Ações</th>
+                  <th className="px-4 md:px-6 py-3 md:py-4 font-semibold uppercase">Produto / Serviço</th>
+                  <th className="px-4 md:px-6 py-3 md:py-4 font-semibold uppercase hidden md:table-cell">Categoria</th>
+                  <th className="px-4 md:px-6 py-3 md:py-4 font-semibold uppercase text-right">Preço Unit.</th>
+                  <th className="px-4 md:px-6 py-3 md:py-4 font-semibold uppercase text-right hidden sm:table-cell">IVA (%)</th>
+                  <th className="px-4 md:px-6 py-3 md:py-4 text-right">Ações</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[var(--color-outline-variant)]">
                 {filteredProducts.map((product) => (
                   <tr key={product.id} className="hover:bg-[var(--color-surface-container-lowest)] transition-colors group">
-                    <td className="px-6 py-4">
-                      <div className="font-semibold text-[var(--color-on-surface)]">{product.name}</div>
-                      <div className="text-xs text-[var(--color-on-surface-variant)] flex items-center gap-2 mt-1">
+                    <td className="px-4 md:px-6 py-3 md:py-4 min-w-0">
+                      <div className="font-semibold text-[var(--color-on-surface)] truncate max-w-[150px] sm:max-w-[300px]">{product.name}</div>
+                      <div className="text-xs text-[var(--color-on-surface-variant)] flex items-center gap-2 mt-1 truncate">
                         <span className="font-mono bg-[var(--color-surface-container)] px-1.5 py-0.5 rounded text-[10px]">
                           {product.code || "S/ REF"}
                         </span>
@@ -96,23 +96,23 @@ export default function ProductsPage() {
                         <span>{product.unit || "Unidade"}</span>
                       </div>
                     </td>
-                    <td className="px-6 py-4 hidden md:table-cell">
+                    <td className="px-4 md:px-6 py-3 md:py-4 hidden md:table-cell">
                       <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-[var(--color-surface-container)] text-[var(--color-on-surface-variant)]">
                         {product.category || "Geral"}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-right">
+                    <td className="px-4 md:px-6 py-3 md:py-4 text-right">
                       <div className="font-medium text-[var(--color-on-surface)]">
                         {formatCurrency(product.price)}
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-right hidden sm:table-cell">
+                    <td className="px-4 md:px-6 py-3 md:py-4 text-right hidden sm:table-cell">
                       <div className="text-sm text-[var(--color-on-surface-variant)]">
                         {product.vat}%
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-right">
-                      <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <td className="px-4 md:px-6 py-3 md:py-4 text-right">
+                      <div className="flex justify-end gap-1 md:gap-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
                         <Link href={`/dashboard/products/${product.id}/edit`} className="p-2 text-[var(--color-outline)] hover:text-blue-600 hover:bg-blue-50 rounded-full transition-colors">
                           <Edit2 className="w-5 h-5" />
                         </Link>
