@@ -211,18 +211,23 @@ async function renderMinimalTemplate(params: any) {
       descLines = descLines.concat(wrapText(l, 230, fontRegular, 9));
     });
 
+    const rowHeight = descLines.length * 15 + 10;
+    const rowStartY = cursorY + 10;
+    const rowEndY = rowStartY - rowHeight;
+
+    let textY = cursorY;
     for (let i = 0; i < descLines.length; i++) {
-      page.drawText(descLines[i], { x: 55, y: cursorY, size: 9, font: fontRegular, color: textColor });
+      page.drawText(descLines[i], { x: 55, y: textY, size: 9, font: fontRegular, color: textColor });
       
       if (i === 0) {
-        page.drawText(item.quantity.toString(), { x: 300, y: cursorY, size: 9, font: fontRegular, color: textColor });
-        page.drawText(formatCurrency(item.unit_price).replace("MZN", "").trim(), { x: 350, y: cursorY, size: 9, font: fontRegular, color: textColor });
-        page.drawText(`${item.vat_rate}%`, { x: 420, y: cursorY, size: 9, font: fontRegular, color: textColor });
-        page.drawText(formatCurrency(item.total).replace("MZN", "").trim(), { x: 480, y: cursorY, size: 9, font: fontRegular, color: textColor });
+        page.drawText(item.quantity.toString(), { x: 300, y: textY, size: 9, font: fontRegular, color: textColor });
+        page.drawText(formatCurrency(item.unit_price).replace("MZN", "").trim(), { x: 350, y: textY, size: 9, font: fontRegular, color: textColor });
+        page.drawText(`${item.vat_rate}%`, { x: 420, y: textY, size: 9, font: fontRegular, color: textColor });
+        page.drawText(formatCurrency(item.total).replace("MZN", "").trim(), { x: 480, y: textY, size: 9, font: fontRegular, color: textColor });
       }
-      cursorY -= 15;
+      textY -= 15;
     }
-    cursorY -= 5;
+    cursorY = rowEndY - 10;
   }
 
   page.drawLine({ start: { x: 50, y: cursorY + 10 }, end: { x: width - 50, y: cursorY + 10 }, thickness: 1, color: lineGray });
@@ -384,24 +389,29 @@ async function renderModernTemplate(params: any) {
     rawLines.forEach((l: string) => {
       descLines = descLines.concat(wrapText(l, 250, fontRegular, 9));
     });
+    
     const rowHeight = descLines.length * 15 + 10;
+    const rowStartY = cursorY + 10;
+    const rowEndY = rowStartY - rowHeight;
     
     if (rowIndex % 2 !== 0) {
-      page.drawRectangle({ x: 40, y: cursorY - rowHeight + 10, width: width - 80, height: rowHeight, color: secondaryColor });
+      page.drawRectangle({ x: 40, y: rowEndY, width: width - 80, height: rowHeight, color: secondaryColor });
     }
 
+    let textY = cursorY;
     for (let i = 0; i < descLines.length; i++) {
-      page.drawText(descLines[i], { x: 50, y: cursorY, size: 9, font: fontRegular, color: textColor });
+      page.drawText(descLines[i], { x: 50, y: textY, size: 9, font: fontRegular, color: textColor });
       
       if (i === 0) {
-        page.drawText(item.quantity.toString(), { x: 320, y: cursorY, size: 9, font: fontRegular, color: textColor });
-        page.drawText(formatCurrency(item.unit_price).replace("MZN", "").trim(), { x: 370, y: cursorY, size: 9, font: fontRegular, color: textColor });
-        page.drawText(`${item.vat_rate}%`, { x: 440, y: cursorY, size: 9, font: fontRegular, color: textColor });
-        page.drawText(formatCurrency(item.total).replace("MZN", "").trim(), { x: 490, y: cursorY, size: 9, font: fontRegular, color: textColor });
+        page.drawText(item.quantity.toString(), { x: 320, y: textY, size: 9, font: fontRegular, color: textColor });
+        page.drawText(formatCurrency(item.unit_price).replace("MZN", "").trim(), { x: 370, y: textY, size: 9, font: fontRegular, color: textColor });
+        page.drawText(`${item.vat_rate}%`, { x: 440, y: textY, size: 9, font: fontRegular, color: textColor });
+        page.drawText(formatCurrency(item.total).replace("MZN", "").trim(), { x: 490, y: textY, size: 9, font: fontRegular, color: textColor });
       }
-      cursorY -= 15;
+      textY -= 15;
     }
-    cursorY -= 5;
+    
+    cursorY = rowEndY - 10;
     rowIndex++;
   }
 
@@ -629,31 +639,38 @@ async function renderCorporateTemplate(params: any) {
     rawLines.forEach((l: string) => {
       descLines = descLines.concat(wrapText(l, 250, fontRegular, 9));
     });
+    
     const rowHeight = descLines.length * 15 + 10;
+    const rowStartY = cursorY + 15; // Top of the row border is 15px above the text baseline
+    const rowEndY = rowStartY - rowHeight; // Bottom of the row border
     
     // Draw row bottom border
-    page.drawLine({ start: { x: 40, y: cursorY - rowHeight + 10 }, end: { x: width - 40, y: cursorY - rowHeight + 10 }, thickness: 0.5, color: borderColor });
+    page.drawLine({ start: { x: 40, y: rowEndY }, end: { x: width - 40, y: rowEndY }, thickness: 0.5, color: borderColor });
 
     // Draw vertical separators
-    page.drawLine({ start: { x: 40, y: cursorY + 15 }, end: { x: 40, y: cursorY - rowHeight + 10 }, thickness: 1, color: borderColor });
-    page.drawLine({ start: { x: 310, y: cursorY + 15 }, end: { x: 310, y: cursorY - rowHeight + 10 }, thickness: 0.5, color: borderColor });
-    page.drawLine({ start: { x: 360, y: cursorY + 15 }, end: { x: 360, y: cursorY - rowHeight + 10 }, thickness: 0.5, color: borderColor });
-    page.drawLine({ start: { x: 430, y: cursorY + 15 }, end: { x: 430, y: cursorY - rowHeight + 10 }, thickness: 0.5, color: borderColor });
-    page.drawLine({ start: { x: 480, y: cursorY + 15 }, end: { x: 480, y: cursorY - rowHeight + 10 }, thickness: 0.5, color: borderColor });
-    page.drawLine({ start: { x: width - 40, y: cursorY + 15 }, end: { x: width - 40, y: cursorY - rowHeight + 10 }, thickness: 1, color: borderColor });
+    page.drawLine({ start: { x: 40, y: rowStartY }, end: { x: 40, y: rowEndY }, thickness: 1, color: borderColor });
+    page.drawLine({ start: { x: 310, y: rowStartY }, end: { x: 310, y: rowEndY }, thickness: 0.5, color: borderColor });
+    page.drawLine({ start: { x: 360, y: rowStartY }, end: { x: 360, y: rowEndY }, thickness: 0.5, color: borderColor });
+    page.drawLine({ start: { x: 430, y: rowStartY }, end: { x: 430, y: rowEndY }, thickness: 0.5, color: borderColor });
+    page.drawLine({ start: { x: 480, y: rowStartY }, end: { x: 480, y: rowEndY }, thickness: 0.5, color: borderColor });
+    page.drawLine({ start: { x: width - 40, y: rowStartY }, end: { x: width - 40, y: rowEndY }, thickness: 1, color: borderColor });
 
+    let textY = cursorY;
     for (let i = 0; i < descLines.length; i++) {
-      page.drawText(descLines[i], { x: 45, y: cursorY, size: 9, font: fontRegular, color: darkGray });
+      page.drawText(descLines[i], { x: 45, y: textY, size: 9, font: fontRegular, color: darkGray });
       
       if (i === 0) {
-        page.drawText(item.quantity.toString(), { x: 315, y: cursorY, size: 9, font: fontRegular, color: darkGray });
-        page.drawText(formatCurrency(item.unit_price).replace("MZN", "").trim(), { x: 365, y: cursorY, size: 9, font: fontRegular, color: darkGray });
-        page.drawText(`${item.vat_rate}%`, { x: 435, y: cursorY, size: 9, font: fontRegular, color: darkGray });
-        page.drawText(formatCurrency(item.total).replace("MZN", "").trim(), { x: 485, y: cursorY, size: 9, font: fontRegular, color: darkGray });
+        page.drawText(item.quantity.toString(), { x: 315, y: textY, size: 9, font: fontRegular, color: darkGray });
+        page.drawText(formatCurrency(item.unit_price).replace("MZN", "").trim(), { x: 365, y: textY, size: 9, font: fontRegular, color: darkGray });
+        page.drawText(`${item.vat_rate}%`, { x: 435, y: textY, size: 9, font: fontRegular, color: darkGray });
+        page.drawText(formatCurrency(item.total).replace("MZN", "").trim(), { x: 485, y: textY, size: 9, font: fontRegular, color: darkGray });
       }
-      cursorY -= 15;
+      textY -= 15;
     }
-    cursorY -= 5;
+    
+    // Set cursorY for the next row to be 15px below the previous row's bottom border
+    // This perfectly aligns the next text baseline.
+    cursorY = rowEndY - 15;
   }
 
   cursorY -= 20;
