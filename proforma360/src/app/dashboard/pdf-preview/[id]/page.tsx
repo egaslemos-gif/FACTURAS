@@ -177,13 +177,28 @@ export default function PdfPreviewPage() {
       )}
 
       {/* PDF Iframe */}
-      <div className="flex-1 bg-gray-200 rounded-[var(--radius-lg)] border border-[var(--color-outline-variant)] overflow-hidden shadow-inner">
+      <div className="flex-1 bg-gray-200 rounded-[var(--radius-lg)] border border-[var(--color-outline-variant)] overflow-hidden shadow-inner relative">
         {pdfUrl ? (
-          <iframe 
-            src={pdfUrl} 
-            className="w-full h-full border-none"
-            title="PDF Preview"
-          />
+          <>
+            <iframe 
+              src={pdfUrl} 
+              className="w-full h-full border-none hidden md:block"
+              title="PDF Preview"
+            />
+            <div className="md:hidden flex flex-col items-center justify-center h-full p-6 text-center bg-white">
+               <FileText className="w-16 h-16 text-gray-300 mb-4" />
+               <p className="text-gray-600 mb-6 font-medium text-sm">
+                 A pré-visualização de PDF diretamente no ecrã não é suportada por alguns navegadores móveis.
+               </p>
+               <button 
+                 onClick={() => window.open(pdfUrl, '_blank')}
+                 className="px-6 py-3 bg-[var(--color-primary)] text-white rounded-lg shadow-sm font-medium flex items-center gap-2 active:scale-95 transition-transform"
+               >
+                 <FileText className="w-5 h-5" />
+                 Abrir PDF
+               </button>
+            </div>
+          </>
         ) : (
           <div className="flex items-center justify-center h-full text-gray-500">
             Falha ao carregar a pré-visualização.

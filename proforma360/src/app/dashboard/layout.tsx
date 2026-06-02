@@ -89,7 +89,10 @@ export default function DashboardLayout({
       formData.append("file", new Blob([dbFile as unknown as BlobPart]), "proforma360.db");
       
       const res = await fetch("/api/drive/backup", { method: "POST", body: formData });
-      if (!res.ok) throw new Error("Falha no upload.");
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.details || errorData.error || "Falha no upload. Verifique a sua ligação e tente novamente.");
+      }
       
       setHasUnsyncedChanges(false);
       setLastSyncDate(new Date().toISOString());
@@ -97,6 +100,9 @@ export default function DashboardLayout({
       toast.success("Backup guardado com sucesso na Cloud!");
     } catch (e: any) {
       toast.error("Erro ao fazer backup: " + e.message);
+      if (e.message.includes("Invalid Credentials") || e.message.includes("Não autorizado")) {
+        toast.info("A sua sessão Google pode ter expirado. Por favor, faça logout e login novamente.");
+      }
     } finally {
       setIsSyncing(false);
     }
@@ -110,7 +116,10 @@ export default function DashboardLayout({
     try {
       setIsSyncing(true);
       const res = await fetch("/api/drive/restore");
-      if (!res.ok) throw new Error("Nenhum backup encontrado.");
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.details || errorData.error || "Nenhum backup encontrado ou falha no download.");
+      }
       
       const buffer = await res.arrayBuffer();
       await dbClient.restoreDatabaseFile(new Uint8Array(buffer));
@@ -124,6 +133,9 @@ export default function DashboardLayout({
       setTimeout(() => window.location.reload(), 1500);
     } catch (e: any) {
       toast.error("Erro ao restaurar: " + e.message);
+      if (e.message.includes("Invalid Credentials") || e.message.includes("Não autorizado")) {
+        toast.info("A sua sessão Google pode ter expirado. Por favor, faça logout e login novamente.");
+      }
     } finally {
       setIsSyncing(false);
     }

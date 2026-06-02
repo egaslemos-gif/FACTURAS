@@ -54,6 +54,11 @@ async function multipartUpload(
     body: body as any,
   });
 
+  if (!res.ok) {
+    const errText = await res.text();
+    throw new Error(`Upload Failed (${res.status}): ${errText}`);
+  }
+
   return res.json();
 }
 
@@ -74,6 +79,11 @@ async function multipartUpdate(
     },
     body: fileContent as any,
   });
+
+  if (!res.ok) {
+    const errText = await res.text();
+    throw new Error(`Update Failed (${res.status}): ${errText}`);
+  }
 
   return res.json();
 }
@@ -202,6 +212,11 @@ export async function uploadPdfToDrive(
     },
     body: body as any,
   });
+
+  if (!res.ok) {
+    const errText = await res.text();
+    throw new Error(`PDF Upload Failed (${res.status}): ${errText}`);
+  }
 
   return res.json();
 }
