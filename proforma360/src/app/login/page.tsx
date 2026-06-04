@@ -72,7 +72,7 @@ export default function LoginPage() {
       </div>
 
       {/* Right Panel - Login Form */}
-      <div className="w-full lg:w-1/2 h-full flex flex-col justify-between p-6 sm:p-8 lg:p-12 overflow-y-auto">
+      <div className="flex-1 w-full lg:w-1/2 flex flex-col justify-between p-6 sm:p-8 lg:p-12 overflow-y-auto min-h-[100dvh] lg:min-h-0">
         
         {/* Mobile logo (hidden on desktop) */}
         <Link href="/" className="flex lg:hidden items-center justify-center gap-3 mb-8 hover:opacity-80 transition-opacity w-fit mx-auto cursor-pointer">
@@ -86,7 +86,7 @@ export default function LoginPage() {
         <div className="hidden lg:block"></div>
 
         {/* Main Login Card */}
-        <div className="w-full max-w-md mx-auto flex flex-col">
+        <div className="w-full max-w-md mx-auto flex flex-col my-auto">
           <div className="border border-gray-200 rounded-2xl p-8 sm:p-10 shadow-sm bg-white text-center">
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3 tracking-tight">Bem-vindo de volta</h1>
             <p className="text-gray-500 text-sm sm:text-base mb-10 leading-relaxed px-4">
