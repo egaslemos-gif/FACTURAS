@@ -76,7 +76,7 @@ export default function SupportPage() {
         <p className="text-gray-600 mb-6">
           Envie-nos um e-mail com a sua dúvida e capturas de ecrã (se aplicável). A nossa equipa de desenvolvimento irá responder-lhe com a maior brevidade possível.
         </p>
-        <a href="mailto:support@proforma360.app" className="inline-block px-6 py-3 bg-teal-600 hover:bg-teal-700 text-white font-medium rounded-lg transition-colors">
+        <a href="mailto:egaslemos@gmail.com?cc=cycode360@gmail.com&subject=Suporte%20T%C3%A9cnico%20Proforma360" className="inline-block px-6 py-3 bg-teal-600 hover:bg-teal-700 text-white font-medium rounded-lg transition-colors">
           Contactar Suporte Técnico
         </a>
       </div>
