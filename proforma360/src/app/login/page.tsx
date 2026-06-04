@@ -75,7 +75,7 @@ export default function LoginPage() {
       <div className="w-full lg:w-1/2 h-full flex flex-col justify-between p-6 sm:p-8 lg:p-12 overflow-y-auto">
         
         {/* Mobile logo (hidden on desktop) */}
-        <Link href="/" className="flex lg:hidden items-center gap-3 mb-8 hover:opacity-80 transition-opacity w-fit cursor-pointer">
+        <Link href="/" className="flex lg:hidden items-center justify-center gap-3 mb-8 hover:opacity-80 transition-opacity w-fit mx-auto cursor-pointer">
           <div className="w-10 h-10 bg-[var(--color-primary)] rounded-md flex items-center justify-center">
             <FileText className="w-6 h-6 text-white" />
           </div>
