@@ -76,9 +76,17 @@ export default function SupportPage() {
         <p className="text-gray-600 mb-6">
           Envie-nos um e-mail com a sua dúvida e capturas de ecrã (se aplicável). A nossa equipa de desenvolvimento irá responder-lhe com a maior brevidade possível.
         </p>
-        <a href="mailto:egaslemos@gmail.com?cc=cycode360@gmail.com&subject=Suporte%20T%C3%A9cnico%20Proforma360" className="inline-block px-6 py-3 bg-teal-600 hover:bg-teal-700 text-white font-medium rounded-lg transition-colors">
-          Contactar Suporte Técnico
-        </a>
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+          <a href="mailto:egaslemos@gmail.com?cc=cycode360@gmail.com&subject=Suporte%20T%C3%A9cnico%20Proforma360" className="w-full sm:w-auto px-6 py-3 bg-teal-600 hover:bg-teal-700 text-white font-medium rounded-lg transition-colors flex items-center justify-center gap-2">
+            <Mail className="w-4 h-4" /> App de Email
+          </a>
+          <a href="https://mail.google.com/mail/?view=cm&fs=1&to=egaslemos@gmail.com&cc=cycode360@gmail.com&su=Suporte%20T%C3%A9cnico%20Proforma360" target="_blank" rel="noopener noreferrer" className="w-full sm:w-auto px-6 py-3 bg-white hover:bg-teal-50 text-teal-700 border border-teal-200 font-medium rounded-lg transition-colors flex items-center justify-center gap-2">
+            Gmail Web
+          </a>
+        </div>
+        <p className="text-xs text-gray-500 mt-4">
+          Se os botões não abrirem, envie e-mail diretamente para <strong>egaslemos@gmail.com</strong> (CC: cycode360@gmail.com)
+        </p>
       </div>
 
     </LegalLayout>
