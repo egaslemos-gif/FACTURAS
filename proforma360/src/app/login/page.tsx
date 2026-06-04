@@ -74,19 +74,16 @@ export default function LoginPage() {
       {/* Right Panel - Login Form */}
       <div className="flex-1 w-full lg:w-1/2 flex flex-col p-6 sm:p-8 lg:p-12 overflow-y-auto">
         
-        {/* Mobile logo (hidden on desktop) */}
-        <Link href="/" className="flex lg:hidden items-center justify-center gap-3 mb-4 hover:opacity-80 transition-opacity w-fit mx-auto cursor-pointer flex-none">
-          <div className="w-10 h-10 bg-[var(--color-primary)] rounded-md flex items-center justify-center">
-            <FileText className="w-6 h-6 text-white" />
-          </div>
-          <span className="text-2xl font-bold tracking-tight text-gray-900">Proforma360</span>
-        </Link>
+        <div className="w-full max-w-md mx-auto flex flex-col my-auto gap-6 sm:gap-8">
+          {/* Mobile logo (hidden on desktop) */}
+          <Link href="/" className="flex lg:hidden items-center justify-center gap-2.5 hover:opacity-80 transition-opacity w-fit mx-auto cursor-pointer">
+            <div className="w-10 h-10 bg-[var(--color-primary)] rounded-md flex items-center justify-center shadow-sm">
+              <FileText className="w-5 h-5 text-white" />
+            </div>
+            <span className="text-2xl font-bold tracking-tight text-gray-900">Proforma360</span>
+          </Link>
 
-        {/* Empty space for vertical centering */}
-        <div className="hidden lg:block"></div>
-
-        {/* Main Login Card */}
-        <div className="w-full max-w-md mx-auto flex flex-col my-auto">
+          {/* Main Login Card */}
           <div className="border border-gray-200 rounded-2xl p-8 sm:p-10 shadow-sm bg-white text-center">
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3 tracking-tight">Bem-vindo de volta</h1>
             <p className="text-gray-500 text-sm sm:text-base mb-10 leading-relaxed px-4">
