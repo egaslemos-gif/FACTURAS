@@ -1,12 +1,18 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { useNetworkStore } from '@/stores/useNetworkStore';
 import { CloudOff } from 'lucide-react';
 
 export function OfflineBanner() {
   const { isOnline } = useNetworkStore();
+  const [mounted, setMounted] = useState(false);
 
-  if (isOnline) return null;
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted || isOnline) return null;
 
   return (
     <div className="bg-amber-100 text-amber-900 border-b border-amber-200 overflow-hidden animate-in slide-in-from-top-2 fade-in">

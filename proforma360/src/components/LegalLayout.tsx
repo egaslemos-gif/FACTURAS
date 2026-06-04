@@ -46,7 +46,7 @@ export default function LegalLayout({ children, title, lastUpdated }: LegalLayou
       <footer className="border-t border-gray-100 bg-gray-50 py-12 mt-20">
         <div className="max-w-4xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6">
           <div className="text-sm text-gray-500 font-medium">
-            © {new Date().getFullYear()} Proforma360. Todos os direitos reservados.
+            © 2026 Proforma360. Todos os direitos reservados.
           </div>
           <div className="flex gap-6 text-sm font-medium">
             <Link href="/security" className="text-gray-500 hover:text-gray-900 transition-colors">Segurança</Link>
