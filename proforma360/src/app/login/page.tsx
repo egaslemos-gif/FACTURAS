@@ -36,7 +36,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen lg:h-screen lg:overflow-hidden flex flex-col lg:flex-row bg-white">
+    <div className="h-[100dvh] lg:h-screen lg:overflow-hidden flex flex-col lg:flex-row bg-white">
       {/* Left Panel - Hidden on mobile */}
       <div className="hidden lg:flex lg:w-1/2 bg-[#042f2e] text-white flex-col justify-between p-12 relative overflow-hidden h-full">
         {/* Abstract background graphics */}
@@ -72,10 +72,10 @@ export default function LoginPage() {
       </div>
 
       {/* Right Panel - Login Form */}
-      <div className="flex-1 w-full lg:w-1/2 flex flex-col justify-between p-6 sm:p-8 lg:p-12 overflow-y-auto min-h-[100dvh] lg:min-h-0">
+      <div className="flex-1 w-full lg:w-1/2 flex flex-col p-6 sm:p-8 lg:p-12 overflow-y-auto">
         
         {/* Mobile logo (hidden on desktop) */}
-        <Link href="/" className="flex lg:hidden items-center justify-center gap-3 mb-8 hover:opacity-80 transition-opacity w-fit mx-auto cursor-pointer">
+        <Link href="/" className="flex lg:hidden items-center justify-center gap-3 mb-4 hover:opacity-80 transition-opacity w-fit mx-auto cursor-pointer flex-none">
           <div className="w-10 h-10 bg-[var(--color-primary)] rounded-md flex items-center justify-center">
             <FileText className="w-6 h-6 text-white" />
           </div>
@@ -118,7 +118,7 @@ export default function LoginPage() {
         </div>
 
         {/* Footer Links */}
-        <div className="mt-12 flex flex-wrap justify-center gap-x-6 gap-y-3 text-xs text-gray-400 font-medium pb-4">
+        <div className="mt-8 flex flex-wrap justify-center gap-x-6 gap-y-3 text-xs text-gray-400 font-medium pb-2 flex-none">
           <Link href="/security" className="hover:text-gray-900 transition-colors">Segurança</Link>
           <Link href="/privacy" className="hover:text-gray-900 transition-colors">Privacidade</Link>
           <Link href="/terms" className="hover:text-gray-900 transition-colors">Termos</Link>
