@@ -45,14 +45,14 @@ export default function LoginPage() {
           <div className="absolute -bottom-[20%] -left-[10%] w-[80%] h-[80%] rounded-full border-[60px] border-[#0d9488] blur-3xl"></div>
         </div>
 
-        <div className="relative z-10 flex items-center gap-3">
+        <Link href="/" className="relative z-10 flex items-center gap-3 hover:opacity-90 transition-opacity w-fit cursor-pointer">
           <div className="w-10 h-10 bg-[var(--color-primary)] rounded-md flex items-center justify-center">
             <svg viewBox="0 0 24 24" className="w-6 h-6 text-white" fill="none" stroke="currentColor" strokeWidth="2">
               <path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
             </svg>
           </div>
           <span className="text-2xl font-bold tracking-tight">Proforma360</span>
-        </div>
+        </Link>
 
         <div className="relative z-10 max-w-lg mb-10">
           <div className="text-[var(--color-primary)] text-6xl font-serif leading-none mb-4">"</div>
@@ -75,12 +75,12 @@ export default function LoginPage() {
       <div className="w-full lg:w-1/2 h-full flex flex-col justify-between p-6 sm:p-8 lg:p-12 overflow-y-auto">
         
         {/* Mobile logo (hidden on desktop) */}
-        <div className="flex lg:hidden items-center gap-3 mb-8">
+        <Link href="/" className="flex lg:hidden items-center gap-3 mb-8 hover:opacity-80 transition-opacity w-fit cursor-pointer">
           <div className="w-10 h-10 bg-[var(--color-primary)] rounded-md flex items-center justify-center">
             <FileText className="w-6 h-6 text-white" />
           </div>
           <span className="text-2xl font-bold tracking-tight text-gray-900">Proforma360</span>
-        </div>
+        </Link>
 
         {/* Empty space for vertical centering */}
         <div className="hidden lg:block"></div>
