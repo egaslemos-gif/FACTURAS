@@ -613,6 +613,7 @@ export default function LandingPage() {
             <Link href="/terms" className="hover:text-slate-900 transition-colors">Termos</Link>
             <Link href="/privacy" className="hover:text-slate-900 transition-colors">Privacidade</Link>
             <Link href="/security" className="hover:text-slate-900 transition-colors">Segurança</Link>
+            <Link href="/support" className="hover:text-slate-900 transition-colors">Suporte</Link>
           </div>
         </div>
       </footer>
