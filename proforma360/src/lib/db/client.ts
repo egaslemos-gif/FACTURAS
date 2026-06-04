@@ -12,6 +12,7 @@ class DatabaseClient {
   private db: Database | null = null;
   private idb: IDBPDatabase | null = null;
   private isInitialized = false;
+  public isNewDatabase = false;
   private isInitializing = false;
   private initPromise: Promise<void> | null = null;
 
@@ -27,9 +28,14 @@ class DatabaseClient {
   private async _initialize(): Promise<void> {
     try {
       // 1. Initialize IndexedDB
-      this.idb = await openDB(DB_NAME, 1, {
-        upgrade(db) {
-          db.createObjectStore(STORE_NAME);
+      this.idb = await openDB(DB_NAME, 2, {
+        upgrade(db, oldVersion, newVersion, transaction) {
+          if (oldVersion < 1) {
+            db.createObjectStore(STORE_NAME);
+          }
+          if (oldVersion < 2) {
+            db.createObjectStore('action_queue', { keyPath: 'id' });
+          }
         },
       });
 
@@ -71,6 +77,33 @@ class DatabaseClient {
         safeRun("ALTER TABLE clients ADD COLUMN tags TEXT");
         // Migration 4: Rename classic to minimal in existing rows
         safeRun("UPDATE companies SET pdf_template = 'minimal' WHERE pdf_template = 'classic'");
+        // Migration 5: Add sent_at
+        safeRun("ALTER TABLE quotations ADD COLUMN sent_at TEXT");
+        // Migration 6: Add show_branding
+        safeRun("ALTER TABLE companies ADD COLUMN show_branding INTEGER DEFAULT 1");
+        // Migration 7: CRM Pipeline fields
+        safeRun("ALTER TABLE quotations ADD COLUMN pipeline_stage TEXT DEFAULT 'lead'");
+        safeRun("ALTER TABLE quotations ADD COLUMN next_action TEXT");
+        safeRun("ALTER TABLE quotations ADD COLUMN next_action_date TEXT");
+        // Migration 8: Client Interactions table
+        this.db?.run(`
+          CREATE TABLE IF NOT EXISTS client_interactions (
+            id TEXT PRIMARY KEY,
+            client_id TEXT NOT NULL,
+            type TEXT NOT NULL,
+            title TEXT NOT NULL,
+            description TEXT,
+            created_at TEXT,
+            FOREIGN KEY(client_id) REFERENCES clients(id)
+          )
+        `);
+        // Migration 9: Priority
+        safeRun("ALTER TABLE quotations ADD COLUMN priority TEXT DEFAULT 'medium'");
+        // Migration 10: Pipeline Operations Phase 1
+        safeRun("ALTER TABLE quotations ADD COLUMN next_action_time TEXT");
+        safeRun("ALTER TABLE quotations ADD COLUMN last_activity_at TEXT");
+        safeRun("ALTER TABLE quotations ADD COLUMN last_contact_at TEXT");
+        safeRun("ALTER TABLE quotations ADD COLUMN reminders_enabled INTEGER DEFAULT 1");
         
         await this.save();
       } else {
@@ -78,6 +111,7 @@ class DatabaseClient {
         this.db = new SQL.Database();
         this.createSchema();
         await this.save();
+        this.isNewDatabase = true;
         console.log("New database created and saved.");
       }
 
@@ -113,6 +147,7 @@ class DatabaseClient {
         nib_iban TEXT,
         mpesa TEXT,
         emola TEXT,
+        show_branding INTEGER DEFAULT 1,
         created_at TEXT,
         updated_at TEXT
       );
@@ -152,6 +187,14 @@ class DatabaseClient {
         date TEXT,
         expiry_date TEXT,
         status TEXT DEFAULT 'draft',
+        pipeline_stage TEXT DEFAULT 'lead',
+        priority TEXT DEFAULT 'medium',
+        next_action TEXT,
+        next_action_date TEXT,
+        next_action_time TEXT,
+        last_activity_at TEXT,
+        last_contact_at TEXT,
+        reminders_enabled INTEGER DEFAULT 1,
         subtotal REAL,
         discount REAL DEFAULT 0,
         discount_type TEXT DEFAULT 'percentage',
@@ -161,6 +204,7 @@ class DatabaseClient {
         terms TEXT,
         pdf_url TEXT,
         pdf_drive_id TEXT,
+        sent_at TEXT,
         created_at TEXT,
         updated_at TEXT,
         FOREIGN KEY(client_id) REFERENCES clients(id)
@@ -195,6 +239,16 @@ class DatabaseClient {
         key TEXT PRIMARY KEY,
         value TEXT
       );
+
+      CREATE TABLE IF NOT EXISTS client_interactions (
+        id TEXT PRIMARY KEY,
+        client_id TEXT NOT NULL,
+        type TEXT NOT NULL,
+        title TEXT NOT NULL,
+        description TEXT,
+        created_at TEXT,
+        FOREIGN KEY(client_id) REFERENCES clients(id)
+      );
     `);
   }
 
@@ -209,6 +263,33 @@ class DatabaseClient {
       
       // Notify sync store that changes happened
       useSyncStore.getState().setHasUnsyncedChanges(true);
+
+      // Mutation Metadata for Eventual Consistency / Cloud Sync
+      if (typeof window !== 'undefined') {
+        const isMutation = query.trim().toUpperCase().match(/^(INSERT|UPDATE|DELETE)/);
+        if (isMutation) {
+          import('@/lib/sync/actionQueue').then(({ actionQueue }) => {
+            let deviceId = localStorage.getItem('proforma_device_id');
+            if (!deviceId) {
+              deviceId = `dev_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+              localStorage.setItem('proforma_device_id', deviceId);
+            }
+            
+            const uuid = typeof crypto !== 'undefined' && crypto.randomUUID 
+              ? crypto.randomUUID() 
+              : `op_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+
+            actionQueue.enqueue('SYNC_MUTATION', {
+              operation_id: uuid,
+              device_id: deviceId,
+              timestamp: Date.now(),
+              mutation_version: 1,
+              query,
+              params
+            }, 'MEDIUM');
+          });
+        }
+      }
     } catch (error) {
       console.error("Execute write error:", error);
       throw error;

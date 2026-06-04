@@ -5,6 +5,7 @@ import { useProductsStore } from "@/stores";
 import { Search, Plus, Trash2, Edit2, PackageOpen } from "lucide-react";
 import { cn, formatCurrency } from "@/lib/utils";
 import Link from "next/link";
+import { EmptyState } from "@/components/EmptyState";
 
 export default function ProductsPage() {
   const { products, fetchProducts, isLoading, deleteProduct } = useProductsStore();
@@ -24,14 +25,14 @@ export default function ProductsPage() {
     <div className="max-w-[var(--spacing-container-max)] mx-auto animate-fade-in">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
         <div>
-          <h1 className="text-headline-lg text-[var(--color-on-surface)]">Produtos & Serviços</h1>
-          <p className="text-body-md text-[var(--color-on-surface-variant)] mt-1">
-            Faça a gestão do seu catálogo de produtos e serviços
+          <h1 className="text-page-title">Produtos & Serviços</h1>
+          <p className="text-page-subtitle">
+            Catálogo de serviços e produtos.
           </p>
         </div>
         <Link
           href="/dashboard/products/new"
-          className="flex items-center justify-center gap-2 px-6 py-3 bg-[var(--color-primary)] hover:bg-[#003ea8] text-white rounded-lg font-medium transition-colors elevation-1"
+          className="flex items-center justify-center gap-2 px-6 py-3 bg-[var(--color-primary)] hover:bg-[#003ea8] text-white rounded-md font-medium transition-colors elevation-1"
         >
           <Plus className="w-5 h-5" />
           Novo Produto
@@ -48,7 +49,7 @@ export default function ProductsPage() {
               placeholder="Pesquisar por nome, código ou categoria..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-[var(--color-outline-variant)] rounded-lg focus:ring-2 focus:ring-[var(--color-primary)] outline-none bg-[var(--color-surface)]"
+              className="w-full pl-10 pr-4 py-2 border border-[var(--color-outline-variant)] rounded-md focus:ring-2 focus:ring-[var(--color-primary)] outline-none bg-[var(--color-surface)]"
             />
           </div>
           <div className="text-sm text-[var(--color-on-surface-variant)] ml-auto font-medium">
@@ -63,33 +64,36 @@ export default function ProductsPage() {
               <div className="w-8 h-8 border-4 border-[var(--color-primary)] border-t-transparent rounded-full animate-spin"></div>
             </div>
           ) : filteredProducts.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-64 text-center px-4">
-              <div className="w-16 h-16 bg-[var(--color-surface-container)] rounded-full flex items-center justify-center mb-4">
-                <PackageOpen className="w-8 h-8 text-[var(--color-outline)]" />
-              </div>
-              <h3 className="text-headline-sm text-[var(--color-on-surface)] mb-2">Nenhum produto encontrado</h3>
-              <p className="text-body-sm text-[var(--color-on-surface-variant)] max-w-md">
-                Adicione produtos ou serviços ao seu catálogo para utilizar nas proformas.
-              </p>
+            <div className="py-12">
+              <EmptyState 
+                icon={PackageOpen} 
+                title="Nenhum produto encontrado" 
+                description="Adicione produtos ou serviços ao seu catálogo para utilizar nas proformas."
+                action={{
+                  label: "Novo Produto",
+                  icon: Plus,
+                  onClick: () => window.location.href = "/dashboard/products/new"
+                }}
+              />
             </div>
           ) : (
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="bg-[var(--color-surface-container-low)] text-[var(--color-on-surface-variant)] text-label-sm border-b border-[var(--color-outline-variant)]">
-                  <th className="px-4 md:px-6 py-3 md:py-4 font-semibold uppercase">Produto / Serviço</th>
-                  <th className="px-4 md:px-6 py-3 md:py-4 font-semibold uppercase hidden md:table-cell">Categoria</th>
-                  <th className="px-4 md:px-6 py-3 md:py-4 font-semibold uppercase text-right">Preço Unit.</th>
-                  <th className="px-4 md:px-6 py-3 md:py-4 font-semibold uppercase text-right hidden sm:table-cell">IVA (%)</th>
-                  <th className="px-4 md:px-6 py-3 md:py-4 text-right">Ações</th>
+                <tr className="bg-[var(--color-surface-container-low)] border-b border-[var(--color-outline-variant)]">
+                  <th className="text-table-header px-4 md:px-6 py-3 md:py-4 text-left">Produto / Serviço</th>
+                  <th className="text-table-header px-4 md:px-6 py-3 md:py-4 text-left hidden md:table-cell">Categoria</th>
+                  <th className="text-table-header px-4 md:px-6 py-3 md:py-4 text-right">Preço Unit.</th>
+                  <th className="text-table-header px-4 md:px-6 py-3 md:py-4 text-right hidden sm:table-cell">IVA (%)</th>
+                  <th className="text-table-header px-4 md:px-6 py-3 md:py-4 text-right">Ações</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[var(--color-outline-variant)]">
                 {filteredProducts.map((product) => (
                   <tr key={product.id} className="hover:bg-[var(--color-surface-container-lowest)] transition-colors group">
                     <td className="px-4 md:px-6 py-3 md:py-4 min-w-0">
-                      <div className="font-semibold text-[var(--color-on-surface)] truncate max-w-[150px] sm:max-w-[300px]">{product.name}</div>
-                      <div className="text-xs text-[var(--color-on-surface-variant)] flex items-center gap-2 mt-1 truncate">
-                        <span className="font-mono bg-[var(--color-surface-container)] px-1.5 py-0.5 rounded text-[10px]">
+                      <div className="text-body font-semibold truncate max-w-[150px] sm:max-w-[300px]">{product.name}</div>
+                      <div className="text-muted flex items-center gap-2 mt-1 truncate">
+                        <span className="font-mono bg-[var(--color-surface-container)] px-1.5 py-0.5 rounded text-caption border border-[var(--color-outline-variant)]">
                           {product.code || "S/ REF"}
                         </span>
                         <span>•</span>
@@ -97,17 +101,17 @@ export default function ProductsPage() {
                       </div>
                     </td>
                     <td className="px-4 md:px-6 py-3 md:py-4 hidden md:table-cell">
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-[var(--color-surface-container)] text-[var(--color-on-surface-variant)]">
+                      <span className="inline-flex items-center px-2.5 py-1 rounded-md text-caption bg-[var(--color-surface-container)] text-gray-600 border border-[var(--color-outline-variant)]">
                         {product.category || "Geral"}
                       </span>
                     </td>
                     <td className="px-4 md:px-6 py-3 md:py-4 text-right">
-                      <div className="font-medium text-[var(--color-on-surface)]">
+                      <div className="text-body font-medium">
                         {formatCurrency(product.price)}
                       </div>
                     </td>
                     <td className="px-4 md:px-6 py-3 md:py-4 text-right hidden sm:table-cell">
-                      <div className="text-sm text-[var(--color-on-surface-variant)]">
+                      <div className="text-muted">
                         {product.vat}%
                       </div>
                     </td>

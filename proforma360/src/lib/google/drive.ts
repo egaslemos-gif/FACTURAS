@@ -220,3 +220,46 @@ export async function uploadPdfToDrive(
 
   return res.json();
 }
+
+/**
+ * Uploads a JSON payload to Drive and makes it public (reader: anyone)
+ */
+export async function sharePayloadToDrive(
+  accessToken: string,
+  folderId: string,
+  payload: any,
+  fileName: string
+): Promise<{ id: string }> {
+  const metadata = {
+    name: fileName,
+    parents: [folderId],
+    mimeType: "application/json",
+  };
+
+  const payloadString = JSON.stringify(payload);
+  const encoder = new TextEncoder();
+  const fileBytes = encoder.encode(payloadString);
+
+  // 1. Upload via multipartUpload helper
+  const uploadRes = await multipartUpload(accessToken, metadata, fileBytes, "application/json");
+
+  // 2. Set permissions to anyone with link (reader)
+  const permRes = await fetch(`https://www.googleapis.com/drive/v3/files/${uploadRes.id}/permissions`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      role: "reader",
+      type: "anyone",
+    }),
+  });
+
+  if (!permRes.ok) {
+    const errText = await permRes.text();
+    throw new Error(`Permission Update Failed (${permRes.status}): ${errText}`);
+  }
+
+  return { id: uploadRes.id };
+}

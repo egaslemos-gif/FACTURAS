@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useQuotationsStore, useClientsStore, useCompanyStore } from "@/stores";
+import { useLicenseStore } from "@/stores/licenseStore";
 import { generateQuotationPDF } from "@/lib/pdf/generator";
 import { ArrowLeft, Download, CloudUpload, FileText } from "lucide-react";
 import Link from "next/link";
@@ -11,6 +12,7 @@ import { toast } from "sonner";
 
 export default function PdfPreviewPage() {
   const params = useParams();
+  const router = useRouter();
   const id = params.id as string;
   const { data: session } = useSession();
   
@@ -35,6 +37,14 @@ export default function PdfPreviewPage() {
   useEffect(() => {
     async function buildPdf() {
       if (currentDetail && company && clients.length > 0) {
+        if (currentDetail.quotation.status === 'draft') {
+          const canExport = await useLicenseStore.getState().incrementUsage();
+          if (!canExport) {
+            router.push(`/dashboard/quotations/${id}`);
+            return;
+          }
+        }
+        
         setIsGenerating(true);
         try {
           const client = clients.find(c => c.id === currentDetail.quotation.client_id);
@@ -150,7 +160,7 @@ export default function PdfPreviewPage() {
         <div className="flex items-center gap-3">
           <button
             onClick={handleDownload}
-            className="flex items-center gap-2 px-4 py-2 bg-white border border-[var(--color-outline-variant)] text-[var(--color-on-surface)] hover:bg-gray-50 rounded-lg font-medium transition-colors"
+            className="flex items-center gap-2 px-4 py-2 bg-white border border-[var(--color-outline-variant)] text-[var(--color-on-surface)] hover:bg-gray-50 rounded-md font-medium transition-colors"
           >
             <Download className="w-4 h-4" /> Transferir
           </button>
@@ -158,7 +168,7 @@ export default function PdfPreviewPage() {
           <button
             onClick={handleUploadToDrive}
             disabled={isUploading}
-            className="flex items-center gap-2 px-6 py-2 bg-[var(--color-primary)] hover:bg-[#003ea8] text-white rounded-lg font-medium transition-colors shadow-sm disabled:opacity-70"
+            className="flex items-center gap-2 px-6 py-2 bg-[var(--color-primary)] hover:bg-[#003ea8] text-white rounded-md font-medium transition-colors shadow-sm disabled:opacity-70"
           >
             {isUploading ? (
               <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
@@ -171,7 +181,7 @@ export default function PdfPreviewPage() {
       </div>
 
       {uploadSuccess && (
-        <div className="mb-4 p-3 bg-green-50 border border-green-200 text-green-700 rounded-lg flex items-center gap-2 shrink-0 animate-fade-in">
+        <div className="mb-4 p-3 bg-green-50 border border-green-200 text-green-700 rounded-md flex items-center gap-2 shrink-0 animate-fade-in">
           <div className="w-2 h-2 rounded-full bg-green-500"></div>
           Documento guardado com sucesso no seu Google Drive (pasta Proforma360/PDFs).
         </div>
@@ -193,7 +203,7 @@ export default function PdfPreviewPage() {
                </p>
                <button 
                  onClick={() => window.open(pdfUrl, '_blank')}
-                 className="px-6 py-3 bg-[var(--color-primary)] text-white rounded-lg shadow-sm font-medium flex items-center gap-2 active:scale-95 transition-transform"
+                 className="px-6 py-3 bg-[var(--color-primary)] text-white rounded-md shadow-sm font-medium flex items-center gap-2 active:scale-95 transition-transform"
                >
                  <FileText className="w-5 h-5" />
                  Abrir PDF

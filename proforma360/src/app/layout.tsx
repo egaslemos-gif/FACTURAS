@@ -3,13 +3,16 @@ import { Inter, Geist } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import { Providers } from "@/components/Providers";
+import { PwaInitializer } from "@/components/pwa/PwaInitializer";
 import { Toaster } from "sonner";
+import { NetworkAwareness } from "@/components/network/NetworkAwareness";
+import { OfflineBanner } from "@/components/network/OfflineBanner";
 
-const geist = Geist({subsets:['latin'],variable:'--font-sans'});
+const geist = Geist({subsets:['latin'],variable:'--font-geist'});
 
 const inter = Inter({
   subsets: ["latin"],
-  variable: "--font-inter",
+  variable: "--font-sans",
   display: "swap",
 });
 
@@ -29,9 +32,24 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "pt_MZ",
+    url: "https://proforma360.vercel.app",
     title: "Proforma360",
-    description: "Proformas profissionais em segundos",
+    description: "Crie, envie e acompanhe propostas comerciais profissionais. CRM • Pipeline • PDFs • Offline-First.",
     siteName: "Proforma360",
+    images: [
+      {
+        url: "https://proforma360.vercel.app/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "Proforma360 - Gestão comercial moderna para empresas",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Proforma360",
+    description: "Crie, envie e acompanhe propostas comerciais profissionais. CRM • Pipeline • PDFs • Offline-First.",
+    images: ["https://proforma360.vercel.app/og-image.png"],
   },
 };
 
@@ -49,7 +67,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="pt" className={cn("h-full", inter.variable, "font-sans", geist.variable)}>
+    <html lang="pt" className={cn("h-full", inter.variable, geist.variable)}>
       <head>
         <link
           rel="stylesheet"
@@ -58,11 +76,17 @@ export default function RootLayout({
         <link rel="icon" href="/icon.svg" type="image/svg+xml" />
         <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
       </head>
-      <body className="min-h-full antialiased overflow-x-hidden bg-[var(--color-surface)] text-[var(--color-on-surface)]" suppressHydrationWarning>
-        <Providers>
-          {children}
-          <Toaster position="top-right" richColors />
-        </Providers>
+      <body className="min-h-full flex flex-col antialiased overflow-x-hidden font-sans bg-[var(--color-surface)] text-[var(--color-on-surface)]" suppressHydrationWarning>
+        <NetworkAwareness />
+        <OfflineBanner />
+        <div className="flex-1 flex flex-col min-h-0">
+          <Providers>
+            <PwaInitializer>
+              {children}
+              <Toaster position="top-right" richColors />
+            </PwaInitializer>
+          </Providers>
+        </div>
       </body>
     </html>
   );

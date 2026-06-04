@@ -21,7 +21,7 @@ export function TopBar({ title = "Dashboard" }: TopBarProps) {
           </div>
           <input
             type="text"
-            className="block w-full pl-10 pr-3 py-2 border border-[var(--color-outline-variant)] rounded-lg leading-5 bg-[var(--color-surface-container-lowest)] placeholder-[var(--color-outline)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent sm:text-sm transition-colors"
+            className="block w-full pl-10 pr-3 py-2 border border-[var(--color-outline-variant)] rounded-md leading-5 bg-[var(--color-surface-container-lowest)] placeholder-[var(--color-outline)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent sm:text-sm transition-colors"
             placeholder="Pesquisar clientes, proformas..."
           />
         </div>

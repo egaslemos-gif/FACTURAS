@@ -44,6 +44,8 @@ export const quotationsRepo = {
     const newQuotation = {
       id: quotationId,
       ...quotationData,
+      last_activity_at: timestamp,
+      reminders_enabled: 1,
       created_at: timestamp,
       updated_at: timestamp,
     };
@@ -105,6 +107,8 @@ export const quotationsRepo = {
         }
       });
 
+      updates.push("last_activity_at = ?");
+      values.push(timestamp);
       updates.push("updated_at = ?");
       values.push(timestamp);
       values.push(id);
@@ -143,8 +147,17 @@ export const quotationsRepo = {
     const q = await this.getById(id);
     if (!q) return;
 
-    await dbClient.executeWrite("UPDATE quotations SET status = ?, updated_at = ? WHERE id = ?", [newStatus, now(), id]);
+    await dbClient.executeWrite("UPDATE quotations SET status = ?, last_activity_at = ?, updated_at = ? WHERE id = ?", [newStatus, now(), now(), id]);
     await this.addHistory(id, "Status Change", q.quotation.status, newStatus, actionDetails);
+  },
+
+  async markAsSent(id: string): Promise<void> {
+    const q = await this.getById(id);
+    if (!q) return;
+
+    const timestamp = now();
+    await dbClient.executeWrite("UPDATE quotations SET status = 'sent', sent_at = ?, last_contact_at = ?, last_activity_at = ?, updated_at = ? WHERE id = ?", [timestamp, timestamp, timestamp, timestamp, id]);
+    await this.addHistory(id, "Shared", q.quotation.status, "sent", "Proforma partilhada com o cliente");
   },
 
   async delete(id: string): Promise<void> {
@@ -169,5 +182,38 @@ export const quotationsRepo = {
     const values = Object.values(history);
 
     await dbClient.executeWrite(`INSERT INTO quotation_history (${keys}) VALUES (${placeholders})`, values);
-  }
+  },
+
+  async updatePipelineStage(id: string, newStage: string): Promise<void> {
+    const q = await this.getById(id);
+    if (!q) return;
+
+    const oldStage = q.quotation.pipeline_stage || "lead";
+    await dbClient.executeWrite(
+      "UPDATE quotations SET pipeline_stage = ?, last_activity_at = ?, updated_at = ? WHERE id = ?",
+      [newStage, now(), now(), id]
+    );
+    await this.addHistory(id, "Pipeline", oldStage, newStage, `Movido para ${newStage}`);
+  },
+
+  async setNextAction(id: string, action: string | null, date: string | null): Promise<void> {
+    await dbClient.executeWrite(
+      "UPDATE quotations SET next_action = ?, next_action_date = ?, next_action_time = ?, last_activity_at = ?, updated_at = ? WHERE id = ?",
+      [action, date, null, now(), now(), id]
+    );
+  },
+
+  async setNextActionFull(id: string, action: string | null, date: string | null, time: string | null, reminders: boolean): Promise<void> {
+    await dbClient.executeWrite(
+      "UPDATE quotations SET next_action = ?, next_action_date = ?, next_action_time = ?, reminders_enabled = ?, last_activity_at = ?, updated_at = ? WHERE id = ?",
+      [action, date, time, reminders ? 1 : 0, now(), now(), id]
+    );
+  },
+
+  async setPriority(id: string, priority: "low" | "medium" | "high"): Promise<void> {
+    await dbClient.executeWrite(
+      "UPDATE quotations SET priority = ?, last_activity_at = ?, updated_at = ? WHERE id = ?",
+      [priority, now(), now(), id]
+    );
+  },
 };

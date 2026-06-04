@@ -72,10 +72,12 @@ export async function initializeDriveWorkspace(session: Session) {
   // 2. Create subfolders
   const backupsFolderId = await ensureFolder(accessToken, "Backups", rootFolderId);
   const pdfsFolderId = await ensureFolder(accessToken, "PDFs", rootFolderId);
+  const sharesFolderId = await ensureFolder(accessToken, "Shared Proposals", rootFolderId);
 
   return {
     rootFolderId,
     backupsFolderId,
     pdfsFolderId,
+    sharesFolderId,
   };
 }

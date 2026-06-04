@@ -22,6 +22,7 @@ export interface Company {
   nib_iban?: string | null;
   mpesa?: string | null;
   emola?: string | null;
+  show_branding: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -67,6 +68,14 @@ export interface Quotation {
   date: string;
   expiry_date: string;
   status: QuotationStatus;
+  pipeline_stage: PipelineStage;
+  priority?: "low" | "medium" | "high";
+  next_action: string | null;
+  next_action_date: string | null;
+  next_action_time: string | null;
+  last_activity_at: string | null;
+  last_contact_at: string | null;
+  reminders_enabled: boolean;
   subtotal: number;
   discount: number;
   discount_type: "percentage" | "fixed";
@@ -76,6 +85,7 @@ export interface Quotation {
   terms: string;
   pdf_url: string | null;
   pdf_drive_id: string | null;
+  sent_at: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -101,6 +111,38 @@ export interface QuotationHistory {
   old_status: string | null;
   new_status: string | null;
   details: string | null;
+  created_at: string;
+}
+
+// --- Pipeline Stage (independent from quotation_status) ---
+export type PipelineStage = "lead" | "contacted" | "proposal" | "negotiation" | "won" | "lost";
+
+export const PIPELINE_STAGES: { key: PipelineStage; label: string; color: string }[] = [
+  { key: "lead", label: "Lead", color: "#6366f1" },
+  { key: "contacted", label: "Contactado", color: "#0ea5e9" },
+  { key: "proposal", label: "Proposta", color: "#f59e0b" },
+  { key: "negotiation", label: "Negociação", color: "#8b5cf6" },
+  { key: "won", label: "Ganho", color: "#22c55e" },
+  { key: "lost", label: "Perdido", color: "#ef4444" },
+];
+
+// --- Client Interaction (CRM) ---
+export type InteractionType = "note" | "call" | "meeting" | "email" | "whatsapp";
+
+export const INTERACTION_TYPES: { key: InteractionType; label: string; icon: string; color: string }[] = [
+  { key: "note", label: "Nota", icon: "📝", color: "#6b7280" },
+  { key: "call", label: "Chamada", icon: "📞", color: "#3b82f6" },
+  { key: "meeting", label: "Reunião", icon: "🤝", color: "#8b5cf6" },
+  { key: "email", label: "Email", icon: "📧", color: "#f59e0b" },
+  { key: "whatsapp", label: "WhatsApp", icon: "💬", color: "#25d366" },
+];
+
+export interface ClientInteraction {
+  id: string;
+  client_id: string;
+  type: InteractionType;
+  title: string;
+  description: string | null;
   created_at: string;
 }
 

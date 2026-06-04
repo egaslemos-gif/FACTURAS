@@ -77,7 +77,7 @@ export default function NewProductPage() {
               required
               value={formData.name}
               onChange={handleChange}
-              className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-lg focus:ring-2 focus:ring-[var(--color-primary)] outline-none"
+              className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-md focus:ring-2 focus:ring-[var(--color-primary)] outline-none"
               placeholder="Ex: Consultoria em TI (Mensal)"
             />
           </div>
@@ -89,7 +89,7 @@ export default function NewProductPage() {
               name="code"
               value={formData.code}
               onChange={handleChange}
-              className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-lg focus:ring-2 focus:ring-[var(--color-primary)] outline-none font-mono"
+              className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-md focus:ring-2 focus:ring-[var(--color-primary)] outline-none font-mono"
               placeholder="Ex: SRV-001"
             />
           </div>
@@ -100,7 +100,7 @@ export default function NewProductPage() {
               name="category"
               value={formData.category}
               onChange={handleChange}
-              className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-lg focus:ring-2 focus:ring-[var(--color-primary)] outline-none bg-white"
+              className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-md focus:ring-2 focus:ring-[var(--color-primary)] outline-none bg-white"
             >
               <option value="Geral">Geral</option>
               <option value="Serviços">Serviços</option>
@@ -119,7 +119,7 @@ export default function NewProductPage() {
               required
               value={formData.price || ""}
               onChange={handleChange}
-              className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-lg focus:ring-2 focus:ring-[var(--color-primary)] outline-none"
+              className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-md focus:ring-2 focus:ring-[var(--color-primary)] outline-none"
               placeholder="0.00"
             />
           </div>
@@ -134,7 +134,7 @@ export default function NewProductPage() {
                 max="100"
                 value={formData.vat}
                 onChange={handleChange}
-                className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-lg focus:ring-2 focus:ring-[var(--color-primary)] outline-none"
+                className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-md focus:ring-2 focus:ring-[var(--color-primary)] outline-none"
               />
             </div>
             <div>
@@ -143,7 +143,7 @@ export default function NewProductPage() {
                 name="unit"
                 value={formData.unit}
                 onChange={handleChange}
-                className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-lg focus:ring-2 focus:ring-[var(--color-primary)] outline-none bg-white"
+                className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-md focus:ring-2 focus:ring-[var(--color-primary)] outline-none bg-white"
               >
                 <option value="un">un (Unidade)</option>
                 <option value="hr">hr (Hora)</option>
@@ -162,7 +162,7 @@ export default function NewProductPage() {
               value={formData.description}
               onChange={handleChange}
               rows={3}
-              className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-lg focus:ring-2 focus:ring-[var(--color-primary)] outline-none resize-none"
+              className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-md focus:ring-2 focus:ring-[var(--color-primary)] outline-none resize-none"
               placeholder="Detalhes que aparecerão na linha da proforma..."
             />
           </div>
@@ -171,7 +171,7 @@ export default function NewProductPage() {
         <div className="flex justify-end gap-4 mt-8 pt-6 border-t border-[var(--color-outline-variant)]">
           <Link
             href="/dashboard/products"
-            className="px-6 py-3 rounded-lg text-[var(--color-on-surface)] hover:bg-[var(--color-surface-container)] font-medium transition-colors"
+            className="px-6 py-3 rounded-md text-[var(--color-on-surface)] hover:bg-[var(--color-surface-container)] font-medium transition-colors"
           >
             Cancelar
           </Link>
@@ -179,7 +179,7 @@ export default function NewProductPage() {
             type="submit"
             disabled={isSaving}
             className={cn(
-              "flex items-center gap-2 px-6 py-3 rounded-lg text-white font-medium transition-colors",
+              "flex items-center gap-2 px-6 py-3 rounded-md text-white font-medium transition-colors",
               isSaving ? "bg-[var(--color-primary-fixed-dim)] cursor-not-allowed" : "bg-[var(--color-primary)] hover:bg-[#003ea8]"
             )}
           >

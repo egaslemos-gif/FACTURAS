@@ -2,10 +2,12 @@
 
 import { useEffect, useState, useMemo } from "react";
 import { useRouter, useParams } from "next/navigation";
-import { useClientsStore, useQuotationsStore } from "@/stores";
-import { ArrowLeft, Edit2, FileText, Plus, User, Calendar, Activity, Tag, Link as LinkIcon, Phone, Mail, MapPin } from "lucide-react";
+import { useClientsStore, useQuotationsStore, useInteractionsStore } from "@/stores";
+import { InteractionType, INTERACTION_TYPES, QuotationHistory } from "@/lib/types";
+import { ArrowLeft, Edit2, FileText, Plus, User, Calendar, Activity, Tag, Link as LinkIcon, Phone, Mail, MapPin, MessageCircle, Send } from "lucide-react";
 import Link from "next/link";
-import { cn, formatDate, formatCurrency } from "@/lib/utils";
+import { cn, formatDate, formatCurrency, formatDateTime } from "@/lib/utils";
+import { quotationsRepo } from "@/lib/db";
 
 export default function ClientDetailsPage() {
   const params = useParams();
@@ -13,12 +15,37 @@ export default function ClientDetailsPage() {
   const { clients, fetchClients, isLoading: isClientsLoading } = useClientsStore();
   const { quotations, fetchQuotations, isLoading: isQuotationsLoading } = useQuotationsStore();
   
-  const [activeTab, setActiveTab] = useState<"overview" | "quotations">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "quotations" | "crm">("overview");
+  const { interactions, fetchByClient, addInteraction } = useInteractionsStore();
+  const [interactionType, setInteractionType] = useState<InteractionType>("note");
+  const [interactionTitle, setInteractionTitle] = useState("");
+  const [interactionDesc, setInteractionDesc] = useState("");
+  const [quotationHistory, setQuotationHistory] = useState<(QuotationHistory & { quotation_number?: string })[]>([]);
 
   useEffect(() => {
     fetchClients();
     fetchQuotations();
-  }, [fetchClients, fetchQuotations]);
+    if (id) {
+      fetchByClient(id);
+      // Fetch quotation history for this client's deals
+      (async () => {
+        try {
+          const allQ = await quotationsRepo.getAll();
+          const clientQs = allQ.filter((q: any) => q.client_id === id);
+          const allHistory: (QuotationHistory & { quotation_number?: string })[] = [];
+          for (const q of clientQs) {
+            const detail = await quotationsRepo.getById(q.id);
+            if (detail) {
+              detail.history.forEach((h) => {
+                allHistory.push({ ...h, quotation_number: q.quotation_number });
+              });
+            }
+          }
+          setQuotationHistory(allHistory);
+        } catch(e) { console.error(e); }
+      })();
+    }
+  }, [fetchClients, fetchQuotations, fetchByClient, id]);
 
   const client = clients.find((c) => c.id === id);
   const clientQuotations = useMemo(() => quotations.filter((q) => q.client_id === id), [quotations, id]);
@@ -77,14 +104,14 @@ export default function ClientDetailsPage() {
         <div className="flex gap-2">
           <Link
             href={`/dashboard/quotations/new?client_id=${client.id}`}
-            className="flex items-center gap-2 px-4 py-2 bg-[var(--color-primary)] text-white rounded-lg hover:bg-[#003ea8] transition-colors elevation-1"
+            className="flex items-center gap-2 px-4 py-2 bg-[var(--color-primary)] text-white rounded-md hover:bg-[#003ea8] transition-colors elevation-1"
           >
             <Plus className="w-4 h-4" />
             <span className="hidden sm:inline">Nova Proforma</span>
           </Link>
           <Link
             href={`/dashboard/clients/${client.id}/edit`}
-            className="flex items-center gap-2 px-4 py-2 bg-[var(--color-surface-container)] text-[var(--color-on-surface)] rounded-lg hover:bg-[var(--color-surface-container-high)] transition-colors elevation-1"
+            className="flex items-center gap-2 px-4 py-2 bg-[var(--color-surface-container)] text-[var(--color-on-surface)] rounded-md hover:bg-[var(--color-surface-container-high)] transition-colors elevation-1"
           >
             <Edit2 className="w-4 h-4" />
             <span className="hidden sm:inline">Editar</span>
@@ -106,6 +133,14 @@ export default function ClientDetailsPage() {
         >
           Proformas
           <span className="bg-[var(--color-surface-container-high)] text-xs py-0.5 px-2 rounded-full text-[var(--color-on-surface)]">{clientQuotations.length}</span>
+        </button>
+        <button
+          onClick={() => setActiveTab("crm")}
+          className={cn("px-6 py-3 font-medium text-sm transition-colors border-b-2 flex items-center gap-2", activeTab === "crm" ? "border-[var(--color-primary)] text-[var(--color-primary)]" : "border-transparent text-[var(--color-on-surface-variant)] hover:text-[var(--color-on-surface)]")}
+        >
+          <MessageCircle className="w-4 h-4" />
+          Histórico & CRM
+          <span className="bg-[var(--color-surface-container-high)] text-xs py-0.5 px-2 rounded-full text-[var(--color-on-surface)]">{interactions.length}</span>
         </button>
       </div>
 
@@ -191,7 +226,7 @@ export default function ClientDetailsPage() {
                 {client.notes && (
                   <div>
                     <p className="text-label-sm text-[var(--color-on-surface-variant)] mb-1">Notas Internas</p>
-                    <p className="text-body-md whitespace-pre-wrap bg-[var(--color-surface-container-lowest)] p-4 rounded-lg border border-[var(--color-outline-variant)]">{client.notes}</p>
+                    <p className="text-body-md whitespace-pre-wrap bg-[var(--color-surface-container-lowest)] p-4 rounded-md border border-[var(--color-outline-variant)]">{client.notes}</p>
                   </div>
                 )}
               </div>
@@ -227,7 +262,7 @@ export default function ClientDetailsPage() {
               <FileText className="w-12 h-12 text-[var(--color-outline)] mx-auto mb-3" />
               <h3 className="text-headline-sm mb-2">Nenhuma proforma</h3>
               <p className="text-body-sm text-[var(--color-on-surface-variant)] mb-4">Este cliente ainda não tem proformas associadas.</p>
-              <Link href={`/dashboard/quotations/new?client_id=${client.id}`} className="inline-flex px-4 py-2 bg-[var(--color-primary)] text-white rounded-lg">Criar Proforma</Link>
+              <Link href={`/dashboard/quotations/new?client_id=${client.id}`} className="inline-flex px-4 py-2 bg-[var(--color-primary)] text-white rounded-md">Criar Proforma</Link>
             </div>
           ) : (
             <table className="w-full text-left border-collapse">
@@ -262,6 +297,135 @@ export default function ClientDetailsPage() {
               </tbody>
             </table>
           )}
+        </div>
+      )}
+      {activeTab === "crm" && (
+        <div className="space-y-6">
+          {/* Add Interaction Form */}
+          <div className="bg-white rounded-[var(--radius-lg)] elevation-1 border border-[var(--color-outline-variant)] p-5">
+            <h3 className="text-sm font-semibold text-gray-800 mb-3">Registar Interação</h3>
+            <div className="flex flex-wrap gap-2 mb-3">
+              {INTERACTION_TYPES.map((t) => (
+                <button
+                  key={t.key}
+                  onClick={() => setInteractionType(t.key)}
+                  className={cn(
+                    "flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium border transition-colors",
+                    interactionType === t.key
+                      ? "border-[var(--color-primary)] bg-[var(--color-primary-container)] text-[var(--color-on-primary-container)]"
+                      : "border-gray-200 bg-gray-50 text-gray-600 hover:bg-gray-100"
+                  )}
+                >
+                  <span>{t.icon}</span> {t.label}
+                </button>
+              ))}
+            </div>
+            <input
+              type="text"
+              value={interactionTitle}
+              onChange={(e) => setInteractionTitle(e.target.value)}
+              placeholder="Título (ex: Chamada com o João)"
+              className="w-full p-3 text-sm border border-gray-200 rounded-md focus:ring-2 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] mb-2"
+            />
+            <textarea
+              value={interactionDesc}
+              onChange={(e) => setInteractionDesc(e.target.value)}
+              placeholder="Detalhes (opcional)"
+              className="w-full p-3 text-sm border border-gray-200 rounded-md focus:ring-2 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] resize-none h-20 mb-3"
+            />
+            <button
+              onClick={async () => {
+                if (!interactionTitle.trim()) return;
+                await addInteraction(id, interactionType, interactionTitle.trim(), interactionDesc.trim() || null);
+                setInteractionTitle("");
+                setInteractionDesc("");
+              }}
+              disabled={!interactionTitle.trim()}
+              className="flex items-center gap-2 px-5 py-2.5 bg-[var(--color-primary)] text-white rounded-md font-medium text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#003ea8]"
+            >
+              <Send className="w-4 h-4" /> Registar
+            </button>
+          </div>
+
+          {/* Timeline */}
+          <div className="bg-white rounded-[var(--radius-lg)] elevation-1 border border-[var(--color-outline-variant)] p-5">
+            <h3 className="text-sm font-semibold text-gray-800 mb-4">Linha do Tempo</h3>
+            {(() => {
+              // Merge manual interactions + quotation history into one timeline
+              const manualEvents = interactions.map((i) => ({
+                id: i.id,
+                date: i.created_at,
+                type: "manual" as const,
+                icon: INTERACTION_TYPES.find((t) => t.key === i.type)?.icon || "📝",
+                color: INTERACTION_TYPES.find((t) => t.key === i.type)?.color || "#6b7280",
+                label: INTERACTION_TYPES.find((t) => t.key === i.type)?.label || "Nota",
+                title: i.title,
+                description: i.description,
+              }));
+
+              const autoEvents = quotationHistory.map((h) => ({
+                id: h.id,
+                date: h.created_at,
+                type: "auto" as const,
+                icon: h.action === "Created" ? "📄" : h.action === "Shared" ? "📤" : h.action === "Pipeline" ? "📊" : "🔄",
+                color: h.action === "Created" ? "#3b82f6" : h.action === "Shared" ? "#22c55e" : "#8b5cf6",
+                label: h.quotation_number || "Proforma",
+                title: h.action === "Created" ? "Proforma criada" : h.action === "Shared" ? "Proforma enviada" : h.action === "Pipeline" ? `Pipeline: ${h.new_status}` : `Status: ${h.old_status} → ${h.new_status}`,
+                description: h.details,
+              }));
+
+              const allEvents = [...manualEvents, ...autoEvents].sort(
+                (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+              );
+
+              if (allEvents.length === 0) {
+                return (
+                  <div className="text-center py-8 text-gray-400">
+                    <MessageCircle className="w-10 h-10 mx-auto mb-2 opacity-50" />
+                    <p className="text-sm">Nenhuma interação registada.</p>
+                    <p className="text-xs mt-1">Use o formulário acima para registar uma chamada, nota ou reunião.</p>
+                  </div>
+                );
+              }
+
+              return (
+                <div className="relative">
+                  <div className="absolute left-4 top-0 bottom-0 w-px bg-gray-200" />
+                  <div className="space-y-4">
+                    {allEvents.map((event) => (
+                      <div key={event.id} className="flex gap-3 relative">
+                        <div
+                          className="w-8 h-8 rounded-full flex items-center justify-center text-sm shrink-0 z-10 border-2 border-white"
+                          style={{ backgroundColor: event.color + "20", borderColor: event.color }}
+                        >
+                          {event.icon}
+                        </div>
+                        <div className="flex-1 bg-gray-50 rounded-lg p-3 border border-gray-100">
+                          <div className="flex items-center justify-between mb-1">
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs font-semibold" style={{ color: event.color }}>
+                                {event.label}
+                              </span>
+                              {event.type === "auto" && (
+                                <span className="text-[10px] px-1.5 py-0.5 bg-gray-200 text-gray-500 rounded-full uppercase">auto</span>
+                              )}
+                            </div>
+                            <span className="text-xs text-gray-400">
+                              {formatDateTime(event.date)}
+                            </span>
+                          </div>
+                          <p className="text-sm font-medium text-gray-800">{event.title}</p>
+                          {event.description && (
+                            <p className="text-xs text-gray-500 mt-1 whitespace-pre-wrap">{event.description}</p>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              );
+            })()}
+          </div>
         </div>
       )}
     </div>

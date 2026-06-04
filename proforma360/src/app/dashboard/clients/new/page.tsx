@@ -76,7 +76,7 @@ export default function NewClientPage() {
               required
               value={formData.name}
               onChange={handleChange}
-              className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-lg focus:ring-2 focus:ring-[var(--color-primary)] outline-none"
+              className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-md focus:ring-2 focus:ring-[var(--color-primary)] outline-none"
               placeholder="Ex: João Silva ou Empresa XYZ"
             />
           </div>
@@ -88,7 +88,7 @@ export default function NewClientPage() {
               name="tax_number"
               value={formData.tax_number}
               onChange={handleChange}
-              className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-lg focus:ring-2 focus:ring-[var(--color-primary)] outline-none"
+              className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-md focus:ring-2 focus:ring-[var(--color-primary)] outline-none"
               placeholder="Ex: 400123456"
             />
           </div>
@@ -100,7 +100,7 @@ export default function NewClientPage() {
               name="phone"
               value={formData.phone}
               onChange={handleChange}
-              className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-lg focus:ring-2 focus:ring-[var(--color-primary)] outline-none"
+              className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-md focus:ring-2 focus:ring-[var(--color-primary)] outline-none"
               placeholder="+258 84 123 4567"
             />
           </div>
@@ -112,7 +112,7 @@ export default function NewClientPage() {
               name="email"
               value={formData.email}
               onChange={handleChange}
-              className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-lg focus:ring-2 focus:ring-[var(--color-primary)] outline-none"
+              className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-md focus:ring-2 focus:ring-[var(--color-primary)] outline-none"
               placeholder="cliente@email.com"
             />
           </div>
@@ -124,7 +124,7 @@ export default function NewClientPage() {
               value={formData.address}
               onChange={handleChange}
               rows={3}
-              className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-lg focus:ring-2 focus:ring-[var(--color-primary)] outline-none resize-none"
+              className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-md focus:ring-2 focus:ring-[var(--color-primary)] outline-none resize-none"
               placeholder="Av. 25 de Setembro, Maputo"
             />
           </div>
@@ -136,7 +136,7 @@ export default function NewClientPage() {
               value={formData.notes}
               onChange={handleChange}
               rows={2}
-              className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-lg focus:ring-2 focus:ring-[var(--color-primary)] outline-none resize-none"
+              className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-md focus:ring-2 focus:ring-[var(--color-primary)] outline-none resize-none"
               placeholder="Informação adicional sobre este cliente..."
             />
           </div>
@@ -147,7 +147,7 @@ export default function NewClientPage() {
               name="origin"
               value={formData.origin}
               onChange={(e) => setFormData({ ...formData, origin: e.target.value })}
-              className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-lg focus:ring-2 focus:ring-[var(--color-primary)] outline-none bg-white"
+              className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-md focus:ring-2 focus:ring-[var(--color-primary)] outline-none bg-white"
             >
               <option value="">Selecione...</option>
               <option value="website">Website</option>
@@ -165,7 +165,7 @@ export default function NewClientPage() {
               name="tagsInput"
               value={formData.tagsInput}
               onChange={handleChange}
-              className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-lg focus:ring-2 focus:ring-[var(--color-primary)] outline-none"
+              className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-md focus:ring-2 focus:ring-[var(--color-primary)] outline-none"
               placeholder="Ex: VIP, Retalho, B2B"
             />
           </div>
@@ -174,7 +174,7 @@ export default function NewClientPage() {
         <div className="flex justify-end gap-4 mt-8 pt-6 border-t border-[var(--color-outline-variant)]">
           <Link
             href="/dashboard/clients"
-            className="px-6 py-3 rounded-lg text-[var(--color-on-surface)] hover:bg-[var(--color-surface-container)] font-medium transition-colors"
+            className="px-6 py-3 rounded-md text-[var(--color-on-surface)] hover:bg-[var(--color-surface-container)] font-medium transition-colors"
           >
             Cancelar
           </Link>
@@ -182,7 +182,7 @@ export default function NewClientPage() {
             type="submit"
             disabled={isSaving}
             className={cn(
-              "flex items-center gap-2 px-6 py-3 rounded-lg text-white font-medium transition-colors",
+              "flex items-center gap-2 px-6 py-3 rounded-md text-white font-medium transition-colors",
               isSaving ? "bg-[var(--color-primary-fixed-dim)] cursor-not-allowed" : "bg-[var(--color-primary)] hover:bg-[#003ea8]"
             )}
           >

@@ -25,6 +25,8 @@ interface QuotationsState {
     items?: Omit<QuotationItem, "id" | "quotation_id">[]
   ) => Promise<void>;
   updateStatus: (id: string, status: string, details: string) => Promise<void>;
+  setNextActionFull: (id: string, action: string | null, date: string | null, time: string | null, reminders: boolean) => Promise<void>;
+  markAsSent: (id: string) => Promise<void>;
   deleteQuotation: (id: string) => Promise<void>;
 }
 
@@ -98,6 +100,55 @@ export const useQuotationsStore = create<QuotationsState>((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       await quotationsRepo.updateStatus(id, status, details);
+      
+      // Automations
+      const currentQ = get().quotations.find(q => q.id === id);
+      if (currentQ) {
+        if (status === 'approved') {
+          await quotationsRepo.updatePipelineStage(id, 'won');
+        } else if (status === 'rejected' || status === 'expired') {
+          await quotationsRepo.updatePipelineStage(id, 'lost');
+        }
+      }
+
+      if (get().currentDetail?.quotation.id === id) {
+        await get().fetchQuotationDetail(id);
+      }
+      await get().fetchQuotations();
+    } catch (error) {
+      set({ error: (error as Error).message, isLoading: false });
+      throw error;
+    }
+  },
+
+  setNextActionFull: async (id, action, date, time, reminders) => {
+    set({ isLoading: true, error: null });
+    try {
+      await quotationsRepo.setNextActionFull(id, action, date, time, reminders);
+      
+      if (get().currentDetail?.quotation.id === id) {
+        await get().fetchQuotationDetail(id);
+      }
+      await get().fetchQuotations();
+    } catch (error) {
+      set({ error: (error as Error).message, isLoading: false });
+      throw error;
+    }
+  },
+
+  markAsSent: async (id) => {
+    set({ isLoading: true, error: null });
+    try {
+      await quotationsRepo.markAsSent(id);
+      
+      // Automations
+      const currentQ = get().quotations.find(q => q.id === id);
+      if (currentQ) {
+        if (currentQ.pipeline_stage === 'lead' || currentQ.pipeline_stage === 'contacted') {
+          await quotationsRepo.updatePipelineStage(id, 'proposal');
+        }
+      }
+
       if (get().currentDetail?.quotation.id === id) {
         await get().fetchQuotationDetail(id);
       }

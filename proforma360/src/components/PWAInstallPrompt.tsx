@@ -61,7 +61,7 @@ export function PWAInstallPrompt() {
 
   return (
     <div className="fixed bottom-24 md:bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-md bg-white border border-[var(--color-primary-fixed-dim)] rounded-[var(--radius-lg)] elevation-3 z-50 p-4 animate-slide-up flex items-start gap-4">
-      <div className="w-12 h-12 bg-[var(--color-primary-container)] text-[var(--color-on-primary-container)] rounded-xl flex items-center justify-center shrink-0">
+      <div className="w-12 h-12 bg-[var(--color-primary-container)] text-[var(--color-on-primary-container)] rounded-md flex items-center justify-center shrink-0">
         <Download className="w-6 h-6" />
       </div>
       
@@ -73,13 +73,13 @@ export function PWAInstallPrompt() {
         <div className="flex items-center gap-2">
           <button 
             onClick={handleInstallClick}
-            className="flex-1 bg-[var(--color-primary)] text-white text-sm font-medium py-2 rounded-lg hover:bg-[var(--color-on-primary-fixed-variant)] transition-colors"
+            className="flex-1 bg-[var(--color-primary)] text-white text-sm font-medium py-2 rounded-md hover:bg-[var(--color-on-primary-fixed-variant)] transition-colors"
           >
             Instalar App
           </button>
           <button 
             onClick={handleDismiss}
-            className="px-3 py-2 text-[var(--color-on-surface-variant)] hover:bg-[var(--color-surface-container)] rounded-lg transition-colors"
+            className="px-3 py-2 text-[var(--color-on-surface-variant)] hover:bg-[var(--color-surface-container)] rounded-md transition-colors"
           >
             <X className="w-5 h-5" />
           </button>

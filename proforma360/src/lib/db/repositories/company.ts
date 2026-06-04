@@ -4,7 +4,10 @@ import { generateId, now } from "../../utils";
 
 export const companyRepo = {
   async get(): Promise<Company | null> {
-    const data = await dbClient.getOne("SELECT * FROM companies LIMIT 1");
+    const data = await dbClient.getOne("SELECT * FROM companies LIMIT 1") as any;
+    if (data) {
+      data.show_branding = data.show_branding === undefined ? true : Boolean(data.show_branding);
+    }
     return data as Company | null;
   },
 
@@ -20,7 +23,7 @@ export const companyRepo = {
       Object.entries(companyData).forEach(([key, value]) => {
         if (key !== "id" && key !== "created_at" && key !== "updated_at") {
           updates.push(`${key} = ?`);
-          values.push(value);
+          values.push(typeof value === 'boolean' ? (value ? 1 : 0) : value);
         }
       });
 
@@ -47,6 +50,7 @@ export const companyRepo = {
         stamp_url: companyData.stamp_url || null,
         footer_text: companyData.footer_text || null,
         quotation_prefix: companyData.quotation_prefix || "PF",
+        show_branding: companyData.show_branding ?? true,
         created_at: timestamp,
         updated_at: timestamp,
       };

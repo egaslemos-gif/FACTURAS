@@ -3,3 +3,7 @@ export * from "./clients";
 export * from "./products";
 export * from "./quotations";
 export * from "./sync";
+export * from "./pipeline";
+export * from "./interactions";
+export * from "./useUpdateStore";
+export * from "./useDraftProtectionStore";

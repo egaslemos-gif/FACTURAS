@@ -5,6 +5,7 @@ import { useClientsStore } from "@/stores";
 import { Search, Plus, Trash2, Edit2, Building } from "lucide-react";
 import { cn, getInitials, formatDate } from "@/lib/utils";
 import Link from "next/link";
+import { EmptyState } from "@/components/EmptyState";
 
 export default function ClientsPage() {
   const { clients, fetchClients, isLoading, deleteClient } = useClientsStore();
@@ -24,14 +25,14 @@ export default function ClientsPage() {
     <div className="max-w-[var(--spacing-container-max)] mx-auto animate-fade-in">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
         <div>
-          <h1 className="text-headline-lg text-[var(--color-on-surface)]">Clientes</h1>
-          <p className="text-body-md text-[var(--color-on-surface-variant)] mt-1">
-            Faça a gestão da sua carteira de clientes
+          <h1 className="text-page-title">Clientes</h1>
+          <p className="text-page-subtitle">
+            Diretório e gestão de contactos.
           </p>
         </div>
         <Link
           href="/dashboard/clients/new"
-          className="flex items-center justify-center gap-2 px-6 py-3 bg-[var(--color-primary)] hover:bg-[#003ea8] text-white rounded-lg font-medium transition-colors elevation-1"
+          className="flex items-center justify-center gap-2 px-6 py-3 bg-[var(--color-primary)] hover:bg-[#003ea8] text-white rounded-md font-medium transition-colors elevation-1"
         >
           <Plus className="w-5 h-5" />
           Novo Cliente
@@ -48,7 +49,7 @@ export default function ClientsPage() {
               placeholder="Pesquisar por nome, email ou NUIT..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-[var(--color-outline-variant)] rounded-lg focus:ring-2 focus:ring-[var(--color-primary)] outline-none bg-[var(--color-surface)]"
+              className="w-full pl-10 pr-4 py-2 border border-[var(--color-outline-variant)] rounded-md focus:ring-2 focus:ring-[var(--color-primary)] outline-none bg-[var(--color-surface)]"
             />
           </div>
           <div className="text-sm text-[var(--color-on-surface-variant)] ml-auto font-medium">
@@ -63,24 +64,27 @@ export default function ClientsPage() {
               <div className="w-8 h-8 border-4 border-[var(--color-primary)] border-t-transparent rounded-full animate-spin"></div>
             </div>
           ) : filteredClients.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-64 text-center px-4">
-              <div className="w-16 h-16 bg-[var(--color-surface-container)] rounded-full flex items-center justify-center mb-4">
-                <Building className="w-8 h-8 text-[var(--color-outline)]" />
-              </div>
-              <h3 className="text-headline-sm text-[var(--color-on-surface)] mb-2">Nenhum cliente encontrado</h3>
-              <p className="text-body-sm text-[var(--color-on-surface-variant)] max-w-md">
-                Comece por adicionar o seu primeiro cliente para poder gerar proformas e orçamentos.
-              </p>
+            <div className="py-12">
+              <EmptyState 
+                icon={Building} 
+                title="Nenhum cliente encontrado" 
+                description="Comece por adicionar o seu primeiro cliente para poder gerar proformas e orçamentos."
+                action={{
+                  label: "Novo Cliente",
+                  icon: Plus,
+                  onClick: () => window.location.href = "/dashboard/clients/new"
+                }}
+              />
             </div>
           ) : (
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="bg-[var(--color-surface-container-low)] text-[var(--color-on-surface-variant)] text-label-sm border-b border-[var(--color-outline-variant)]">
-                  <th className="px-4 md:px-6 py-3 md:py-4 font-semibold uppercase">Cliente</th>
-                  <th className="px-4 md:px-6 py-3 md:py-4 font-semibold uppercase">Contacto</th>
-                  <th className="px-4 md:px-6 py-3 md:py-4 font-semibold uppercase hidden md:table-cell">NUIT</th>
-                  <th className="px-4 md:px-6 py-3 md:py-4 font-semibold uppercase hidden lg:table-cell">Registado em</th>
-                  <th className="px-4 md:px-6 py-3 md:py-4 text-right">Ações</th>
+                <tr className="bg-[var(--color-surface-container-low)] border-b border-[var(--color-outline-variant)]">
+                  <th className="text-table-header px-4 md:px-6 py-3 md:py-4 text-left">Cliente</th>
+                  <th className="text-table-header px-4 md:px-6 py-3 md:py-4 text-left">Contacto</th>
+                  <th className="text-table-header px-4 md:px-6 py-3 md:py-4 text-left hidden md:table-cell">NUIT</th>
+                  <th className="text-table-header px-4 md:px-6 py-3 md:py-4 text-left hidden lg:table-cell">Registado em</th>
+                  <th className="text-table-header px-4 md:px-6 py-3 md:py-4 text-right">Ações</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[var(--color-outline-variant)]">
@@ -95,21 +99,21 @@ export default function ClientsPage() {
                           <Link href={`/dashboard/clients/${client.id}`} className="font-semibold text-[var(--color-primary)] hover:underline truncate block max-w-[120px] sm:max-w-[200px]">
                             {client.name}
                           </Link>
-                          <div className="text-xs text-[var(--color-on-surface-variant)] hidden md:block">
+                          <div className="text-caption hidden md:block">
                             {client.address || "Sem endereço"}
                           </div>
                         </div>
                       </div>
                     </td>
                     <td className="px-4 md:px-6 py-3 md:py-4">
-                      <div className="text-sm text-[var(--color-on-surface)] truncate max-w-[120px] sm:max-w-none">{client.email || "—"}</div>
-                      <div className="text-xs text-[var(--color-on-surface-variant)]">{client.phone || "—"}</div>
+                      <div className="text-body font-medium truncate max-w-[120px] sm:max-w-none">{client.email || "—"}</div>
+                      <div className="text-muted mt-0.5">{client.phone || "—"}</div>
                     </td>
                     <td className="px-4 md:px-6 py-3 md:py-4 hidden md:table-cell">
-                      <div className="text-sm font-mono text-[var(--color-on-surface-variant)]">{client.tax_number || "—"}</div>
+                      <div className="text-muted font-mono">{client.tax_number || "—"}</div>
                     </td>
                     <td className="px-4 md:px-6 py-3 md:py-4 hidden lg:table-cell">
-                      <div className="text-sm text-[var(--color-on-surface-variant)]">{formatDate(client.created_at)}</div>
+                      <div className="text-muted">{formatDate(client.created_at)}</div>
                     </td>
                     <td className="px-4 md:px-6 py-3 md:py-4 text-right">
                       <div className="flex justify-end gap-1 md:gap-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">

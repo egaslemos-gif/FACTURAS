@@ -51,9 +51,9 @@ export default function CompanyPage() {
   return (
     <div className="max-w-4xl mx-auto animate-fade-in">
       <div className="mb-8">
-        <h1 className="text-headline-lg text-[var(--color-on-surface)]">A Minha Empresa</h1>
-        <p className="text-body-md text-[var(--color-on-surface-variant)] mt-2">
-          Configure os dados da sua empresa, logotipo e assinaturas para os documentos.
+        <h1 className="text-page-title">Perfil da Empresa</h1>
+        <p className="text-page-subtitle">
+          Perfil da sua organização.
         </p>
       </div>
 
@@ -73,7 +73,7 @@ export default function CompanyPage() {
                 name="name"
                 value={formData.name || ""}
                 onChange={handleChange}
-                className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-lg focus:ring-2 focus:ring-[var(--color-primary)] outline-none transition-shadow"
+                className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-md focus:ring-2 focus:ring-[var(--color-primary)] outline-none transition-shadow"
                 placeholder="Ex: Proforma360 Lda"
                 required
               />
@@ -86,7 +86,7 @@ export default function CompanyPage() {
                 name="tax_number"
                 value={formData.tax_number || ""}
                 onChange={handleChange}
-                className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-lg focus:ring-2 focus:ring-[var(--color-primary)] outline-none"
+                className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-md focus:ring-2 focus:ring-[var(--color-primary)] outline-none"
                 placeholder="Ex: 400123456"
               />
             </div>
@@ -98,7 +98,7 @@ export default function CompanyPage() {
                 name="phone"
                 value={formData.phone || ""}
                 onChange={handleChange}
-                className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-lg focus:ring-2 focus:ring-[var(--color-primary)] outline-none"
+                className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-md focus:ring-2 focus:ring-[var(--color-primary)] outline-none"
                 placeholder="+258 84 123 4567"
               />
             </div>
@@ -110,7 +110,7 @@ export default function CompanyPage() {
                 name="email"
                 value={formData.email || ""}
                 onChange={handleChange}
-                className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-lg focus:ring-2 focus:ring-[var(--color-primary)] outline-none"
+                className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-md focus:ring-2 focus:ring-[var(--color-primary)] outline-none"
                 placeholder="contacto@empresa.com"
               />
             </div>
@@ -122,7 +122,7 @@ export default function CompanyPage() {
                 value={formData.address || ""}
                 onChange={handleChange}
                 rows={3}
-                className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-lg focus:ring-2 focus:ring-[var(--color-primary)] outline-none resize-none"
+                className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-md focus:ring-2 focus:ring-[var(--color-primary)] outline-none resize-none"
                 placeholder="Av. 25 de Setembro, Maputo"
               />
             </div>
@@ -144,7 +144,7 @@ export default function CompanyPage() {
                 name="bank_name"
                 value={formData.bank_name || ""}
                 onChange={handleChange}
-                className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-lg focus:ring-2 focus:ring-[var(--color-primary)] outline-none"
+                className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-md focus:ring-2 focus:ring-[var(--color-primary)] outline-none"
                 placeholder="Ex: Millennium BIM"
               />
             </div>
@@ -156,7 +156,7 @@ export default function CompanyPage() {
                 name="account_holder"
                 value={formData.account_holder || ""}
                 onChange={handleChange}
-                className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-lg focus:ring-2 focus:ring-[var(--color-primary)] outline-none"
+                className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-md focus:ring-2 focus:ring-[var(--color-primary)] outline-none"
                 placeholder="Ex: Proforma360 Lda"
               />
             </div>
@@ -168,7 +168,7 @@ export default function CompanyPage() {
                 name="account_number"
                 value={formData.account_number || ""}
                 onChange={handleChange}
-                className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-lg focus:ring-2 focus:ring-[var(--color-primary)] outline-none"
+                className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-md focus:ring-2 focus:ring-[var(--color-primary)] outline-none"
                 placeholder="Ex: 123456789"
               />
             </div>
@@ -180,7 +180,7 @@ export default function CompanyPage() {
                 name="nib_iban"
                 value={formData.nib_iban || ""}
                 onChange={handleChange}
-                className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-lg focus:ring-2 focus:ring-[var(--color-primary)] outline-none"
+                className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-md focus:ring-2 focus:ring-[var(--color-primary)] outline-none"
                 placeholder="Ex: 000100000012345678912"
               />
             </div>
@@ -192,7 +192,7 @@ export default function CompanyPage() {
                 name="mpesa"
                 value={formData.mpesa || ""}
                 onChange={handleChange}
-                className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-lg focus:ring-2 focus:ring-[var(--color-primary)] outline-none"
+                className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-md focus:ring-2 focus:ring-[var(--color-primary)] outline-none"
                 placeholder="Ex: 84 123 4567"
               />
             </div>
@@ -204,7 +204,7 @@ export default function CompanyPage() {
                 name="emola"
                 value={formData.emola || ""}
                 onChange={handleChange}
-                className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-lg focus:ring-2 focus:ring-[var(--color-primary)] outline-none"
+                className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-md focus:ring-2 focus:ring-[var(--color-primary)] outline-none"
                 placeholder="Ex: 86 123 4567"
               />
             </div>
@@ -220,7 +220,7 @@ export default function CompanyPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* Logo */}
-            <label className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-[var(--color-outline-variant)] rounded-lg bg-[var(--color-surface-container-low)] cursor-pointer hover:bg-[var(--color-surface-container)] transition-colors relative overflow-hidden group">
+            <label className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-[var(--color-outline-variant)] rounded-md bg-[var(--color-surface-container-low)] cursor-pointer hover:bg-[var(--color-surface-container)] transition-colors relative overflow-hidden group">
               <input 
                 type="file" 
                 accept="image/png, image/jpeg" 
@@ -248,7 +248,7 @@ export default function CompanyPage() {
             </label>
 
             {/* Carimbo */}
-            <label className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-[var(--color-outline-variant)] rounded-lg bg-[var(--color-surface-container-low)] cursor-pointer hover:bg-[var(--color-surface-container)] transition-colors relative overflow-hidden group">
+            <label className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-[var(--color-outline-variant)] rounded-md bg-[var(--color-surface-container-low)] cursor-pointer hover:bg-[var(--color-surface-container)] transition-colors relative overflow-hidden group">
               <input 
                 type="file" 
                 accept="image/png, image/jpeg" 
@@ -276,7 +276,7 @@ export default function CompanyPage() {
             </label>
 
             {/* Assinatura */}
-            <label className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-[var(--color-outline-variant)] rounded-lg bg-[var(--color-surface-container-low)] cursor-pointer hover:bg-[var(--color-surface-container)] transition-colors relative overflow-hidden group">
+            <label className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-[var(--color-outline-variant)] rounded-md bg-[var(--color-surface-container-low)] cursor-pointer hover:bg-[var(--color-surface-container)] transition-colors relative overflow-hidden group">
               <input 
                 type="file" 
                 accept="image/png, image/jpeg" 
@@ -312,7 +312,7 @@ export default function CompanyPage() {
                 name="quotation_prefix"
                 value={formData.quotation_prefix || "PF"}
                 onChange={handleChange}
-                className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-lg focus:ring-2 focus:ring-[var(--color-primary)] outline-none font-mono"
+                className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-md focus:ring-2 focus:ring-[var(--color-primary)] outline-none font-mono"
                 placeholder="Ex: PF"
               />
               <p className="text-xs mt-1 text-[var(--color-outline)]">Ex: {formData.quotation_prefix || "PF"}-{new Date().getFullYear()}-0001</p>
@@ -326,7 +326,7 @@ export default function CompanyPage() {
               name="footer_text"
               value={formData.footer_text || ""}
               onChange={handleChange}
-              className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-lg focus:ring-2 focus:ring-[var(--color-primary)] outline-none"
+              className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-md focus:ring-2 focus:ring-[var(--color-primary)] outline-none"
               placeholder="Obrigado por escolher os nossos serviços. Processado por computador."
             />
           </div>
@@ -344,7 +344,7 @@ export default function CompanyPage() {
               type="button"
               onClick={() => setFormData(prev => ({ ...prev, pdf_template: "minimal" }))}
               className={cn(
-                "relative flex flex-col items-center justify-center p-6 border-2 rounded-xl text-center transition-all",
+                "relative flex flex-col items-center justify-center p-6 border-2 rounded-md text-center transition-all",
                 formData.pdf_template === "minimal" || !formData.pdf_template
                   ? "border-[var(--color-primary)] bg-[var(--color-primary-container)] ring-2 ring-[var(--color-primary)] ring-offset-2"
                   : "border-[var(--color-outline-variant)] bg-[var(--color-surface-container-lowest)] hover:border-[var(--color-outline)]"
@@ -361,7 +361,7 @@ export default function CompanyPage() {
               type="button"
               onClick={() => setFormData(prev => ({ ...prev, pdf_template: "modern" }))}
               className={cn(
-                "relative flex flex-col items-center justify-center p-6 border-2 rounded-xl text-center transition-all",
+                "relative flex flex-col items-center justify-center p-6 border-2 rounded-md text-center transition-all",
                 formData.pdf_template === "modern"
                   ? "border-[var(--color-primary)] bg-[var(--color-primary-container)] ring-2 ring-[var(--color-primary)] ring-offset-2"
                   : "border-[var(--color-outline-variant)] bg-[var(--color-surface-container-lowest)] hover:border-[var(--color-outline)]"
@@ -378,7 +378,7 @@ export default function CompanyPage() {
               type="button"
               onClick={() => setFormData(prev => ({ ...prev, pdf_template: "corporate" }))}
               className={cn(
-                "relative flex flex-col items-center justify-center p-6 border-2 rounded-xl text-center transition-all md:col-span-2 lg:col-span-1",
+                "relative flex flex-col items-center justify-center p-6 border-2 rounded-md text-center transition-all md:col-span-2 lg:col-span-1",
                 formData.pdf_template === "corporate"
                   ? "border-[var(--color-primary)] bg-[var(--color-primary-container)] ring-2 ring-[var(--color-primary)] ring-offset-2"
                   : "border-[var(--color-outline-variant)] bg-[var(--color-surface-container-lowest)] hover:border-[var(--color-outline)]"
@@ -423,7 +423,7 @@ export default function CompanyPage() {
             type="submit"
             disabled={isSaving}
             className={cn(
-              "flex items-center gap-2 px-6 py-3 rounded-lg text-white font-medium transition-colors",
+              "flex items-center gap-2 px-6 py-3 rounded-md text-white font-medium transition-colors",
               isSaving ? "bg-[var(--color-primary-fixed-dim)] cursor-not-allowed" : "bg-[var(--color-primary)] hover:bg-[#003ea8]"
             )}
           >

@@ -7,6 +7,7 @@ import { useQuotationsStore, useClientsStore, useProductsStore, useCompanyStore 
 import { ArrowLeft, Save, Plus, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { cn, formatCurrency } from "@/lib/utils";
+import { requestNotificationPermission } from "@/lib/pipeline/notifications";
 
 interface LineItem {
   id: string;
@@ -38,6 +39,10 @@ export default function EditQuotationPage() {
     terms: "",
     discount: 0,
     discount_type: "percentage" as "percentage" | "fixed",
+    next_action: "",
+    next_action_date: "",
+    next_action_time: "",
+    reminders_enabled: true,
   });
 
   const [items, setItems] = useState<LineItem[]>([]);
@@ -64,6 +69,10 @@ export default function EditQuotationPage() {
         terms: q.terms || "",
         discount: q.discount || 0,
         discount_type: q.discount_type as "percentage" | "fixed" || "percentage",
+        next_action: q.next_action || "",
+        next_action_date: q.next_action_date || "",
+        next_action_time: q.next_action_time || "",
+        reminders_enabled: q.reminders_enabled !== false,
       });
 
       setItems(
@@ -156,6 +165,11 @@ export default function EditQuotationPage() {
       return;
     }
 
+    if (headerData.reminders_enabled) {
+      setIsSaving(true);
+      await requestNotificationPermission();
+    }
+
     setIsSaving(true);
     try {
       await updateQuotation(
@@ -172,6 +186,10 @@ export default function EditQuotationPage() {
           grand_total: grandTotal,
           notes: headerData.notes,
           terms: headerData.terms,
+          next_action: headerData.next_action || null,
+          next_action_date: headerData.next_action_date || null,
+          next_action_time: headerData.next_action_time || null,
+          reminders_enabled: headerData.reminders_enabled,
         } as any,
         items.map(({ id, ...item }, index) => ({ ...item, sort_order: index })) as any
       );
@@ -211,7 +229,7 @@ export default function EditQuotationPage() {
             onClick={handleSubmit}
             disabled={isSaving}
             className={cn(
-              "flex items-center gap-2 px-6 py-3 rounded-lg text-white font-medium transition-colors elevation-1",
+              "flex items-center gap-2 px-6 py-3 rounded-md text-white font-medium transition-colors elevation-1",
               isSaving ? "bg-[var(--color-primary-fixed-dim)] cursor-not-allowed" : "bg-[var(--color-primary)] hover:bg-[#003ea8]"
             )}
           >
@@ -235,7 +253,7 @@ export default function EditQuotationPage() {
                 <select
                   value={headerData.client_id}
                   onChange={(e) => setHeaderData({ ...headerData, client_id: e.target.value })}
-                  className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-lg focus:ring-2 focus:ring-[var(--color-primary)] outline-none bg-white"
+                  className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-md focus:ring-2 focus:ring-[var(--color-primary)] outline-none bg-white"
                   required
                 >
                   <option value="">Selecione um cliente...</option>
@@ -251,7 +269,7 @@ export default function EditQuotationPage() {
                   type="text"
                   value={headerData.quotation_number}
                   onChange={(e) => setHeaderData({ ...headerData, quotation_number: e.target.value })}
-                  className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-lg focus:ring-2 focus:ring-[var(--color-primary)] outline-none font-mono"
+                  className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-md focus:ring-2 focus:ring-[var(--color-primary)] outline-none font-mono"
                   required
                 />
               </div>
@@ -262,7 +280,7 @@ export default function EditQuotationPage() {
                   type="date"
                   value={headerData.date}
                   onChange={(e) => setHeaderData({ ...headerData, date: e.target.value })}
-                  className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-lg focus:ring-2 focus:ring-[var(--color-primary)] outline-none"
+                  className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-md focus:ring-2 focus:ring-[var(--color-primary)] outline-none"
                   required
                 />
               </div>
@@ -273,9 +291,55 @@ export default function EditQuotationPage() {
                   type="date"
                   value={headerData.expiry_date}
                   onChange={(e) => setHeaderData({ ...headerData, expiry_date: e.target.value })}
-                  className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-lg focus:ring-2 focus:ring-[var(--color-primary)] outline-none"
+                  className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-md focus:ring-2 focus:ring-[var(--color-primary)] outline-none"
                   required
                 />
+              </div>
+            </div>
+
+            <div className="mt-6 pt-6 border-t border-[var(--color-outline-variant)]">
+              <h3 className="text-label-md font-semibold text-slate-800 mb-4">Ação de Follow-up (Opcional)</h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div>
+                  <label className="block text-label-md mb-2">Próxima Ação</label>
+                  <input
+                    type="text"
+                    value={headerData.next_action}
+                    onChange={(e) => setHeaderData({ ...headerData, next_action: e.target.value })}
+                    placeholder="Ex: Ligar ao cliente"
+                    className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-md focus:ring-2 focus:ring-[var(--color-primary)] outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-label-md mb-2">Data Prevista</label>
+                  <input
+                    type="date"
+                    value={headerData.next_action_date}
+                    onChange={(e) => setHeaderData({ ...headerData, next_action_date: e.target.value })}
+                    className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-md focus:ring-2 focus:ring-[var(--color-primary)] outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-label-md mb-2">Hora (Opcional)</label>
+                  <input
+                    type="time"
+                    value={headerData.next_action_time}
+                    onChange={(e) => setHeaderData({ ...headerData, next_action_time: e.target.value })}
+                    className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-md focus:ring-2 focus:ring-[var(--color-primary)] outline-none"
+                  />
+                </div>
+              </div>
+              <div className="mt-4 flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="reminders_enabled"
+                  checked={headerData.reminders_enabled}
+                  onChange={(e) => setHeaderData({ ...headerData, reminders_enabled: e.target.checked })}
+                  className="rounded text-indigo-600 focus:ring-indigo-500"
+                />
+                <label htmlFor="reminders_enabled" className="text-sm font-medium text-slate-700 cursor-pointer">
+                  Ativar lembretes para esta ação
+                </label>
               </div>
             </div>
           </div>
@@ -287,7 +351,7 @@ export default function EditQuotationPage() {
             
             <div className="space-y-4">
               {items.map((item, index) => (
-                <div key={item.id} className="p-4 border border-[var(--color-outline-variant)] rounded-lg bg-[var(--color-surface-container-lowest)] relative group">
+                <div key={item.id} className="p-4 border border-[var(--color-outline-variant)] rounded-md bg-[var(--color-surface-container-lowest)] relative group">
                   <button 
                     onClick={() => removeLineItem(item.id)}
                     className="absolute -top-3 -right-3 p-1.5 bg-white border border-[var(--color-outline-variant)] rounded-full text-red-500 hover:bg-red-50 hover:text-red-600 transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100 shadow-sm"
@@ -371,7 +435,7 @@ export default function EditQuotationPage() {
             <button
               type="button"
               onClick={addLineItem}
-              className="mt-4 flex items-center justify-center gap-2 w-full py-3 border-2 border-dashed border-[var(--color-outline-variant)] rounded-lg text-[var(--color-primary)] hover:bg-[var(--color-primary-container)] hover:border-[var(--color-primary)] transition-colors font-medium"
+              className="mt-4 flex items-center justify-center gap-2 w-full py-3 border-2 border-dashed border-[var(--color-outline-variant)] rounded-md text-[var(--color-primary)] hover:bg-[var(--color-primary-container)] hover:border-[var(--color-primary)] transition-colors font-medium"
             >
               <Plus className="w-5 h-5" />
               Adicionar Nova Linha
@@ -386,7 +450,7 @@ export default function EditQuotationPage() {
                   value={headerData.notes}
                   onChange={(e) => setHeaderData({ ...headerData, notes: e.target.value })}
                   rows={4}
-                  className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-lg focus:ring-2 focus:ring-[var(--color-primary)] outline-none resize-none"
+                  className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-md focus:ring-2 focus:ring-[var(--color-primary)] outline-none resize-none"
                   placeholder="Informação adicional..."
                 />
               </div>
@@ -396,7 +460,7 @@ export default function EditQuotationPage() {
                   value={headerData.terms}
                   onChange={(e) => setHeaderData({ ...headerData, terms: e.target.value })}
                   rows={4}
-                  className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-lg focus:ring-2 focus:ring-[var(--color-primary)] outline-none resize-none"
+                  className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-md focus:ring-2 focus:ring-[var(--color-primary)] outline-none resize-none"
                 />
               </div>
             </div>
@@ -453,7 +517,7 @@ export default function EditQuotationPage() {
             </div>
             
             {items.length === 0 && (
-              <div className="mt-6 p-3 bg-blue-50 text-blue-700 text-sm rounded-lg border border-blue-100">
+              <div className="mt-6 p-3 bg-blue-50 text-blue-700 text-sm rounded-md border border-blue-100">
                 Adicione itens à proforma para ver o resumo dos valores.
               </div>
             )}

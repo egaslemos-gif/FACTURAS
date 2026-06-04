@@ -40,7 +40,7 @@ export function Sidebar() {
       {/* Brand Header */}
       <div className="h-16 flex items-center px-6 border-b border-[var(--color-outline-variant)]">
         <Link href="/dashboard" className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-[var(--color-primary)] flex items-center justify-center text-white font-bold">
+          <div className="w-8 h-8 rounded-md bg-[var(--color-primary)] flex items-center justify-center text-white font-bold">
             P
           </div>
           <span className="text-xl font-bold text-[var(--color-primary)]">
@@ -60,7 +60,7 @@ export function Sidebar() {
               key={item.href}
               href={item.href}
               className={cn(
-                "flex items-center gap-3 px-3 py-2.5 rounded-lg text-[var(--font-size-body-md)] transition-colors duration-200",
+                "flex items-center gap-3 px-3 py-2.5 rounded-md text-[var(--font-size-body-md)] transition-colors duration-200",
                 isActive
                   ? "nav-active font-medium"
                   : "text-[var(--color-on-surface-variant)] hover:bg-[var(--color-surface-container)] hover:text-[var(--color-on-surface)]"
@@ -82,7 +82,7 @@ export function Sidebar() {
 
       {/* User Footer */}
       <div className="p-4 border-t border-[var(--color-outline-variant)]">
-        <button className="flex items-center gap-3 w-full p-2 rounded-lg hover:bg-[var(--color-surface-container)] transition-colors text-left">
+        <button className="flex items-center gap-3 w-full p-2 rounded-md hover:bg-[var(--color-surface-container)] transition-colors text-left">
           <div className="w-10 h-10 rounded-full bg-[var(--color-primary-container)] text-[var(--color-on-primary-container)] flex items-center justify-center font-bold">
             U
           </div>
