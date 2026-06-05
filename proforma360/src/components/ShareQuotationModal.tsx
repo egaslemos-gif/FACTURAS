@@ -4,7 +4,7 @@ import { Quotation, Company, Client } from '@/lib/types';
 import { useQuotationsStore } from '@/stores';
 import { useNetworkStore } from '@/stores/useNetworkStore';
 import { useLicenseStore } from '@/stores/licenseStore';
-import { formatCurrency } from '@/lib/utils';
+import { formatCurrency, formatDate } from '@/lib/utils';
 import { generateQuotationPDF } from '@/lib/pdf/generator';
 
 interface ShareModalProps {
@@ -31,7 +31,10 @@ export default function ShareQuotationModal({ isOpen, onClose, quotation, compan
   const [whatsappText, setWhatsappText] = useState('');
   const [emailSubject, setEmailSubject] = useState('');
   const [emailBodyPlain, setEmailBodyPlain] = useState('');
-  const [expiresInDays, setExpiresInDays] = useState<number>(30);
+  // Calculate real validity from quotation dates
+  const validityDays = Math.max(1, Math.round((new Date(quotation.expiry_date).getTime() - new Date(quotation.date).getTime()) / (1000 * 60 * 60 * 24)));
+  const daysRemaining = Math.ceil((new Date(quotation.expiry_date).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+  const expiryDateFormatted = formatDate(quotation.expiry_date);
   
   const [copiedLink, setCopiedLink] = useState(false);
   const [copiedHtml, setCopiedHtml] = useState(false);
@@ -63,7 +66,7 @@ export default function ShareQuotationModal({ isOpen, onClose, quotation, compan
           const clientName = client?.name || quotation.client_name || 'Cliente';
           const cName = company?.name || 'A Empresa';
           
-          let wText = `📄 *Proposta Comercial ${quotation.quotation_number}*\n\nOlá ${clientName},\nSegue a nossa proposta comercial para sua apreciação.\n\n*Valor Total:* ${formatCurrency(quotation.grand_total)}\n*Validade:* ${expiresInDays} dias\n\n(O ficheiro PDF segue em anexo.)\n\nCom os melhores cumprimentos,\n${cName}`;
+          let wText = `📄 *Proposta Comercial ${quotation.quotation_number}*\n\nOlá ${clientName},\nSegue a nossa proposta comercial para sua apreciação.\n\n*Valor Total:* ${formatCurrency(quotation.grand_total)}\n*Válida até:* ${expiryDateFormatted} (${validityDays} dias)\n\n(O ficheiro PDF segue em anexo.)\n\nCom os melhores cumprimentos,\n${cName}`;
 
           if (company.show_branding !== false) {
              wText += `\n\n---\n⚡ Powered by Proforma360`;
@@ -71,7 +74,7 @@ export default function ShareQuotationModal({ isOpen, onClose, quotation, compan
           
           setWhatsappText(wText);
           setEmailSubject(`Proposta Comercial ${quotation.quotation_number} — ${cName}`);
-          setEmailBodyPlain(`Estimado(a) ${clientName},\n\nSegue em anexo a nossa proposta comercial número ${quotation.quotation_number}.\n\nValor: ${formatCurrency(quotation.grand_total)}\nValidade: ${expiresInDays} dias\n\nCaso tenha alguma dúvida, não hesite em contactar-nos.\n\nCom os melhores cumprimentos,\n${cName}`);
+          setEmailBodyPlain(`Estimado(a) ${clientName},\n\nSegue em anexo a nossa proposta comercial número ${quotation.quotation_number}.\n\nValor: ${formatCurrency(quotation.grand_total)}\nVálida até: ${expiryDateFormatted} (${validityDays} dias)\n\nCaso tenha alguma dúvida, não hesite em contactar-nos.\n\nCom os melhores cumprimentos,\n${cName}`);
         }
         return;
       }
@@ -89,7 +92,7 @@ export default function ShareQuotationModal({ isOpen, onClose, quotation, compan
           c: client,
           cmp: cmpToShare,
           i: items,
-          expires_at: Date.now() + expiresInDays * 24 * 60 * 60 * 1000
+          expires_at: new Date(quotation.expiry_date).getTime()
         };
 
         const res = await fetch('/api/drive/share', {
@@ -109,7 +112,7 @@ export default function ShareQuotationModal({ isOpen, onClose, quotation, compan
           const clientName = client?.name || quotation.client_name || 'Cliente';
           const cName = company?.name || 'A Empresa';
           
-          let wText = `📄 *Proposta Comercial ${quotation.quotation_number}*\n\nOlá ${clientName},\nA sua proposta comercial já se encontra disponível para consulta.\n\n*Valor Total:* ${formatCurrency(quotation.grand_total)}\n*Validade:* ${expiresInDays} dias\n\n🔗 *Ver proposta e PDF:*\n${url}\n\nCom os melhores cumprimentos,\n${cName}`;
+          let wText = `📄 *Proposta Comercial ${quotation.quotation_number}*\n\nOlá ${clientName},\nA sua proposta comercial já se encontra disponível para consulta.\n\n*Valor Total:* ${formatCurrency(quotation.grand_total)}\n*Válida até:* ${expiryDateFormatted} (${validityDays} dias)\n\n🔗 *Ver proposta e PDF:*\n${url}\n\nCom os melhores cumprimentos,\n${cName}`;
 
           if (company.show_branding !== false) {
              wText += `\n\n---\n⚡ Powered by Proforma360\nGestão comercial moderna para empresas.\nhttps://proforma360.vercel.app`;
@@ -118,7 +121,7 @@ export default function ShareQuotationModal({ isOpen, onClose, quotation, compan
           setWhatsappText(wText);
           
           setEmailSubject(`Proposta Comercial ${quotation.quotation_number} — ${cName}`);
-          setEmailBodyPlain(`Estimado(a) ${clientName},\n\nSegue a nossa proposta comercial número ${quotation.quotation_number}.\n\nValor: ${formatCurrency(quotation.grand_total)}\nValidade: ${expiresInDays} dias\n\nPode aceder à proposta no link abaixo:\n${url}\n\nCaso tenha alguma dúvida, não hesite em contactar-nos.\n\nCom os melhores cumprimentos,\n${cName}`);
+          setEmailBodyPlain(`Estimado(a) ${clientName},\n\nSegue a nossa proposta comercial número ${quotation.quotation_number}.\n\nValor: ${formatCurrency(quotation.grand_total)}\nVálida até: ${expiryDateFormatted} (${validityDays} dias)\n\nPode aceder à proposta no link abaixo:\n${url}\n\nCaso tenha alguma dúvida, não hesite em contactar-nos.\n\nCom os melhores cumprimentos,\n${cName}`);
           
           setIsLoading(false);
         }
@@ -134,7 +137,7 @@ export default function ShareQuotationModal({ isOpen, onClose, quotation, compan
     generateShareLink();
     
     return () => { isMounted = false; };
-  }, [isOpen, expiresInDays]); // Regenerate if expiration changes, but usually 30 is fine
+  }, [isOpen]); // Regenerate on open
 
   if (!isOpen) return null;
 
@@ -414,7 +417,7 @@ export default function ShareQuotationModal({ isOpen, onClose, quotation, compan
                               </tr>
                               <tr>
                                 <td style={{ fontSize: '14px', color: '#64748b' }}>Validade:</td>
-                                <td style={{ fontSize: '14px', fontWeight: '600', color: '#0f172a', textAlign: 'right' }}>{expiresInDays} dias</td>
+                                <td style={{ fontSize: '14px', fontWeight: '600', color: '#0f172a', textAlign: 'right' }}>{expiryDateFormatted} ({validityDays} dias)</td>
                               </tr>
                             </tbody>
                           </table>
@@ -556,7 +559,7 @@ export default function ShareQuotationModal({ isOpen, onClose, quotation, compan
                     </div>
                     <h4 className="text-lg font-bold text-gray-900">Link Seguro Partilhável</h4>
                     <p className="text-sm text-gray-500 max-w-md mx-auto">
-                      Este link está alojado de forma segura no seu Google Drive. Qualquer pessoa com o link pode visualizar a proposta. Expirará em {expiresInDays} dias.
+                      Este link está alojado de forma segura no seu Google Drive. Qualquer pessoa com o link pode visualizar a proposta. Válido até {expiryDateFormatted}.
                     </p>
                   </div>
                   

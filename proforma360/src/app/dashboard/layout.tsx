@@ -287,12 +287,32 @@ export default function DashboardLayout({
   }, [activeSession, isOffline, isChecking]);
 
   useEffect(() => {
-    if (status === "unauthenticated" && !isOffline && !isChecking) {
-      redirect("/");
+    if (status === "unauthenticated" && !isChecking) {
+      if (isOffline) {
+        // Offline: try to use cached session, don't redirect
+        getOfflineSession().then(offSession => {
+          if (!offSession) {
+            // No cached session at all — must go online to login
+            redirect("/");
+          }
+          // If offSession exists, activeSession will be derived from it
+        });
+      } else {
+        redirect("/");
+      }
     }
   }, [status, isOffline, isChecking]);
 
-  if ((status === "loading" || !activeSession) && !isOffline) {
+  // Loading timeout: if loading takes more than 5s when offline, proceed with offline session
+  const [loadingTimedOut, setLoadingTimedOut] = useState(false);
+  useEffect(() => {
+    if ((status === "loading" || !activeSession) && isOffline) {
+      const timeout = setTimeout(() => setLoadingTimedOut(true), 2000);
+      return () => clearTimeout(timeout);
+    }
+  }, [status, activeSession, isOffline]);
+
+  if ((status === "loading" || !activeSession) && !isOffline && !loadingTimedOut) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[var(--color-surface-container-lowest)]">
         <div className="w-12 h-12 border-4 border-[var(--color-primary)] border-t-transparent rounded-full animate-spin"></div>
@@ -437,10 +457,28 @@ export default function DashboardLayout({
         <div className="flex items-center gap-2 relative" ref={mobileProfileMenuContainerRef}>
            <button 
              onClick={() => setIsSearchOpen(true)}
-             className="p-1.5 text-gray-500 hover:text-gray-700 transition-colors mr-1"
+             className="p-1.5 text-gray-500 hover:text-gray-700 transition-colors"
              title="Pesquisar (Cmd+K)"
            >
              <Search className="w-5 h-5" />
+           </button>
+           <button 
+             onClick={() => setIsSyncMenuOpen(!isSyncMenuOpen)}
+             className={cn(
+               "relative p-1.5 rounded-full transition-colors",
+               hasUnsyncedChanges 
+                 ? "text-amber-600 bg-amber-50" 
+                 : "text-gray-500 hover:text-gray-700"
+             )}
+             title="Sincronização Cloud"
+           >
+             <Cloud className="w-5 h-5" />
+             {hasUnsyncedChanges && (
+               <span className="absolute -top-0.5 -right-0.5 flex h-2.5 w-2.5">
+                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                 <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500"></span>
+               </span>
+             )}
            </button>
            <button 
              onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
@@ -481,6 +519,55 @@ export default function DashboardLayout({
                    <LogOut className="w-4 h-4" /> Terminar Sessão
                  </button>
                </div>
+           )}
+
+           {/* Mobile Sync Menu */}
+           {isSyncMenuOpen && (
+             <>
+               <div 
+                 className="fixed inset-0 z-40" 
+                 onClick={() => setIsSyncMenuOpen(false)}
+               ></div>
+               <div className="absolute top-12 right-0 mt-2 w-80 bg-[var(--color-surface-elevated)] rounded-xl shadow-elevated border border-gray-100 overflow-hidden z-50">
+                 <div className="p-4 border-b border-gray-100 bg-[var(--color-surface-elevated)]">
+                   <p className="text-sm font-semibold text-[var(--color-on-surface)]">Sincronização Google Drive</p>
+                   <p className="text-xs text-[var(--color-on-surface-variant)] mt-1">
+                     {lastSyncDate ? `Última sincronização: ${new Date(lastSyncDate).toLocaleDateString('pt-PT')} às ${new Date(lastSyncDate).toLocaleTimeString('pt-PT', {hour:'2-digit', minute:'2-digit'})}` : "Nunca sincronizado"}
+                   </p>
+                   
+                   {lastSyncDate && Date.now() - new Date(lastSyncDate).getTime() > 7 * 24 * 60 * 60 * 1000 && (
+                     <p className="text-xs text-amber-600 mt-1 font-medium">⚠️ Último backup há mais de 7 dias!</p>
+                   )}
+
+                   {hasUnsyncedChanges && (
+                     <div className="mt-2 text-xs font-medium text-amber-700 bg-amber-50 p-2 rounded border border-amber-200 flex items-center gap-1.5">
+                       <span className="w-2 h-2 bg-amber-500 rounded-full animate-pulse"></span>
+                       Existem alterações locais pendentes.
+                     </div>
+                   )}
+                 </div>
+                 <div className="p-2 space-y-1">
+                   <button 
+                     onClick={handleBackup} 
+                     disabled={isSyncing || isOffline}
+                     title={isOffline ? "Internet necessária para sincronização" : "Guardar dados na cloud"}
+                     className="flex items-center gap-3 w-full text-left px-3 py-2.5 text-sm font-medium text-[var(--color-on-surface)] hover:bg-[var(--color-surface-container)] hover:text-[var(--color-primary)] rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                   >
+                     {isSyncing ? <RefreshCw className="w-4 h-4 animate-spin" /> : <CloudUpload className="w-4 h-4 text-green-600" />}
+                     Fazer Backup
+                   </button>
+                   <button 
+                     onClick={handleRestore} 
+                     disabled={isSyncing || isOffline}
+                     title={isOffline ? "Internet necessária para restaurar" : "Restaurar dados da cloud"}
+                     className="flex items-center gap-3 w-full text-left px-3 py-2.5 text-sm font-medium text-[var(--color-on-surface)] hover:bg-[var(--color-surface-container)] hover:text-[var(--color-primary)] rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                   >
+                     {isSyncing ? <RefreshCw className="w-4 h-4 animate-spin" /> : <CloudDownload className="w-4 h-4 text-blue-600" />}
+                     Restaurar Backup
+                   </button>
+                 </div>
+               </div>
+             </>
            )}
         </div>
       </header>

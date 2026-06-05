@@ -84,7 +84,10 @@ export default function QuotationDetailPage() {
       const newItems = items.map(({id, quotation_id, ...rest}, index) => ({...rest, sort_order: index})) as any;
       
       const newDate = new Date().toISOString().split("T")[0];
-      const expiryDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split("T")[0];
+      // Preserve the original validity period (difference between date and expiry_date)
+      const originalDiffMs = new Date(quotation.expiry_date).getTime() - new Date(quotation.date).getTime();
+      const originalDiffDays = Math.max(1, Math.round(originalDiffMs / (1000 * 60 * 60 * 24)));
+      const expiryDate = new Date(Date.now() + originalDiffDays * 24 * 60 * 60 * 1000).toISOString().split("T")[0];
 
       const { id: _id, quotation_number, status, date, expiry_date, created_at, updated_at, client_name, pdf_url, pdf_drive_id, ...quotationDataToCopy } = quotation as any;
 

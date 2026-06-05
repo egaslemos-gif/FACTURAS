@@ -49,80 +49,82 @@ export default function CompanyPage() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto animate-fade-in">
-      <div className="mb-8">
-        <h1 className="text-page-title">Perfil da Empresa</h1>
-        <p className="text-page-subtitle">
+    <div className="max-w-4xl mx-auto animate-fade-in pb-12 md:pb-20">
+      <div className="mb-6 md:mb-8">
+        <h1 className="text-2xl font-bold tracking-tight text-slate-900">Perfil da Empresa</h1>
+        <p className="text-sm text-slate-500 mt-1 leading-normal">
           Perfil da sua organização.
         </p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Informações Básicas */}
-        <div className="bg-white p-6 md:p-8 rounded-[var(--radius-lg)] elevation-1 border border-[var(--color-outline-variant)]">
+        <div className="dashboard-section border-none shadow-sm">
           <div className="flex items-center gap-3 mb-6">
-            <Building2 className="w-6 h-6 text-[var(--color-primary)]" />
-            <h2 className="text-headline-sm">Informações Básicas</h2>
+            <div className="w-10 h-10 rounded-xl bg-teal-50 flex items-center justify-center">
+              <Building2 className="w-5 h-5 text-teal-600" />
+            </div>
+            <h2 className="text-lg font-bold text-slate-900">Informações Básicas</h2>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="col-span-1 md:col-span-2">
-              <label className="block text-label-md mb-2">Nome da Empresa</label>
+              <label className="block text-sm font-semibold text-slate-700 mb-1.5">Nome da Empresa</label>
               <input
                 type="text"
                 name="name"
                 value={formData.name || ""}
                 onChange={handleChange}
-                className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-md focus:ring-2 focus:ring-[var(--color-primary)] outline-none transition-shadow"
+                className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 outline-none transition-all shadow-sm bg-slate-50/50 hover:bg-white focus:bg-white text-sm"
                 placeholder="Ex: Proforma360 Lda"
                 required
               />
             </div>
 
             <div>
-              <label className="block text-label-md mb-2">NUIT / NIF</label>
+              <label className="block text-sm font-semibold text-slate-700 mb-1.5">NUIT / NIF</label>
               <input
                 type="text"
                 name="tax_number"
                 value={formData.tax_number || ""}
                 onChange={handleChange}
-                className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-md focus:ring-2 focus:ring-[var(--color-primary)] outline-none"
+                className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 outline-none transition-all shadow-sm bg-slate-50/50 hover:bg-white focus:bg-white text-sm"
                 placeholder="Ex: 400123456"
               />
             </div>
 
             <div>
-              <label className="block text-label-md mb-2">Telefone</label>
+              <label className="block text-sm font-semibold text-slate-700 mb-1.5">Telefone</label>
               <input
                 type="text"
                 name="phone"
                 value={formData.phone || ""}
                 onChange={handleChange}
-                className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-md focus:ring-2 focus:ring-[var(--color-primary)] outline-none"
+                className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 outline-none transition-all shadow-sm bg-slate-50/50 hover:bg-white focus:bg-white text-sm"
                 placeholder="+258 84 123 4567"
               />
             </div>
 
             <div className="col-span-1 md:col-span-2">
-              <label className="block text-label-md mb-2">E-mail Comercial</label>
+              <label className="block text-sm font-semibold text-slate-700 mb-1.5">E-mail Comercial</label>
               <input
                 type="email"
                 name="email"
                 value={formData.email || ""}
                 onChange={handleChange}
-                className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-md focus:ring-2 focus:ring-[var(--color-primary)] outline-none"
+                className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 outline-none transition-all shadow-sm bg-slate-50/50 hover:bg-white focus:bg-white text-sm"
                 placeholder="contacto@empresa.com"
               />
             </div>
 
             <div className="col-span-1 md:col-span-2">
-              <label className="block text-label-md mb-2">Endereço Completo</label>
+              <label className="block text-sm font-semibold text-slate-700 mb-1.5">Endereço Completo</label>
               <textarea
                 name="address"
                 value={formData.address || ""}
                 onChange={handleChange}
                 rows={3}
-                className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-md focus:ring-2 focus:ring-[var(--color-primary)] outline-none resize-none"
+                className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 outline-none transition-all shadow-sm bg-slate-50/50 hover:bg-white focus:bg-white text-sm resize-none"
                 placeholder="Av. 25 de Setembro, Maputo"
               />
             </div>
@@ -130,81 +132,83 @@ export default function CompanyPage() {
         </div>
 
         {/* Informações Financeiras */}
-        <div className="bg-white p-6 md:p-8 rounded-[var(--radius-lg)] elevation-1 border border-[var(--color-outline-variant)]">
+        <div className="dashboard-section border-none shadow-sm">
           <div className="flex items-center gap-3 mb-6">
-            <Building2 className="w-6 h-6 text-[var(--color-primary)]" />
-            <h2 className="text-headline-sm">Informações Financeiras</h2>
+            <div className="w-10 h-10 rounded-xl bg-teal-50 flex items-center justify-center">
+              <Building2 className="w-5 h-5 text-teal-600" />
+            </div>
+            <h2 className="text-lg font-bold text-slate-900">Informações Financeiras</h2>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-label-md mb-2">Nome do Banco</label>
+              <label className="block text-sm font-semibold text-slate-700 mb-1.5">Nome do Banco</label>
               <input
                 type="text"
                 name="bank_name"
                 value={formData.bank_name || ""}
                 onChange={handleChange}
-                className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-md focus:ring-2 focus:ring-[var(--color-primary)] outline-none"
+                className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 outline-none transition-all shadow-sm bg-slate-50/50 hover:bg-white focus:bg-white text-sm"
                 placeholder="Ex: Millennium BIM"
               />
             </div>
 
             <div>
-              <label className="block text-label-md mb-2">Titular da Conta</label>
+              <label className="block text-sm font-semibold text-slate-700 mb-1.5">Titular da Conta</label>
               <input
                 type="text"
                 name="account_holder"
                 value={formData.account_holder || ""}
                 onChange={handleChange}
-                className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-md focus:ring-2 focus:ring-[var(--color-primary)] outline-none"
+                className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 outline-none transition-all shadow-sm bg-slate-50/50 hover:bg-white focus:bg-white text-sm"
                 placeholder="Ex: Proforma360 Lda"
               />
             </div>
 
             <div>
-              <label className="block text-label-md mb-2">Número da Conta</label>
+              <label className="block text-sm font-semibold text-slate-700 mb-1.5">Número da Conta</label>
               <input
                 type="text"
                 name="account_number"
                 value={formData.account_number || ""}
                 onChange={handleChange}
-                className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-md focus:ring-2 focus:ring-[var(--color-primary)] outline-none"
+                className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 outline-none transition-all shadow-sm bg-slate-50/50 hover:bg-white focus:bg-white text-sm"
                 placeholder="Ex: 123456789"
               />
             </div>
 
             <div>
-              <label className="block text-label-md mb-2">NIB / IBAN</label>
+              <label className="block text-sm font-semibold text-slate-700 mb-1.5">NIB / IBAN</label>
               <input
                 type="text"
                 name="nib_iban"
                 value={formData.nib_iban || ""}
                 onChange={handleChange}
-                className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-md focus:ring-2 focus:ring-[var(--color-primary)] outline-none"
+                className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 outline-none transition-all shadow-sm bg-slate-50/50 hover:bg-white focus:bg-white text-sm"
                 placeholder="Ex: 000100000012345678912"
               />
             </div>
 
             <div>
-              <label className="block text-label-md mb-2">Número M-Pesa</label>
+              <label className="block text-sm font-semibold text-slate-700 mb-1.5">Número M-Pesa</label>
               <input
                 type="text"
                 name="mpesa"
                 value={formData.mpesa || ""}
                 onChange={handleChange}
-                className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-md focus:ring-2 focus:ring-[var(--color-primary)] outline-none"
+                className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 outline-none transition-all shadow-sm bg-slate-50/50 hover:bg-white focus:bg-white text-sm"
                 placeholder="Ex: 84 123 4567"
               />
             </div>
 
             <div>
-              <label className="block text-label-md mb-2">Número e-Mola</label>
+              <label className="block text-sm font-semibold text-slate-700 mb-1.5">Número e-Mola</label>
               <input
                 type="text"
                 name="emola"
                 value={formData.emola || ""}
                 onChange={handleChange}
-                className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-md focus:ring-2 focus:ring-[var(--color-primary)] outline-none"
+                className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 outline-none transition-all shadow-sm bg-slate-50/50 hover:bg-white focus:bg-white text-sm"
                 placeholder="Ex: 86 123 4567"
               />
             </div>
@@ -212,15 +216,17 @@ export default function CompanyPage() {
         </div>
 
         {/* Identidade Visual */}
-        <div className="bg-white p-6 md:p-8 rounded-[var(--radius-lg)] elevation-1 border border-[var(--color-outline-variant)]">
+        <div className="dashboard-section border-none shadow-sm">
           <div className="flex items-center gap-3 mb-6">
-            <FileSignature className="w-6 h-6 text-[var(--color-primary)]" />
-            <h2 className="text-headline-sm">Identidade Visual & Assinaturas</h2>
+            <div className="w-10 h-10 rounded-xl bg-teal-50 flex items-center justify-center">
+              <FileSignature className="w-5 h-5 text-teal-600" />
+            </div>
+            <h2 className="text-lg font-bold text-slate-900">Identidade Visual & Assinaturas</h2>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* Logo */}
-            <label className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-[var(--color-outline-variant)] rounded-md bg-[var(--color-surface-container-low)] cursor-pointer hover:bg-[var(--color-surface-container)] transition-colors relative overflow-hidden group">
+            <label className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-slate-200 rounded-xl bg-slate-50 cursor-pointer hover:bg-teal-50 hover:border-teal-200 transition-colors relative overflow-hidden group">
               <input 
                 type="file" 
                 accept="image/png, image/jpeg" 
@@ -240,15 +246,15 @@ export default function CompanyPage() {
                 <img src={formData.logo_url} alt="Logo" className="absolute inset-0 w-full h-full object-contain p-2" />
               ) : (
                 <>
-                  <Upload className="w-8 h-8 text-[var(--color-outline)] mb-3 group-hover:text-[var(--color-primary)] transition-colors" />
-                  <span className="text-label-sm text-[var(--color-on-surface-variant)] mb-1">LOGOTIPO</span>
-                  <p className="text-xs text-center text-[var(--color-outline)]">PNG transparente (Máx 2MB)</p>
+                  <Upload className="w-8 h-8 text-slate-400 mb-3 group-hover:text-teal-600 transition-colors" />
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-600 mb-1">LOGOTIPO</span>
+                  <p className="text-xs text-center text-slate-400">PNG transparente (Máx 2MB)</p>
                 </>
               )}
             </label>
 
             {/* Carimbo */}
-            <label className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-[var(--color-outline-variant)] rounded-md bg-[var(--color-surface-container-low)] cursor-pointer hover:bg-[var(--color-surface-container)] transition-colors relative overflow-hidden group">
+            <label className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-slate-200 rounded-xl bg-slate-50 cursor-pointer hover:bg-teal-50 hover:border-teal-200 transition-colors relative overflow-hidden group">
               <input 
                 type="file" 
                 accept="image/png, image/jpeg" 
@@ -268,15 +274,15 @@ export default function CompanyPage() {
                 <img src={formData.stamp_url} alt="Carimbo" className="absolute inset-0 w-full h-full object-contain p-2" />
               ) : (
                 <>
-                  <Upload className="w-8 h-8 text-[var(--color-outline)] mb-3 group-hover:text-[var(--color-primary)] transition-colors" />
-                  <span className="text-label-sm text-[var(--color-on-surface-variant)] mb-1">CARIMBO</span>
-                  <p className="text-xs text-center text-[var(--color-outline)]">PNG transparente (Máx 2MB)</p>
+                  <Upload className="w-8 h-8 text-slate-400 mb-3 group-hover:text-teal-600 transition-colors" />
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-600 mb-1">CARIMBO</span>
+                  <p className="text-xs text-center text-slate-400">PNG transparente (Máx 2MB)</p>
                 </>
               )}
             </label>
 
             {/* Assinatura */}
-            <label className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-[var(--color-outline-variant)] rounded-md bg-[var(--color-surface-container-low)] cursor-pointer hover:bg-[var(--color-surface-container)] transition-colors relative overflow-hidden group">
+            <label className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-slate-200 rounded-xl bg-slate-50 cursor-pointer hover:bg-teal-50 hover:border-teal-200 transition-colors relative overflow-hidden group">
               <input 
                 type="file" 
                 accept="image/png, image/jpeg" 
@@ -296,9 +302,9 @@ export default function CompanyPage() {
                 <img src={formData.signature_url} alt="Assinatura" className="absolute inset-0 w-full h-full object-contain p-2" />
               ) : (
                 <>
-                  <Upload className="w-8 h-8 text-[var(--color-outline)] mb-3 group-hover:text-[var(--color-primary)] transition-colors" />
-                  <span className="text-label-sm text-[var(--color-on-surface-variant)] mb-1">ASSINATURA</span>
-                  <p className="text-xs text-center text-[var(--color-outline)]">PNG transparente (Máx 2MB)</p>
+                  <Upload className="w-8 h-8 text-slate-400 mb-3 group-hover:text-teal-600 transition-colors" />
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-600 mb-1">ASSINATURA</span>
+                  <p className="text-xs text-center text-slate-400">PNG transparente (Máx 2MB)</p>
                 </>
               )}
             </label>
@@ -306,113 +312,115 @@ export default function CompanyPage() {
 
           <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="col-span-1 md:col-span-2">
-              <label className="block text-label-md mb-2">Prefixo da Proforma</label>
+              <label className="block text-sm font-semibold text-slate-700 mb-1.5">Prefixo da Proforma</label>
               <input
                 type="text"
                 name="quotation_prefix"
                 value={formData.quotation_prefix || "PF"}
                 onChange={handleChange}
-                className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-md focus:ring-2 focus:ring-[var(--color-primary)] outline-none font-mono"
+                className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 outline-none font-mono transition-all shadow-sm bg-slate-50/50 hover:bg-white focus:bg-white text-sm"
                 placeholder="Ex: PF"
               />
-              <p className="text-xs mt-1 text-[var(--color-outline)]">Ex: {formData.quotation_prefix || "PF"}-{new Date().getFullYear()}-0001</p>
+              <p className="text-xs mt-1.5 text-slate-500">Ex: {formData.quotation_prefix || "PF"}-{new Date().getFullYear()}-0001</p>
             </div>
           </div>
 
           <div className="mt-6">
-            <label className="block text-label-md mb-2">Texto de Rodapé (Aparece em todas as proformas)</label>
+            <label className="block text-sm font-semibold text-slate-700 mb-1.5">Texto de Rodapé (Aparece em todas as proformas)</label>
             <input
               type="text"
               name="footer_text"
               value={formData.footer_text || ""}
               onChange={handleChange}
-              className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-md focus:ring-2 focus:ring-[var(--color-primary)] outline-none"
+              className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 outline-none transition-all shadow-sm bg-slate-50/50 hover:bg-white focus:bg-white text-sm"
               placeholder="Obrigado por escolher os nossos serviços. Processado por computador."
             />
           </div>
         </div>
 
         {/* Estilo da Proforma */}
-        <div className="bg-white p-6 md:p-8 rounded-[var(--radius-lg)] elevation-1 border border-[var(--color-outline-variant)]">
+        <div className="dashboard-section border-none shadow-sm">
           <div className="flex items-center gap-3 mb-6">
-            <LayoutTemplate className="w-6 h-6 text-[var(--color-primary)]" />
-            <h2 className="text-headline-sm">Estilo da Proforma</h2>
+            <div className="w-10 h-10 rounded-xl bg-teal-50 flex items-center justify-center">
+              <LayoutTemplate className="w-5 h-5 text-teal-600" />
+            </div>
+            <h2 className="text-lg font-bold text-slate-900">Estilo da Proforma</h2>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <button
               type="button"
               onClick={() => setFormData(prev => ({ ...prev, pdf_template: "minimal" }))}
               className={cn(
-                "relative flex flex-col items-center justify-center p-6 border-2 rounded-md text-center transition-all",
+                "relative flex flex-col items-center justify-center p-6 border-2 rounded-xl text-center transition-all",
                 formData.pdf_template === "minimal" || !formData.pdf_template
-                  ? "border-[var(--color-primary)] bg-[var(--color-primary-container)] ring-2 ring-[var(--color-primary)] ring-offset-2"
-                  : "border-[var(--color-outline-variant)] bg-[var(--color-surface-container-lowest)] hover:border-[var(--color-outline)]"
+                  ? "border-teal-600 bg-teal-50 ring-2 ring-teal-600/20 ring-offset-2"
+                  : "border-slate-200 bg-slate-50 hover:border-slate-300 hover:bg-slate-100"
               )}
             >
-              <div className="w-24 h-32 bg-white border border-gray-200 shadow-sm mb-4 flex flex-col rounded-md overflow-hidden">
+              <div className="w-24 h-32 bg-white border border-slate-200 shadow-sm mb-4 flex flex-col rounded-md overflow-hidden">
                 <img src="/template_classic.png" alt="Minimal Template" className="w-full h-full object-cover" />
               </div>
-              <h3 className="font-bold text-[var(--color-on-surface)]">Minimal (Clássico)</h3>
-              <p className="text-xs text-[var(--color-on-surface-variant)] mt-1">Design simples, preto e branco tradicional.</p>
+              <h3 className="font-bold text-slate-900">Minimal (Clássico)</h3>
+              <p className="text-xs text-slate-500 mt-1">Design simples, preto e branco tradicional.</p>
             </button>
 
             <button
               type="button"
               onClick={() => setFormData(prev => ({ ...prev, pdf_template: "modern" }))}
               className={cn(
-                "relative flex flex-col items-center justify-center p-6 border-2 rounded-md text-center transition-all",
+                "relative flex flex-col items-center justify-center p-6 border-2 rounded-xl text-center transition-all",
                 formData.pdf_template === "modern"
-                  ? "border-[var(--color-primary)] bg-[var(--color-primary-container)] ring-2 ring-[var(--color-primary)] ring-offset-2"
-                  : "border-[var(--color-outline-variant)] bg-[var(--color-surface-container-lowest)] hover:border-[var(--color-outline)]"
+                  ? "border-teal-600 bg-teal-50 ring-2 ring-teal-600/20 ring-offset-2"
+                  : "border-slate-200 bg-slate-50 hover:border-slate-300 hover:bg-slate-100"
               )}
             >
-              <div className="w-24 h-32 bg-white border border-gray-200 shadow-sm mb-4 flex flex-col rounded-md overflow-hidden">
+              <div className="w-24 h-32 bg-white border border-slate-200 shadow-sm mb-4 flex flex-col rounded-md overflow-hidden">
                 <img src="/template_modern.png" alt="Modern Template" className="w-full h-full object-cover" />
               </div>
-              <h3 className="font-bold text-[var(--color-on-surface)]">Moderno (Colorido)</h3>
-              <p className="text-xs text-[var(--color-on-surface-variant)] mt-1">Design atual com cabeçalhos azuis e arredondados.</p>
+              <h3 className="font-bold text-slate-900">Moderno (Colorido)</h3>
+              <p className="text-xs text-slate-500 mt-1">Design atual com cabeçalhos azuis.</p>
             </button>
 
             <button
               type="button"
               onClick={() => setFormData(prev => ({ ...prev, pdf_template: "corporate" }))}
               className={cn(
-                "relative flex flex-col items-center justify-center p-6 border-2 rounded-md text-center transition-all md:col-span-2 lg:col-span-1",
+                "relative flex flex-col items-center justify-center p-6 border-2 rounded-xl text-center transition-all md:col-span-2 lg:col-span-1",
                 formData.pdf_template === "corporate"
-                  ? "border-[var(--color-primary)] bg-[var(--color-primary-container)] ring-2 ring-[var(--color-primary)] ring-offset-2"
-                  : "border-[var(--color-outline-variant)] bg-[var(--color-surface-container-lowest)] hover:border-[var(--color-outline)]"
+                  ? "border-teal-600 bg-teal-50 ring-2 ring-teal-600/20 ring-offset-2"
+                  : "border-slate-200 bg-slate-50 hover:border-slate-300 hover:bg-slate-100"
               )}
             >
-              <div className="w-24 h-32 bg-white border border-gray-200 shadow-sm mb-4 flex flex-col rounded-md overflow-hidden relative">
+              <div className="w-24 h-32 bg-white border border-slate-200 shadow-sm mb-4 flex flex-col rounded-md overflow-hidden relative">
                 {/* Header */}
-                <div className="w-full p-2 flex justify-between items-start border-b border-gray-100">
-                  <div className="w-4 h-4 rounded-full bg-gray-300"></div>
+                <div className="w-full p-2 flex justify-between items-start border-b border-slate-100">
+                  <div className="w-4 h-4 rounded-full bg-slate-300"></div>
                   <div className="flex flex-col items-end gap-1">
-                    <div className="w-8 h-1 bg-gray-800 rounded"></div>
-                    <div className="w-6 h-1 bg-gray-300 rounded"></div>
+                    <div className="w-8 h-1 bg-slate-800 rounded"></div>
+                    <div className="w-6 h-1 bg-slate-300 rounded"></div>
                   </div>
                 </div>
                 {/* Client / Info Box */}
-                <div className="flex p-2 gap-2 border-b border-gray-100">
-                  <div className="flex-1 h-6 border border-gray-200 rounded-sm bg-gray-50"></div>
-                  <div className="w-8 h-6 border border-gray-200 rounded-sm bg-gray-50"></div>
+                <div className="flex p-2 gap-2 border-b border-slate-100">
+                  <div className="flex-1 h-6 border border-slate-200 rounded-sm bg-slate-50"></div>
+                  <div className="w-8 h-6 border border-slate-200 rounded-sm bg-slate-50"></div>
                 </div>
                 {/* Table Header */}
-                <div className="w-[calc(100%-16px)] mx-auto mt-2 h-2 bg-gray-200 rounded-sm"></div>
+                <div className="w-[calc(100%-16px)] mx-auto mt-2 h-2 bg-slate-200 rounded-sm"></div>
                 {/* Table Rows */}
                 <div className="flex-1 w-[calc(100%-16px)] mx-auto mt-1 flex flex-col gap-1">
-                  <div className="w-full h-1 bg-gray-100 border-b border-gray-200"></div>
-                  <div className="w-full h-1 bg-gray-100 border-b border-gray-200"></div>
-                  <div className="w-full h-1 bg-gray-100 border-b border-gray-200"></div>
+                  <div className="w-full h-1 bg-slate-100 border-b border-slate-200"></div>
+                  <div className="w-full h-1 bg-slate-100 border-b border-slate-200"></div>
+                  <div className="w-full h-1 bg-slate-100 border-b border-slate-200"></div>
                 </div>
                 {/* Footer Total */}
                 <div className="w-[calc(100%-16px)] mx-auto mb-2 flex justify-end">
-                  <div className="w-10 h-3 border border-gray-200 bg-gray-50 rounded-sm"></div>
+                  <div className="w-10 h-3 border border-slate-200 bg-slate-50 rounded-sm"></div>
                 </div>
               </div>
-              <h3 className="font-bold text-[var(--color-on-surface)]">Corporativo</h3>
-              <p className="text-xs text-[var(--color-on-surface-variant)] mt-1">Design sério e estruturado para empresas de grande porte.</p>
+              <h3 className="font-bold text-slate-900">Corporativo</h3>
+              <p className="text-xs text-slate-500 mt-1">Design sério para empresas de grande porte.</p>
             </button>
           </div>
         </div>
@@ -423,8 +431,8 @@ export default function CompanyPage() {
             type="submit"
             disabled={isSaving}
             className={cn(
-              "flex items-center gap-2 px-6 py-3 rounded-md text-white font-medium transition-colors",
-              isSaving ? "bg-[var(--color-primary-fixed-dim)] cursor-not-allowed" : "bg-[var(--color-primary)] hover:bg-[#003ea8]"
+              "flex items-center gap-2 px-6 py-3 rounded-xl text-white font-semibold shadow-sm transition-all active:scale-95",
+              isSaving ? "bg-slate-400 cursor-not-allowed" : "bg-teal-600 hover:bg-teal-700"
             )}
           >
             {isSaving ? (

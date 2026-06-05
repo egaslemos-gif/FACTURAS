@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
-import { useQuotationsStore, usePipelineStore, useInteractionsStore, useCompanyStore } from "@/stores";
+import { useQuotationsStore, usePipelineStore, useInteractionsStore, useCompanyStore, useClientsStore } from "@/stores";
 import { Quotation, PipelineStage, PIPELINE_STAGES } from "@/lib/types";
 import { formatCurrency } from "@/lib/utils";
 import { requestNotificationPermission } from "@/lib/pipeline/notifications";
@@ -84,21 +84,25 @@ function PriorityBadge({ priority }: { priority?: "low" | "medium" | "high" }) {
 function KanbanCard({
   deal,
   companyName,
+  clientEmail,
   onDragStart,
   onSetNextAction,
   onSetPriority,
   onSetStage,
   onCompleteAction,
-  onLogWhatsApp
+  onLogWhatsApp,
+  onLogEmail
 }: {
   deal: Quotation;
   companyName: string;
+  clientEmail: string;
   onDragStart: (e: React.DragEvent, id: string) => void;
   onSetNextAction: (deal: Quotation) => void;
   onSetPriority: (id: string, priority: "low" | "medium" | "high") => void;
   onSetStage: (deal: Quotation) => void;
   onCompleteAction: (deal: Quotation) => void;
   onLogWhatsApp: (deal: Quotation) => void;
+  onLogEmail: (deal: Quotation) => void;
 }) {
   const router = useRouter();
   const [showMenu, setShowMenu] = useState(false);
@@ -223,9 +227,17 @@ function KanbanCard({
           <button 
             onClick={(e) => {
               e.stopPropagation();
-              window.open(`mailto:?subject=${encodeURIComponent(`Follow-up Proposta ${deal.quotation_number}`)}`, '_self');
+              const clientName = deal.client_name || 'Cliente';
+              const publicUrl = deal.pdf_drive_id ? `${window.location.origin}/view/${deal.pdf_drive_id}` : '';
+              
+              const subject = `Seguimento — Proposta ${deal.quotation_number} — ${companyName}`;
+              const body = `Estimado(a) ${clientName},\n\nEspero que esteja bem.\n\nPermita-me fazer um seguimento relativamente à proposta comercial que lhe enviámos:\n\n• Referência: ${deal.quotation_number}\n• Valor: ${formatCurrency(deal.grand_total)}${publicUrl ? `\n\nPode rever os detalhes da proposta aqui:\n${publicUrl}` : ''}\n\nGostaria de saber se teve oportunidade de analisar a nossa proposta e se tem alguma questão ou necessidade de ajuste.\n\nEstamos inteiramente disponíveis para qualquer esclarecimento.\n\nCom os melhores cumprimentos,\n${companyName}`;
+              
+              const mailTo = clientEmail ? `mailto:${encodeURIComponent(clientEmail)}` : 'mailto:';
+              window.open(`${mailTo}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`, '_self');
+              onLogEmail(deal);
             }}
-            title="Enviar Email" 
+            title="Enviar Email de Seguimento" 
             className="p-1.5 bg-gray-100 text-gray-600 hover:bg-blue-500 hover:text-white rounded-full transition-colors"
           >
             <Mail className="w-3.5 h-3.5" />
@@ -240,6 +252,7 @@ function KanbanColumn({
   stage,
   deals,
   companyName,
+  getClientEmail,
   onDragStart,
   onDrop,
   onDragOver,
@@ -248,11 +261,13 @@ function KanbanColumn({
   onSetPriority,
   onSetStage,
   onCompleteAction,
-  onLogWhatsApp
+  onLogWhatsApp,
+  onLogEmail
 }: {
   stage: (typeof PIPELINE_STAGES)[number];
   deals: Quotation[];
   companyName: string;
+  getClientEmail: (clientId: string) => string;
   onDragStart: (e: React.DragEvent, id: string) => void;
   onDrop: (e: React.DragEvent, stage: PipelineStage) => void;
   onDragOver: (e: React.DragEvent) => void;
@@ -262,6 +277,7 @@ function KanbanColumn({
   onSetStage: (deal: Quotation) => void;
   onCompleteAction: (deal: Quotation) => void;
   onLogWhatsApp: (deal: Quotation) => void;
+  onLogEmail: (deal: Quotation) => void;
 }) {
   const totalValue = deals.reduce((sum, d) => sum + (d.grand_total || 0), 0);
 
@@ -302,12 +318,14 @@ function KanbanColumn({
               key={deal.id} 
               deal={deal} 
               companyName={companyName}
+              clientEmail={getClientEmail(deal.client_id)}
               onDragStart={onDragStart} 
               onSetNextAction={onSetNextAction}
               onSetPriority={onSetPriority}
               onSetStage={onSetStage}
               onCompleteAction={onCompleteAction}
               onLogWhatsApp={onLogWhatsApp}
+              onLogEmail={onLogEmail}
             />
           ))
         )}
@@ -501,6 +519,7 @@ export default function PipelinePage() {
   const { moveDeal, setPriority, getDealsByStage, getPipelineMetrics } = usePipelineStore();
   const { addInteraction } = useInteractionsStore();
   const { company } = useCompanyStore();
+  const { clients, fetchClients } = useClientsStore();
 
   const [dragOverStage, setDragOverStage] = useState<PipelineStage | null>(null);
   const [actionModal, setActionModal] = useState<Quotation | null>(null);
@@ -509,7 +528,13 @@ export default function PipelinePage() {
 
   useEffect(() => {
     fetchQuotations();
-  }, [fetchQuotations]);
+    fetchClients();
+  }, [fetchQuotations, fetchClients]);
+
+  const getClientEmail = (clientId: string): string => {
+    const client = clients.find(c => c.id === clientId);
+    return client?.email || '';
+  };
 
   const activeQuotations = useMemo(() => quotations.filter(q => q.pipeline_stage !== "won" && q.pipeline_stage !== "lost"), [quotations]);
 
@@ -570,7 +595,17 @@ export default function PipelinePage() {
     try {
       if (deal.client_id) {
         await addInteraction(deal.client_id, "whatsapp", "Follow-up enviado por WhatsApp", `Proforma: ${deal.quotation_number}`);
-        // Refresh to update aging
+        await fetchQuotations();
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleLogEmail = async (deal: Quotation) => {
+    try {
+      if (deal.client_id) {
+        await addInteraction(deal.client_id, "email", "Follow-up enviado por Email", `Proforma: ${deal.quotation_number}`);
         await fetchQuotations();
       }
     } catch (err) {
@@ -761,6 +796,7 @@ export default function PipelinePage() {
                 stage={stage}
                 deals={deals}
                 companyName={company?.name || "A Empresa"}
+                getClientEmail={getClientEmail}
                 onDragStart={handleDragStart}
                 onDrop={handleDrop}
                 onDragOver={(e) => {
@@ -773,6 +809,7 @@ export default function PipelinePage() {
                 onSetStage={setMoveModal}
                 onCompleteAction={handleCompleteAction}
                 onLogWhatsApp={handleLogWhatsApp}
+                onLogEmail={handleLogEmail}
               />
             );
           })}

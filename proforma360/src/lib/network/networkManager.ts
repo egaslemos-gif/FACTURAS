@@ -1,4 +1,5 @@
 import { useNetworkStore } from '@/stores/useNetworkStore';
+import { actionQueue } from '@/lib/sync/actionQueue';
 
 const PING_URL = '/api/ping';
 const PING_INTERVAL = 30000; // 30 seconds
@@ -11,6 +12,7 @@ let pingTimer: NodeJS.Timeout | null = null;
  */
 export const checkRealConnectivity = async (): Promise<boolean> => {
   const store = useNetworkStore.getState();
+  const wasOnline = store.isOnline;
   
   if (!navigator.onLine) {
     store.setOnline(false);
@@ -33,6 +35,13 @@ export const checkRealConnectivity = async (): Promise<boolean> => {
     
     const isOnline = response.ok;
     store.setOnline(isOnline);
+
+    // Orchestrate Background Sync Recovery
+    if (isOnline && !wasOnline) {
+      console.log('🌐 Conectividade real restaurada. A orquestrar sincronização...');
+      actionQueue.processQueue();
+    }
+
     return isOnline;
   } catch (error) {
     // If it aborts or fails to fetch, we assume offline/degraded network

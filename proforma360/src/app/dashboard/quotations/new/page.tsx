@@ -32,19 +32,24 @@ export default function NewQuotationPage() {
   const { company, fetchCompany } = useCompanyStore();
 
   const [isSaving, setIsSaving] = useState(false);
-  const [headerData, setHeaderData] = useState({
-    quotation_number: "",
-    client_id: "",
-    date: new Date().toISOString().split("T")[0],
-    expiry_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split("T")[0], // +30 days
-    notes: "",
-    terms: "Condições de Pagamento: 50% na adjudicação, 50% na entrega.\nValidade: 30 dias.",
-    discount: 0,
-    discount_type: "percentage" as "percentage" | "fixed",
-    next_action: "",
-    next_action_date: "",
-    next_action_time: "",
-    reminders_enabled: true,
+  const [headerData, setHeaderData] = useState(() => {
+    const issueDate = new Date();
+    const expiryDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+    const diffDays = Math.round((expiryDate.getTime() - issueDate.getTime()) / (1000 * 60 * 60 * 24));
+    return {
+      quotation_number: "",
+      client_id: "",
+      date: issueDate.toISOString().split("T")[0],
+      expiry_date: expiryDate.toISOString().split("T")[0],
+      notes: "",
+      terms: `Condições de Pagamento: 50% na adjudicação, 50% na entrega.\nValidade: ${diffDays} dias.`,
+      discount: 0,
+      discount_type: "percentage" as "percentage" | "fixed",
+      next_action: "",
+      next_action_date: "",
+      next_action_time: "",
+      reminders_enabled: true,
+    };
   });
 
   const [items, setItems] = useState<LineItem[]>([]);
@@ -65,6 +70,21 @@ export default function NewQuotationPage() {
       }));
     }
   }, [company, quotations]);
+
+  // Recalculate validity in terms when dates change
+  useEffect(() => {
+    if (headerData.date && headerData.expiry_date) {
+      const diffDays = Math.round(
+        (new Date(headerData.expiry_date).getTime() - new Date(headerData.date).getTime()) / (1000 * 60 * 60 * 24)
+      );
+      if (diffDays > 0) {
+        setHeaderData(prev => ({
+          ...prev,
+          terms: prev.terms.replace(/Validade:\s*\d+\s*dias\.?/i, `Validade: ${diffDays} dias.`)
+        }));
+      }
+    }
+  }, [headerData.date, headerData.expiry_date]);
 
   const addLineItem = () => {
     setItems([

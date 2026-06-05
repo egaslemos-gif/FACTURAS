@@ -3,6 +3,8 @@
   "short_name": "Proforma360",
   "description": "Crie, gerencie e partilhe proformas profissionais. Dados guardados no seu Google Drive (BYOS).",
   "start_url": "/dashboard",
+  "scope": "/",
+  "id": "/dashboard",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#004ac6",

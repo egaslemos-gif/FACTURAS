@@ -63,17 +63,40 @@ const withPWA = require("next-pwa")({
       },
     },
     {
-      urlPattern: /.*/i,
+      // App Shell / Dashboard - StaleWhileRevalidate for instant Cold Boot offline.
+      // This guarantees the shell loads immediately from cache, and updates in the background.
+      urlPattern: /^https?:\/\/[^/]+\/dashboard.*/i,
       handler: 'StaleWhileRevalidate',
       options: {
-        cacheName: 'others',
+        cacheName: 'dashboard-pages',
         expiration: {
-          maxEntries: 32,
+          maxEntries: 100,
+          maxAgeSeconds: 30 * 24 * 60 * 60, // 30 dias para garantir sobrevivência
+        },
+        matchOptions: {
+          ignoreSearch: true,
+        },
+      },
+    },
+    {
+      urlPattern: /.*/i,
+      handler: 'NetworkFirst',
+      options: {
+        cacheName: 'others',
+        networkTimeoutSeconds: 3,
+        expiration: {
+          maxEntries: 64,
           maxAgeSeconds: 24 * 60 * 60, // 1 dia
         },
       },
     },
   ],
+  // Em vez de forçar o utilizador para /offline sempre que a rede falhar num refresh agressivo,
+  // mantemos apenas fallback mínimo, permitindo Graceful Degradation via App Router (client-side).
+  // A UI offline "Graceful" passa a ser gerida pelo React via Zustand store.
+  fallbacks: {
+    // document: '/offline', // Desativado para evitar redirecionamento abrupto; client router lida melhor.
+  },
 });
 
 const buildVersion = `build_${new Date().toISOString().replace(/[-:T]/g, '').slice(0, 12)}`;
