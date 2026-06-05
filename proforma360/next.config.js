@@ -91,11 +91,10 @@ const withPWA = require("next-pwa")({
       },
     },
   ],
-  // Em vez de forçar o utilizador para /offline sempre que a rede falhar num refresh agressivo,
-  // mantemos apenas fallback mínimo, permitindo Graceful Degradation via App Router (client-side).
-  // A UI offline "Graceful" passa a ser gerida pelo React via Zustand store.
+  // Mantemos o fallback document para cenários de Cold Boot onde a cache da página falha.
+  // Isto impede que o Android mostre o ecrã nativo genérico "You're offline".
   fallbacks: {
-    // document: '/offline', // Desativado para evitar redirecionamento abrupto; client router lida melhor.
+    document: '/offline.html',
   },
 });
 
