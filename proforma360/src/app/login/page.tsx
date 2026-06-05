@@ -6,16 +6,52 @@ import { useEffect, useState } from "react";
 import { FileText } from "lucide-react";
 import Link from "next/link";
 
+const testimonials = [
+  {
+    quote: "A gestão de proformas ficou muito mais intuitiva e ágil. O suporte offline é uma viragem de jogo para a nossa equipa no terreno.",
+    name: "Canísio Arsénio",
+    role: "CA Serviços e Consultoria Informatica"
+  },
+  {
+    quote: "Finalmente uma ferramenta que entende a dinâmica do nosso negócio. A integração direta com o nosso Google Drive simplifica tudo.",
+    name: "Roberto Carimo",
+    role: "Nova Informatica"
+  },
+  {
+    quote: "O Proforma360 elevou o nível de profissionalismo das nossas propostas. A rapidez com que as enviamos agora é o nosso maior diferencial.",
+    name: "Egas Lemos",
+    role: "CyberCode360"
+  },
+  {
+    quote: "A clareza dos PDFs e a facilidade de criar propostas complexas poupa-nos horas de trabalho administrativo todas as semanas. Essencial!",
+    name: "Leonardo Sozinho",
+    role: "Portoquimica EI"
+  },
+  {
+    quote: "A resiliência offline garante que a nossa operação nunca para. Emitimos propostas de qualquer lado, independentemente da internet.",
+    name: "Prosperino Rodrigues",
+    role: "Titanium"
+  }
+];
+
 export default function LoginPage() {
   const { status } = useSession();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const [currentTestimonialIndex, setCurrentTestimonialIndex] = useState(0);
 
   useEffect(() => {
     if (status === "authenticated") {
       router.push("/dashboard");
     }
   }, [status, router]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentTestimonialIndex((prev) => (prev + 1) % testimonials.length);
+    }, 8000); // 8 segundos por slide (rotação razoavelmente lenta)
+    return () => clearInterval(interval);
+  }, []);
 
   const handleGoogleLogin = async () => {
     setIsLoading(true);
@@ -54,19 +90,45 @@ export default function LoginPage() {
           <span className="text-2xl font-bold tracking-tight">Proforma360</span>
         </Link>
 
-        <div className="relative z-10 max-w-lg mb-10">
+        <div className="relative z-10 max-w-lg mb-10 min-h-[300px] flex flex-col justify-end">
           <div className="text-[var(--color-primary)] text-6xl font-serif leading-none mb-4">"</div>
-          <p className="text-2xl font-medium leading-relaxed mb-8">
-            "O Proforma360 transformou fundamentalmente as nossas operações financeiras. A velocidade e clareza que traz aos fluxos de trabalho de faturação são incomparáveis no espaço corporativo."
-          </p>
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-gray-700 rounded-full overflow-hidden flex-shrink-0">
-              <img src="https://ui-avatars.com/api/?name=Alexander+Vance&background=1f2937&color=fff" alt="Alexander Vance" className="w-full h-full object-cover" />
-            </div>
-            <div>
-              <div className="font-semibold">Alexander Vance</div>
-              <div className="text-[var(--color-primary-fixed-dim)] text-sm">CFO, Apex Global Logistics</div>
-            </div>
+          <div className="relative w-full h-[220px]">
+            {testimonials.map((t, idx) => (
+              <div 
+                key={idx}
+                className={`absolute inset-0 transition-all duration-1000 ease-in-out flex flex-col ${
+                  idx === currentTestimonialIndex 
+                    ? 'opacity-100 translate-x-0' 
+                    : 'opacity-0 translate-x-8 pointer-events-none'
+                }`}
+              >
+                <p className="text-xl sm:text-2xl font-medium leading-relaxed mb-8 flex-1 italic">
+                  "{t.quote}"
+                </p>
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 bg-gray-700 rounded-full overflow-hidden flex-shrink-0 border-2 border-[var(--color-primary)]">
+                    <img src={`https://ui-avatars.com/api/?name=${encodeURIComponent(t.name)}&background=1f2937&color=fff`} alt={t.name} className="w-full h-full object-cover" />
+                  </div>
+                  <div>
+                    <div className="font-semibold text-lg">{t.name}</div>
+                    <div className="text-[var(--color-primary-fixed-dim)] text-sm">{t.role}</div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+          {/* Dots Indicator */}
+          <div className="flex gap-2 mt-8 z-20">
+            {testimonials.map((_, idx) => (
+              <button 
+                key={idx}
+                onClick={() => setCurrentTestimonialIndex(idx)}
+                className={`h-1.5 rounded-full transition-all duration-500 ${
+                  idx === currentTestimonialIndex ? 'bg-[var(--color-primary)] w-8' : 'bg-white/30 hover:bg-white/50 w-2'
+                }`}
+                aria-label={`Ir para testemunho ${idx + 1}`}
+              />
+            ))}
           </div>
         </div>
       </div>
