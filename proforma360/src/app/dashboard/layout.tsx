@@ -355,6 +355,7 @@ export default function DashboardLayout({
               <Link
                 key={item.name}
                 href={item.href}
+                prefetch={true}
                 className={cn(
                   "flex items-center px-3 py-2.5 rounded-lg transition-all duration-200 group relative",
                   isActive 
@@ -378,6 +379,7 @@ export default function DashboardLayout({
           {isAdmin && (
              <Link
                href="/dashboard/admin"
+               prefetch={true}
                className={cn(
                  "flex items-center px-3 py-2.5 rounded-lg transition-all duration-200 group relative mt-4 border border-teal-100",
                  pathname === '/dashboard/admin' 
@@ -499,16 +501,16 @@ export default function DashboardLayout({
                    <p className="text-sm font-semibold text-[var(--color-on-surface)] truncate">{activeSession?.user?.name}</p>
                    <p className="text-xs text-[var(--color-on-surface-variant)] truncate mt-0.5">{activeSession?.user?.email}</p>
                  </div>
-                 <Link href="/dashboard/pipeline" onClick={() => setIsProfileMenuOpen(false)} className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-[var(--color-on-surface-variant)] hover:bg-[var(--color-surface-container)] hover:text-[var(--color-primary)] transition-colors">
+                 <Link href="/dashboard/pipeline" prefetch={true} onClick={() => setIsProfileMenuOpen(false)} className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-[var(--color-on-surface-variant)] hover:bg-[var(--color-surface-container)] hover:text-[var(--color-primary)] transition-colors">
                    <Kanban className="w-4 h-4" /> Pipeline
                  </Link>
-                 <Link href="/dashboard/subscription" onClick={() => setIsProfileMenuOpen(false)} className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-[var(--color-on-surface-variant)] hover:bg-[var(--color-surface-container)] hover:text-[var(--color-primary)] transition-colors">
+                 <Link href="/dashboard/subscription" prefetch={true} onClick={() => setIsProfileMenuOpen(false)} className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-[var(--color-on-surface-variant)] hover:bg-[var(--color-surface-container)] hover:text-[var(--color-primary)] transition-colors">
                    <CreditCard className="w-4 h-4" /> Planos & Subscrição
                  </Link>
-                 <Link href="/dashboard/company" onClick={() => setIsProfileMenuOpen(false)} className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-[var(--color-on-surface-variant)] hover:bg-[var(--color-surface-container)] hover:text-[var(--color-primary)] transition-colors">
+                 <Link href="/dashboard/company" prefetch={true} onClick={() => setIsProfileMenuOpen(false)} className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-[var(--color-on-surface-variant)] hover:bg-[var(--color-surface-container)] hover:text-[var(--color-primary)] transition-colors">
                    <Building2 className="w-4 h-4" /> Perfil da Empresa
                  </Link>
-                 <Link href="/dashboard/settings" onClick={() => setIsProfileMenuOpen(false)} className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-[var(--color-on-surface-variant)] hover:bg-[var(--color-surface-container)] hover:text-[var(--color-primary)] transition-colors">
+                 <Link href="/dashboard/settings" prefetch={true} onClick={() => setIsProfileMenuOpen(false)} className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-[var(--color-on-surface-variant)] hover:bg-[var(--color-surface-container)] hover:text-[var(--color-primary)] transition-colors">
                    <Settings className="w-4 h-4" /> Definições
                  </Link>
                  <button onClick={() => { setIsShareAppModalOpen(true); setIsProfileMenuOpen(false); }} className="flex items-center w-full text-left gap-3 px-4 py-3 text-sm font-medium text-[var(--color-on-surface-variant)] hover:bg-[var(--color-surface-container)] hover:text-emerald-600 transition-colors">
@@ -608,6 +610,7 @@ export default function DashboardLayout({
           <div className="flex items-center gap-5">
              <Link
                href="/dashboard/quotations/new"
+               prefetch={true}
                className="hidden lg:flex items-center gap-2 px-5 py-2.5 bg-[var(--color-primary)] text-white rounded-md font-medium hover:bg-[#003ea8] transition-colors elevation-1 shadow-sm"
              >
                <Plus className="w-4 h-4" />
@@ -708,13 +711,13 @@ export default function DashboardLayout({
                         <p className="text-sm font-semibold text-[var(--color-on-surface)] truncate">{activeSession?.user?.name}</p>
                         <p className="text-xs text-[var(--color-on-surface-variant)] truncate mt-0.5">{activeSession?.user?.email}</p>
                       </div>
-                      <Link href="/dashboard/company" onClick={() => setIsProfileMenuOpen(false)} className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-[var(--color-on-surface-variant)] hover:bg-[var(--color-surface-container)] hover:text-[var(--color-primary)] transition-colors">
+                      <Link href="/dashboard/company" prefetch={true} onClick={() => setIsProfileMenuOpen(false)} className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-[var(--color-on-surface-variant)] hover:bg-[var(--color-surface-container)] hover:text-[var(--color-primary)] transition-colors">
                         <Building2 className="w-4 h-4" /> Perfil da Empresa
                       </Link>
                       <button onClick={() => { setIsShareAppModalOpen(true); setIsProfileMenuOpen(false); }} className="flex items-center w-full text-left gap-3 px-4 py-3 text-sm font-medium text-[var(--color-on-surface-variant)] hover:bg-[var(--color-surface-container)] hover:text-emerald-600 transition-colors">
                         <Share2 className="w-4 h-4" /> Partilhar Proforma360
                       </button>
-                      <Link href="/dashboard/settings" onClick={() => setIsProfileMenuOpen(false)} className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-[var(--color-on-surface-variant)] hover:bg-[var(--color-surface-container)] hover:text-[var(--color-primary)] transition-colors">
+                      <Link href="/dashboard/settings" prefetch={true} onClick={() => setIsProfileMenuOpen(false)} className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-[var(--color-on-surface-variant)] hover:bg-[var(--color-surface-container)] hover:text-[var(--color-primary)] transition-colors">
                         <Settings className="w-4 h-4" /> Definições
                       </Link>
                       <div className="border-t border-[var(--color-outline-variant)]"></div>
@@ -743,6 +746,7 @@ export default function DashboardLayout({
               <Link
                 key={item.name}
                 href={item.href}
+                prefetch={true}
                 className="flex flex-col items-center justify-center w-[20%] h-full relative group touch-target"
               >
                 <div className={cn(
@@ -778,6 +782,7 @@ export default function DashboardLayout({
               <Link
                 key={item.name}
                 href={item.href}
+                prefetch={true}
                 className="flex flex-col items-center justify-center w-[20%] h-full relative group touch-target"
               >
                 <div className={cn(
