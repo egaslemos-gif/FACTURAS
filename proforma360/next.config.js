@@ -1,97 +1,51 @@
-const withPWA = require("next-pwa")({
+const withPWA = require("@ducanh2912/next-pwa").default({
   dest: "public",
   disable: process.env.NODE_ENV === "development",
   register: true,
   skipWaiting: false, // Controlado manualmente pelo versionGuard e UpdateBanner
   publicExcludes: ['!**/*.wasm'], // Manter WASM do sql.js
   cleanupOutdatedCaches: true, // Forçar limpeza de caches antigos para evitar storage eviction
+  cacheOnFrontEndNav: true,
+  aggressiveFrontEndNavCaching: true,
+  extendDefaultRuntimeCaching: true,
   runtimeCaching: [
     {
-      urlPattern: /^https:\/\/fonts\.(?:googleapis|gstatic)\.com\/.*/i,
-      handler: 'CacheFirst',
+      urlPattern: /\/api\/auth\/.*$/i,
+      handler: 'NetworkOnly',
       options: {
-        cacheName: 'google-fonts',
-        expiration: {
-          maxEntries: 4,
-          maxAgeSeconds: 365 * 24 * 60 * 60, // 1 ano
-        },
-      },
+        cacheName: 'auth-network-only',
+      }
     },
     {
-      urlPattern: /\.(?:eot|otf|ttc|ttf|woff|woff2|font.css)$/i,
-      handler: 'CacheFirst',
+      urlPattern: /\/api\/sync\/.*$/i,
+      handler: 'NetworkOnly',
       options: {
-        cacheName: 'static-font-assets',
-        expiration: {
-          maxEntries: 4,
-          maxAgeSeconds: 7 * 24 * 60 * 60, // 7 dias
-        },
-      },
+        cacheName: 'sync-queue',
+        backgroundSync: {
+          name: 'proforma360-sync-queue',
+          options: {
+            maxRetentionTime: 24 * 60 // 24 hours
+          }
+        }
+      }
     },
     {
-      urlPattern: /\.(?:jpg|jpeg|gif|png|svg|ico|webp)$/i,
-      handler: 'CacheFirst',
-      options: {
-        cacheName: 'static-image-assets',
-        expiration: {
-          maxEntries: 64,
-          maxAgeSeconds: 30 * 24 * 60 * 60, // 30 dias
-        },
-      },
-    },
-    {
-      urlPattern: /\/_next\/static\/.*/i,
-      handler: 'CacheFirst',
-      options: {
-        cacheName: 'next-static-assets',
-        expiration: {
-          maxEntries: 100,
-          maxAgeSeconds: 30 * 24 * 60 * 60, // 30 dias
-        },
-      },
-    },
-    {
+      // Fallback para rotas dinâmicas
       urlPattern: /\/api\/.*$/i,
       handler: 'NetworkFirst',
       options: {
-        cacheName: 'apis',
-        networkTimeoutSeconds: 5, // Falha rapidamente se a rede estiver morta/degradada
+        cacheName: 'api-cache',
         expiration: {
-          maxEntries: 32,
-          maxAgeSeconds: 24 * 60 * 60, // 1 dia
+          maxEntries: 50,
+          maxAgeSeconds: 24 * 60 * 60, // 24 hours
         },
-      },
-    },
-    {
-      // App Shell / Dashboard - StaleWhileRevalidate for instant Cold Boot offline.
-      // This guarantees the shell loads immediately from cache, and updates in the background.
-      urlPattern: /^https?:\/\/[^/]+\/dashboard.*/i,
-      handler: 'StaleWhileRevalidate',
-      options: {
-        cacheName: 'dashboard-pages',
-        expiration: {
-          maxEntries: 100,
-          maxAgeSeconds: 30 * 24 * 60 * 60, // 30 dias para garantir sobrevivência
-        },
-      },
-    },
-    {
-      urlPattern: /.*/i,
-      handler: 'NetworkFirst',
-      options: {
-        cacheName: 'others',
-        networkTimeoutSeconds: 3,
-        expiration: {
-          maxEntries: 64,
-          maxAgeSeconds: 24 * 60 * 60, // 1 dia
-        },
-      },
-    },
+      }
+    }
   ],
   // Mantemos o fallback document para cenários de Cold Boot onde a cache da página falha.
   // Isto impede que o Android mostre o ecrã nativo genérico "You're offline".
   fallbacks: {
-    document: '/offline.html',
+    document: '/offline-shell.html',
   },
 });
 
