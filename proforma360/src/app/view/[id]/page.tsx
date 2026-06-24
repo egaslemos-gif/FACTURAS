@@ -173,7 +173,9 @@ function MinimalTemplate({ quotation, client, company, items, diffDays, isExpiri
       
       {company.show_branding !== false && (
         <div className="p-8 text-center border-t border-slate-100 print:hidden">
-          <p className="text-slate-400 text-xs font-medium tracking-wide">Generated with Proforma360 • Commercial Operating Workspace</p>
+          <a href="https://proforma360.vercel.app" target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-indigo-600 transition-colors text-xs font-medium tracking-wide">
+            Generated with Proforma360 • Commercial Operating Workspace
+          </a>
         </div>
       )}
     </div>
@@ -295,8 +297,10 @@ function ModernTemplate({ quotation, client, company, items, diffDays, isExpirin
       </div>
       
       {company.show_branding !== false && (
-        <div className="p-6 text-center border-t border-slate-100 print:hidden bg-slate-50">
-          <p className="text-slate-500 text-xs font-semibold tracking-wide">Generated with Proforma360 • Commercial Operating Workspace</p>
+        <div className="p-4 text-center border-t border-slate-100 print:hidden bg-slate-50 mt-auto">
+          <a href="https://proforma360.vercel.app" target="_blank" rel="noopener noreferrer" className="text-slate-500 hover:text-indigo-600 transition-colors text-[10px] font-semibold tracking-wide uppercase">
+            Powered by Proforma360
+          </a>
         </div>
       )}
     </div>
@@ -422,7 +426,9 @@ function CorporateTemplate({ quotation, client, company, items, diffDays, isExpi
       
       {company.show_branding !== false && (
         <div className="bg-slate-900 p-4 text-center print:hidden" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>
-          <p className="text-slate-400 text-[10px] font-semibold tracking-widest uppercase">Powered by Proforma360</p>
+          <a href="https://proforma360.vercel.app" target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-white transition-colors text-[10px] font-semibold tracking-widest uppercase block">
+            Powered by Proforma360
+          </a>
         </div>
       )}
     </div>

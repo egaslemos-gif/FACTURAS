@@ -1,4 +1,4 @@
-import { PDFDocument, rgb, StandardFonts, PDFFont, PDFPage } from "pdf-lib";
+import { PDFDocument, rgb, StandardFonts, PDFFont, PDFPage, PDFString } from "pdf-lib";
 import { Company, Client, Quotation, QuotationItem } from "../types";
 import { formatCurrency, formatDate } from "../utils";
 import QRCode from "qrcode";
@@ -146,14 +146,32 @@ export async function generateQuotationPDF(data: PDFData): Promise<Uint8Array> {
 
     const watermarkText = "Generated with Proforma360 • Commercial Operating Workspace";
     const textWidth = fontRegular.widthOfTextAtSize(watermarkText, 10);
+    const linkX = (width - textWidth) / 2;
+    const linkY = 20;
     
     page.drawText(watermarkText, { 
-      x: (width - textWidth) / 2, 
-      y: 20, 
+      x: linkX, 
+      y: linkY, 
       size: 10, 
       font: fontRegular, 
       color: brandColor 
     });
+
+    const linkAnnotation = pdfDoc.context.register(
+      pdfDoc.context.obj({
+        Type: 'Annot',
+        Subtype: 'Link',
+        Rect: [linkX, linkY - 2, linkX + textWidth, linkY + 10],
+        Border: [0, 0, 0],
+        C: [0, 0, 0],
+        A: {
+          Type: 'Action',
+          S: 'URI',
+          URI: PDFString.of('https://proforma360.vercel.app'),
+        },
+      })
+    );
+    page.node.addAnnot(linkAnnotation);
   }
 
   return await pdfDoc.save();
