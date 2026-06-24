@@ -677,7 +677,7 @@ function renderSignatures(page: PDFPage, width: number, height: number, stampIma
     const finalW = sDims.width * scaleFactor;
     const finalH = sDims.height * scaleFactor;
     page.drawImage(stampImage, {
-      x: sigBlockCenterX - finalW / 2 - 25, // shifted slightly left
+      x: sigBlockCenterX - finalW / 2, // perfectly centered horizontally
       y: lineY - (finalH / 2) + 10, // centered vertically on the line
       width: finalW,
       height: finalH,
@@ -692,7 +692,7 @@ function renderSignatures(page: PDFPage, width: number, height: number, stampIma
     const finalW = sigDims.width * sigScale;
     const finalH = sigDims.height * sigScale;
     page.drawImage(sigImage, {
-      x: sigBlockCenterX - finalW / 2 + 15, // shifted slightly right to overlap stamp
+      x: sigBlockCenterX - finalW / 2, // perfectly centered horizontally
       y: lineY - 5, // base of the signature rests on the line
       width: finalW,
       height: finalH,
