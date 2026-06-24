@@ -548,8 +548,11 @@ export default function DashboardLayout({
       )}>
         <div className="h-16 flex items-center justify-between px-4 border-b border-[var(--color-outline-variant)] shrink-0">
           {!isSidebarCollapsed && (
-            <Link href="/dashboard" className="text-xl font-bold text-[var(--color-primary)] tracking-tight truncate">
-              Proforma360
+            <Link href="/dashboard" className="flex items-center gap-2 hover:opacity-90 transition-opacity truncate">
+              <img src="/icon.svg" alt="Proforma360 Logo" className="w-8 h-8 shadow-sm rounded flex-shrink-0" />
+              <span className="text-xl font-bold text-[var(--color-primary)] tracking-tight truncate">
+                Proforma360
+              </span>
             </Link>
           )}
           <button 
@@ -715,6 +718,7 @@ export default function DashboardLayout({
         isScrolled ? "shadow-soft border-b border-transparent" : "border-b border-gray-100"
       )}>
         <div className="flex items-center gap-2">
+          <img src="/icon.svg" alt="Proforma360 Logo" className="w-7 h-7 shadow-sm rounded flex-shrink-0" />
           <div className="text-lg font-bold text-[var(--color-primary)]">Proforma360</div>
           {isOffline && (
             <div className="flex items-center gap-1 px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full text-xs font-medium" title="A funcionar offline">
