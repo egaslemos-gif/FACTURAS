@@ -36,7 +36,7 @@ import {
 import ShareAppModal from "@/components/ShareAppModal";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import { useSyncStore, useClientsStore, useProductsStore, useQuotationsStore } from "@/stores";
+import { useSyncStore, useClientsStore, useProductsStore, useQuotationsStore, useCompanyStore } from "@/stores";
 import { dbClient } from "@/lib/db/client";
 import { PWAInstallPrompt } from "@/components/PWAInstallPrompt";
 import { useNetworkStatus } from "@/hooks/useNetworkStatus";
@@ -169,7 +169,7 @@ export default function DashboardLayout({
     });
   }, []);
 
-  const { businessProfile, fetchSettings } = useAppSettingsStore();
+  const { businessProfile, fetchSettings, isLoading: isSettingsLoading } = useAppSettingsStore();
   const semanticProfile = getSemanticProfile(businessProfile);
 
   useEffect(() => {
@@ -430,8 +430,8 @@ export default function DashboardLayout({
 
   const results = searchResults();
 
-  // Enforce Hydration Governance: DO NOT render children before RUNTIME_READY
-  if (!runtimeReady) {
+  // Enforce Hydration Governance: DO NOT render children before RUNTIME_READY and Settings loaded
+  if (!runtimeReady || isSettingsLoading) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-[var(--color-surface-container-lowest)]">
         <div className="w-12 h-12 border-4 border-[var(--color-primary)] border-t-transparent rounded-full animate-spin mb-4"></div>
@@ -476,6 +476,8 @@ export default function DashboardLayout({
           useQuotationsStore.setState({ quotations: [], currentDetail: null });
           useClientsStore.setState({ clients: [] });
           useProductsStore.setState({ products: [] });
+          useAppSettingsStore.getState().reset();
+          useCompanyStore.getState().reset();
 
           // Clear local states and in-memory tenant hash
           await runtimeOwnership.runtimeTeardown(true);
@@ -490,16 +492,13 @@ export default function DashboardLayout({
         new Promise(resolve => setTimeout(resolve, 2000))
       ]);
       
-      // Perform NextAuth signout independent of IDB race condition
+      // Perform NextAuth signout with server redirect to guarantee cookie wipe
       try {
-        await signOut({ redirect: false });
+        await signOut({ callbackUrl: "/" });
       } catch (e) {
         console.error("Network error during NextAuth signout:", e);
+        window.location.href = "/";
       }
-
-      
-      // Navigation is handled manually to prevent loops
-      window.location.href = "/";
     } catch (error) {
       console.error("Erro no logout:", error);
       // Fallback

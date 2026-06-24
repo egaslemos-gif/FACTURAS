@@ -150,7 +150,7 @@ export default function DashboardHome() {
       {/* 1. Control Center Header */}
       <div className="mb-6 flex flex-col md:flex-row md:items-end md:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-black tracking-tight text-slate-900">
+          <h1 className="text-2xl font-bold tracking-tight text-slate-800">
             Control Center
           </h1>
           <p className="text-sm font-medium text-slate-500 mt-1">
@@ -178,7 +178,7 @@ export default function DashboardHome() {
 
           <Link 
             href="/dashboard/quotations/new" 
-            className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-sm font-semibold shadow-sm transition-all"
+            className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg text-sm font-semibold shadow-sm transition-all"
           >
             <Plus className="w-4 h-4" /> <span className="hidden sm:inline">Nova Proforma</span>
           </Link>
@@ -205,9 +205,9 @@ export default function DashboardHome() {
           
           <div className="flex items-center gap-2 mb-2">
              <Sparkles className="w-5 h-5 text-[var(--severity-critical)]" />
-             <h2 className="text-lg font-black text-slate-900">Atenção Comercial AGORA</h2>
+             <h2 className="text-lg font-bold text-slate-800">Atenção Comercial AGORA</h2>
              {allAlerts.length > 0 && (
-                <span className="bg-[var(--severity-critical-bg)] text-[var(--severity-critical)] text-xs font-black px-2 py-0.5 rounded-full shrink-0">
+                <span className="bg-[var(--severity-critical-bg)] text-[var(--severity-critical)] text-xs font-bold px-2 py-0.5 rounded-full shrink-0">
                   {allAlerts.length} pendentes
                 </span>
              )}
@@ -232,7 +232,7 @@ export default function DashboardHome() {
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2 mb-1.5 flex-wrap">
                           <span className={cn(
-                            "text-[9px] font-black uppercase px-2 py-0.5 rounded-md",
+                            "text-[10px] font-bold uppercase px-2 py-0.5 rounded-md",
                             alert.priority === "urgent" || alert.priority === "high" ? "bg-[var(--severity-critical-bg)] text-[var(--severity-critical)]" : "bg-[var(--severity-attention-bg)] text-[var(--severity-attention)]"
                           )}>
                             {alert.type.replace(/_/g, " ")}
@@ -246,8 +246,8 @@ export default function DashboardHome() {
                           </span>
                         </div>
                         <p className={cn(
-                          "text-sm font-semibold leading-tight",
-                          alert.priority === "urgent" || alert.priority === "high" ? "text-red-900" : "text-slate-900"
+                          "text-sm font-medium leading-relaxed mt-1",
+                          alert.priority === "urgent" || alert.priority === "high" ? "text-red-800" : "text-slate-800"
                         )}>
                           {alert.message}
                         </p>
@@ -312,7 +312,7 @@ export default function DashboardHome() {
                     >
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2 mb-1">
-                          <span className="bg-teal-50 text-teal-700 text-[9px] font-black uppercase px-2 py-0.5 rounded-md">
+                          <span className="bg-teal-50 text-teal-700 text-[10px] font-bold uppercase px-2 py-0.5 rounded-md">
                             Hoje {q.next_action_time || ""}
                           </span>
                           <span className="font-mono text-xs font-semibold text-[var(--text-muted)]">{q.quotation_number}</span>
@@ -361,10 +361,10 @@ export default function DashboardHome() {
                       className="bg-white border border-slate-200 hover:border-teal-300 hover:shadow-md rounded-xl p-4 transition-all block group"
                     >
                       <div className="flex justify-between items-start mb-2">
-                        <span className="bg-red-50 text-red-600 text-[9px] font-black uppercase px-2 py-0.5 rounded-md">
+                        <span className="bg-red-50 text-red-600 text-[10px] font-bold uppercase px-2 py-0.5 rounded-md">
                           {q.priority}
                         </span>
-                        <span className="text-sm font-black text-[var(--text-primary)] group-hover:text-teal-700">{formatCurrency(q.grand_total)}</span>
+                        <span className="text-sm font-bold text-[var(--text-primary)] group-hover:text-teal-700">{formatCurrency(q.grand_total)}</span>
                       </div>
                       <p className="text-xs font-bold text-[var(--text-secondary)] truncate mb-1">{q.quotation_number} • {q.client_name}</p>
                       <p className="text-sm font-semibold text-[var(--text-primary)] truncate">
@@ -382,7 +382,7 @@ export default function DashboardHome() {
                 <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm border border-teal-100">
                   <Check className="w-8 h-8 text-teal-500" />
                 </div>
-                <h3 className="text-lg font-black text-teal-900 mb-2">Tudo em Dia!</h3>
+                <h3 className="text-lg font-bold text-teal-800 mb-2">Tudo em Dia!</h3>
                 <p className="text-sm text-teal-700 font-medium">O seu pipeline não exige atenção crítica neste momento. Excelente trabalho.</p>
               </div>
             )}
@@ -404,8 +404,8 @@ export default function DashboardHome() {
                     <BarChart3 className="w-5 h-5 text-teal-600" />
                   </div>
                   <div>
-                    <div className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-0.5">Total Pipeline</div>
-                    <div className="text-lg font-black text-[var(--text-primary)]">{formatCurrency(metrics.totalPipeline)}</div>
+                    <div className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wide mb-0.5">Total Pipeline</div>
+                    <div className="text-lg font-bold text-[var(--text-primary)]">{formatCurrency(metrics.totalPipeline)}</div>
                     <div className="text-[10px] font-bold text-[var(--text-secondary)] mt-0.5">{activeDeals.length} negócios ativos</div>
                   </div>
                 </div>
@@ -415,8 +415,8 @@ export default function DashboardHome() {
                     <Send className="w-5 h-5 text-blue-600" />
                   </div>
                   <div>
-                    <div className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-0.5">A Aguardar Feedback</div>
-                    <div className="text-lg font-black text-[var(--text-primary)]">{quotations.filter(q => q.status === "sent").length} proformas</div>
+                    <div className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wide mb-0.5">A Aguardar Feedback</div>
+                    <div className="text-lg font-bold text-[var(--text-primary)]">{quotations.filter(q => q.status === "sent").length} proformas</div>
                   </div>
                 </div>
              </div>

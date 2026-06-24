@@ -177,11 +177,11 @@ export default function EditQuotationPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!headerData.client_id) {
-      toast.error("Por favor, selecione um cliente.");
+      toast.error(`Por favor, selecione um ${profile.clientLabel.toLowerCase()}.`);
       return;
     }
     if (items.length === 0) {
-      toast.error("Por favor, adicione pelo menos um item à proforma.");
+      toast.error(`Por favor, adicione pelo menos um ${profile.itemLabel.toLowerCase()} à ${profile.quotationLabel.toLowerCase()}.`);
       return;
     }
 

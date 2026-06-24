@@ -8,6 +8,7 @@ interface CompanyState {
   error: string | null;
   fetchCompany: () => Promise<void>;
   updateCompany: (data: Partial<Company>) => Promise<void>;
+  reset: () => void;
 }
 
 export const useCompanyStore = create<CompanyState>((set) => ({
@@ -34,5 +35,9 @@ export const useCompanyStore = create<CompanyState>((set) => ({
       set({ error: (error as Error).message, isLoading: false });
       throw error;
     }
+  },
+
+  reset: () => {
+    set({ company: null, error: null, isLoading: false });
   },
 }));

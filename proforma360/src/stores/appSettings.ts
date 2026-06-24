@@ -6,11 +6,12 @@ interface AppSettingsState {
   isLoading: boolean;
   fetchSettings: () => Promise<void>;
   updateBusinessProfile: (profile: string) => Promise<void>;
+  reset: () => void;
 }
 
 export const useAppSettingsStore = create<AppSettingsState>((set) => ({
   businessProfile: "GENERAL",
-  isLoading: false,
+  isLoading: true,
 
   fetchSettings: async () => {
     set({ isLoading: true });
@@ -33,5 +34,9 @@ export const useAppSettingsStore = create<AppSettingsState>((set) => ({
       set({ isLoading: false });
       throw error;
     }
+  },
+
+  reset: () => {
+    set({ businessProfile: "GENERAL", isLoading: false });
   },
 }));

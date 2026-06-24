@@ -247,7 +247,7 @@ export default function ClientDetailsPage() {
             <ArrowLeft className="w-6 h-6" />
           </Link>
           <div>
-            <h1 className="text-2xl font-black text-slate-900 leading-tight">{client.name}</h1>
+            <h1 className="text-2xl font-bold text-slate-800 leading-tight">{client.name}</h1>
             <div className="flex items-center gap-2 mt-1">
               <span className={cn("px-2 py-0.5 rounded-full text-xs font-black uppercase tracking-wider", 
                 client.status === "active" ? "bg-emerald-50 text-emerald-700 border border-emerald-200" :
@@ -284,16 +284,16 @@ export default function ClientDetailsPage() {
       </div>
 
       {/* QUICK COMMUNICATION HUB COMPANION */}
-      <div className="bg-slate-950 text-white rounded-xl p-4 mb-6 flex flex-wrap items-center justify-between gap-4 shadow-md">
+      <div className="bg-teal-50 border border-teal-100 text-teal-900 rounded-xl p-4 mb-6 flex flex-wrap items-center justify-between gap-4 shadow-sm">
         <div className="flex items-center gap-2">
-          <span className="text-xs font-black uppercase tracking-wider text-teal-400">Companion de Comunicação</span>
+          <span className="text-xs font-bold uppercase tracking-wide text-teal-800">Companion de Comunicação</span>
         </div>
         <div className="flex flex-wrap gap-2">
           {client.phone && (
             <>
               <a 
                 href={`tel:${client.phone}`}
-                className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-white/10 hover:bg-white/20 text-white text-xs font-bold rounded-lg transition-colors"
+                className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-white hover:bg-teal-100 text-teal-800 border border-teal-200 text-xs font-bold rounded-lg transition-colors"
               >
                 <Phone className="w-3.5 h-3.5" /> Ligar
               </a>
@@ -302,7 +302,7 @@ export default function ClientDetailsPage() {
               <div className="relative">
                 <button 
                   onClick={() => setWhatsappTemplateOpen(!whatsappTemplateOpen)}
-                  className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg transition-colors"
+                  className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold rounded-lg transition-colors"
                 >
                   <MessageCircle className="w-3.5 h-3.5" /> WhatsApp <ChevronDown className="w-3 h-3" />
                 </button>
@@ -329,7 +329,7 @@ export default function ClientDetailsPage() {
             <div className="relative">
               <button 
                 onClick={() => setEmailTemplateOpen(!emailTemplateOpen)}
-                className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-white/10 hover:bg-white/20 text-white text-xs font-bold rounded-lg transition-colors"
+                className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-white hover:bg-teal-100 text-teal-800 border border-teal-200 text-xs font-bold rounded-lg transition-colors"
               >
                 <Mail className="w-3.5 h-3.5" /> Email <ChevronDown className="w-3 h-3" />
               </button>
@@ -366,8 +366,8 @@ export default function ClientDetailsPage() {
           <div className="flex items-start gap-2.5">
             <Sparkles className="w-5 h-5 text-teal-600 shrink-0 mt-0.5" />
             <div>
-              <p className="text-sm font-bold text-teal-900">Sugestões do Assistente CRM</p>
-              <p className="text-xs text-teal-700">Ações recomendadas com base na inatividade comercial.</p>
+              <p className="text-sm font-bold text-teal-800">Sugestões do Assistente CRM</p>
+              <p className="text-xs text-teal-700 mt-0.5">Ações recomendadas com base na inatividade comercial.</p>
             </div>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -426,18 +426,18 @@ export default function ClientDetailsPage() {
           {/* Top Analytical Cards */}
           <div className="lg:col-span-3 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
             <div className="bg-white p-5 rounded-xl border border-slate-150 shadow-sm">
-              <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Total de Proformas</h3>
-              <p className="text-2xl font-black text-slate-900">{stats.totalQuotations}</p>
+              <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wide mb-2">Total de Proformas</h3>
+              <p className="text-2xl font-bold text-slate-800">{stats.totalQuotations}</p>
             </div>
             
             <div className="bg-white p-5 rounded-xl border border-slate-150 shadow-sm">
-              <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Valor de Negociação</h3>
-              <p className="text-2xl font-black text-slate-900">{formatCurrency(stats.totalValue)}</p>
+              <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wide mb-2">Valor de Negociação</h3>
+              <p className="text-2xl font-bold text-slate-800">{formatCurrency(stats.totalValue)}</p>
             </div>
 
             <div className="bg-white p-5 rounded-xl border border-slate-150 shadow-sm">
-              <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Lifetime Value (LTV)</h3>
-              <p className="text-2xl font-black text-emerald-600">
+              <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wide mb-2">Lifetime Value (LTV)</h3>
+              <p className="text-2xl font-bold text-emerald-600">
                 {relationshipMetrics ? formatCurrency(relationshipMetrics.ltv) : "0,00 MTn"}
               </p>
             </div>
@@ -485,11 +485,11 @@ export default function ClientDetailsPage() {
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                   <div className="bg-slate-50 p-3 rounded-lg text-center">
                     <p className="text-[10px] font-bold text-slate-400 uppercase">Visualizações Proforma</p>
-                    <p className="text-lg font-black text-slate-900 mt-1">{engageMetrics.viewsCount}</p>
+                    <p className="text-lg font-bold text-slate-800 mt-1">{engageMetrics.viewsCount}</p>
                   </div>
                   <div className="bg-slate-50 p-3 rounded-lg text-center">
                     <p className="text-[10px] font-bold text-slate-400 uppercase">Downloads de PDF</p>
-                    <p className="text-lg font-black text-slate-900 mt-1">{engageMetrics.downloadsCount}</p>
+                    <p className="text-lg font-bold text-slate-800 mt-1">{engageMetrics.downloadsCount}</p>
                   </div>
                   <div className="bg-slate-50 p-3 rounded-lg text-center col-span-2 md:col-span-1">
                     <p className="text-[10px] font-bold text-slate-400 uppercase">Estado Geral</p>
