@@ -479,8 +479,8 @@ export default function DashboardLayout({
 
           // Clear local states and in-memory tenant hash
           await runtimeOwnership.runtimeTeardown(true);
-          // Sign out using NextAuth and explicitly return to landing page
-          await signOut({ callbackUrl: "/" });
+          // Sign out using NextAuth without auto redirect
+          await signOut({ redirect: false });
         } catch (e) {
           console.error("Cleanup error:", e);
         }
@@ -492,7 +492,8 @@ export default function DashboardLayout({
         new Promise(resolve => setTimeout(resolve, 2000))
       ]);
       
-      // Navigation is handled by signOut callbackUrl
+      // Navigation is handled manually to prevent loops
+      window.location.href = "/";
     } catch (error) {
       console.error("Erro no logout:", error);
       // Fallback
