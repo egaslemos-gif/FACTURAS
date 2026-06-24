@@ -149,14 +149,13 @@ export default function QuotationDetailPage() {
             <Send className="w-5 h-5" />
           </button>
 
-          <a 
-            href={`/api/view/${quotation.id}`} 
-            target="_blank" 
+          <Link 
+            href={`/dashboard/pdf-preview/${quotation.id}`} 
             title="Imprimir / PDF"
             className="flex items-center justify-center p-2.5 border border-gray-300 bg-white hover:bg-gray-50 text-gray-700 rounded-lg transition-colors shrink-0"
           >
             <Printer className="w-5 h-5" />
-          </a>
+          </Link>
 
           <button 
             onClick={handleDuplicate}
@@ -264,9 +263,9 @@ export default function QuotationDetailPage() {
         <button onClick={() => setIsShareModalOpen(true)} className="flex items-center justify-center p-3 border border-slate-200 bg-slate-50 text-slate-700 rounded-xl">
           <Send className="w-5 h-5" />
         </button>
-        <a href={`/api/view/${quotation.id}`} target="_blank" className="flex items-center justify-center p-3 border border-slate-200 bg-slate-50 text-slate-700 rounded-xl">
+        <Link href={`/dashboard/pdf-preview/${quotation.id}`} className="flex items-center justify-center p-3 border border-slate-200 bg-slate-50 text-slate-700 rounded-xl">
           <Printer className="w-5 h-5" />
-        </a>
+        </Link>
       </div>
 
       <div className="flex flex-col gap-8">

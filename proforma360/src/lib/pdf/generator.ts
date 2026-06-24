@@ -646,20 +646,7 @@ function renderSignatures(page: PDFPage, width: number, height: number, stampIma
     });
   }
 
-  // Determinism Signatures
-  let sigY = bottomY - 15;
-  const sigColor = rgb(0.6, 0.6, 0.6); // light gray
-  if (quotation.semantic_schema_signature) {
-    page.drawText(`Schema Sig: ${quotation.semantic_schema_signature.substring(0, 12)}`, { x: 50, y: sigY, size: 6, font: fontRegular, color: sigColor });
-    sigY -= 8;
-  }
-  if (quotation.execution_plan_signature) {
-    page.drawText(`Exec Plan: ${quotation.execution_plan_signature.substring(0, 12)}`, { x: 50, y: sigY, size: 6, font: fontRegular, color: sigColor });
-    sigY -= 8;
-  }
-  if (quotation.totals_ast_signature) {
-    page.drawText(`Totals AST: ${quotation.totals_ast_signature.substring(0, 12)}`, { x: 50, y: sigY, size: 6, font: fontRegular, color: sigColor });
-  }
+  // Determinism Signatures removed per request
 
   if (stampImage) {
     const sDims = stampImage.scale(0.5);
