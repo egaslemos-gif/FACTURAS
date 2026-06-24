@@ -11,9 +11,13 @@ const withPWA = require("@ducanh2912/next-pwa").default({
   runtimeCaching: [
     {
       urlPattern: /\/api\/auth\/.*$/i,
-      handler: 'NetworkOnly',
+      handler: 'StaleWhileRevalidate',
       options: {
-        cacheName: 'auth-network-only',
+        cacheName: 'auth-cache',
+        expiration: {
+          maxEntries: 10,
+          maxAgeSeconds: 24 * 60 * 60 * 30, // 30 days
+        },
       }
     },
     {
