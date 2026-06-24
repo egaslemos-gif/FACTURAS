@@ -102,8 +102,8 @@ function MinimalTemplate({ quotation, client, company, items, diffDays, isExpiri
         </div>
 
         {/* Items Table */}
-        <div className="mb-12 flex-grow">
-            <table className="w-full text-left text-sm">
+        <div className="mb-12 flex-grow overflow-x-auto w-full">
+            <table className="w-full text-left text-sm min-w-[500px]">
                 <thead>
                     <tr>
                         <th className="py-3 border-b border-black text-xs text-gray-400 uppercase tracking-widest font-normal">Descrição</th>
@@ -235,8 +235,8 @@ function ModernTemplate({ quotation, client, company, items, diffDays, isExpirin
               </div>
           </div>
 
-          <div className="mb-10 rounded-xl overflow-hidden border border-slate-200">
-              <table className="w-full text-left text-sm">
+          <div className="mb-10 rounded-xl overflow-x-auto border border-slate-200 w-full">
+              <table className="w-full text-left text-sm min-w-[500px]">
                   <thead className="bg-slate-50" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>
                       <tr>
                           <th className="py-4 px-6 text-xs font-semibold text-slate-500 uppercase">Descrição</th>
@@ -351,8 +351,8 @@ function CorporateTemplate({ quotation, client, company, items, diffDays, isExpi
           </div>
 
           {/* Table */}
-          <div className="mb-10">
-              <table className="w-full text-sm border-collapse">
+          <div className="mb-10 overflow-x-auto w-full">
+              <table className="w-full text-sm border-collapse min-w-[600px]">
                   <thead>
                       <tr className="bg-slate-900 text-white" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>
                           <th className="p-4 text-left font-semibold">Descrição</th>

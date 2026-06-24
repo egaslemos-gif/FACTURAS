@@ -547,7 +547,7 @@ export default function ClientDetailsPage() {
       )}
 
       {activeTab === "quotations" && (
-        <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+        <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-x-auto w-full">
           {clientQuotations.length === 0 ? (
             <div className="p-8 text-center">
               <FileText className="w-12 h-12 text-slate-300 mx-auto mb-3" />
@@ -555,7 +555,7 @@ export default function ClientDetailsPage() {
               <p className="text-xs text-slate-400 mb-4 font-semibold">Este cliente ainda não tem proformas associadas.</p>
             </div>
           ) : (
-            <table className="w-full text-left border-collapse">
+            <table className="w-full text-left border-collapse min-w-[600px]">
               <thead>
                 <tr className="bg-slate-50 text-slate-400 text-[10px] font-black uppercase tracking-wider border-b border-slate-200">
                   <th className="px-6 py-4">Número</th>
