@@ -306,117 +306,123 @@ function ModernTemplate({ quotation, client, company, items, diffDays, isExpirin
 function CorporateTemplate({ quotation, client, company, items, diffDays, isExpiringSoon }: any) {
   return (
     <div className="bg-white border border-slate-200/80 shadow-soft rounded-xl print:shadow-none print:border-none print:rounded-none overflow-hidden font-sans text-gray-800">
-      <div className="p-8 sm:p-10 flex flex-col">
-          <div className="border-b-2 border-gray-800 pb-6 mb-8 flex flex-col sm:flex-row justify-between items-start gap-6">
-              <div className="flex flex-col">
-                  <h1 className="text-4xl font-bold text-gray-900 mb-2 uppercase tracking-wide">Proforma</h1>
-                  <p className="text-sm font-bold text-gray-600">Document No: <span className="font-normal text-gray-900">{quotation.quotation_number}</span></p>
-              </div>
-              <div className="text-left sm:text-right">
+      
+      {/* 1. Solid Dark Slate Header Banner */}
+      <div className="bg-slate-900 text-white p-8 sm:p-12 flex flex-col sm:flex-row justify-between items-start gap-8" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>
+          <div className="flex flex-col max-w-md">
+              <div className="flex items-center gap-4 mb-4">
                   {company.logo_url ? (
-                    <img src={company.logo_url} alt="Logo" className="max-h-12 object-contain mb-2 sm:ml-auto" />
+                    <img src={company.logo_url} alt="Logo" className="max-h-12 object-contain bg-white/10 rounded p-1" />
                   ) : (
-                    <h2 className="text-2xl font-bold text-indigo-900">{company.name}</h2>
+                    <div className="text-3xl font-bold text-white tracking-tight flex items-center gap-2">
+                        <span className="text-slate-400">C/D</span> {company.name}
+                    </div>
                   )}
-                  <p className="text-xs text-gray-600 mt-1 whitespace-pre-wrap">{company.address}</p>
-                  {(company.phone || company.email) && <p className="text-xs text-gray-600">{[company.phone, company.email].filter(Boolean).join(" • ")}</p>}
-                  {company.tax_number && <p className="text-xs text-gray-600">NUIT: {company.tax_number}</p>}
+              </div>
+              
+              {company.tax_number && <p className="text-sm font-bold text-slate-300 mb-1">NUIT: {company.tax_number}</p>}
+              <p className="text-xs text-slate-400 leading-relaxed whitespace-pre-wrap">
+                  {company.address}
+                  {(company.phone || company.email) && ` | ${[company.phone, company.email].filter(Boolean).join(" • ")}`}
+              </p>
+          </div>
+          
+          <div className="flex flex-col sm:text-right">
+              <h1 className="text-3xl sm:text-4xl font-bold text-white mb-4 tracking-wide uppercase">Proforma</h1>
+              <div className="space-y-1 text-sm text-slate-300">
+                  <p>Ref. <span className="font-semibold text-white">{quotation.quotation_number}</span></p>
+                  <p>Emitido em: {formatDate(quotation.date)}</p>
+                  <p>Válido até: {formatDate(quotation.expiry_date)}</p>
               </div>
           </div>
+      </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-              <div className="border border-gray-300 p-4 relative pt-6">
-                  <h3 className="text-xs font-bold bg-gray-100 px-3 py-1.5 absolute top-0 left-0 border-b border-r border-gray-300 uppercase" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>Faturar A</h3>
-                  <p className="font-bold text-sm mt-2">{client?.name || quotation.client_name}</p>
-                  <p className="text-sm whitespace-pre-wrap">{client?.address}</p>
-                  {client?.tax_number && <p className="text-sm mt-2 font-bold">NUIT: <span className="font-normal">{client.tax_number}</span></p>}
-              </div>
-              <div className="border border-gray-300 p-0">
-                  <div className="grid grid-cols-2 text-sm h-full">
-                      <div className="p-3 border-r border-b border-gray-300 bg-gray-50 font-bold" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>Data Emissão:</div>
-                      <div className="p-3 border-b border-gray-300">{formatDate(quotation.date)}</div>
-                      
-                      <div className="p-3 border-r border-b border-gray-300 bg-gray-50 font-bold" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>Válido Até:</div>
-                      <div className="p-3 border-b border-gray-300">{formatDate(quotation.expiry_date)}</div>
-                      
-                      <div className="p-3 border-r border-gray-300 bg-gray-50 font-bold" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>Moeda:</div>
-                      <div className="p-3 border-gray-300">MZN</div>
-                  </div>
-              </div>
+      <div className="p-8 sm:p-12 flex flex-col">
+          {/* Faturar A */}
+          <div className="mb-10 pl-4 border-l-4 border-slate-900" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>
+              <h3 className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Faturar A</h3>
+              <p className="font-bold text-lg text-slate-900">{client?.name || quotation.client_name}</p>
+              <p className="text-sm text-slate-600 mt-1 whitespace-pre-wrap">{client?.address}</p>
+              {client?.tax_number && <p className="text-sm text-slate-600 mt-1 font-semibold">NUIT: {client.tax_number}</p>}
           </div>
 
-          <div className="mb-8">
-              <table className="w-full text-sm border-collapse border border-gray-300">
+          {/* Table */}
+          <div className="mb-10">
+              <table className="w-full text-sm border-collapse">
                   <thead>
-                      <tr className="bg-gray-800 text-white" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>
-                          <th className="border border-gray-300 p-2 text-left">Descrição</th>
-                          <th className="border border-gray-300 p-2 text-center w-16">Qtd</th>
-                          <th className="border border-gray-300 p-2 text-right w-28">Preço Un.</th>
-                          <th className="border border-gray-300 p-2 text-right w-16">IVA</th>
-                          <th className="border border-gray-300 p-2 text-right w-32">Total</th>
+                      <tr className="bg-slate-900 text-white" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>
+                          <th className="p-4 text-left font-semibold">Descrição</th>
+                          <th className="p-4 text-center font-semibold w-16">Qtd</th>
+                          <th className="p-4 text-right font-semibold w-32">Preço Unitário</th>
+                          <th className="p-4 text-center font-semibold w-20">IVA %</th>
+                          <th className="p-4 text-right font-semibold w-32">Total</th>
                       </tr>
                   </thead>
-                  <tbody>
+                  <tbody className="divide-y divide-slate-200">
                       {items.map((item: any, i: number) => (
-                        <tr key={i}>
-                            <td className="border border-gray-300 p-2 font-medium whitespace-pre-wrap">{item.description}</td>
-                            <td className="border border-gray-300 p-2 text-center">{item.quantity}</td>
-                            <td className="border border-gray-300 p-2 text-right">{formatCurrency(item.unit_price)}</td>
-                            <td className="border border-gray-300 p-2 text-right text-gray-500 text-xs">{item.vat_rate}%</td>
-                            <td className="border border-gray-300 p-2 text-right font-bold">{formatCurrency(item.total)}</td>
+                        <tr key={i} className="hover:bg-slate-50 transition-colors">
+                            <td className="p-4 font-medium text-slate-900 whitespace-pre-wrap">{item.description}</td>
+                            <td className="p-4 text-center text-slate-600">{item.quantity}</td>
+                            <td className="p-4 text-right text-slate-600">{formatCurrency(item.unit_price)}</td>
+                            <td className="p-4 text-center text-slate-500 text-xs">{item.vat_rate}%</td>
+                            <td className="p-4 text-right font-bold text-slate-900">{formatCurrency(item.total)}</td>
                         </tr>
                       ))}
                   </tbody>
               </table>
           </div>
 
+          {/* Totals */}
           <div className="flex justify-end mb-12">
-              <div className="w-full sm:w-1/2 md:w-2/5 border border-gray-300">
-                  <div className="flex text-sm border-b border-gray-300">
-                      <div className="w-1/2 p-2 bg-gray-50 font-bold border-r border-gray-300" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>Subtotal</div>
-                      <div className="w-1/2 p-2 text-right">{formatCurrency(quotation.subtotal)}</div>
+              <div className="w-full sm:w-1/2 md:w-2/5">
+                  <div className="flex text-sm py-3 border-b border-slate-200">
+                      <div className="w-1/2 font-bold text-slate-600">Subtotal</div>
+                      <div className="w-1/2 text-right font-medium text-slate-900">{formatCurrency(quotation.subtotal)}</div>
                   </div>
                   {quotation.discount > 0 && (
-                    <div className="flex text-sm border-b border-gray-300">
-                        <div className="w-1/2 p-2 bg-gray-50 font-bold border-r border-gray-300 text-red-600" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>Desconto</div>
-                        <div className="w-1/2 p-2 text-right text-red-600">-{formatCurrency(quotation.discount_type === 'percentage' ? (quotation.subtotal * quotation.discount / 100) : quotation.discount)}</div>
+                    <div className="flex text-sm py-3 border-b border-slate-200">
+                        <div className="w-1/2 font-bold text-red-500">Desconto</div>
+                        <div className="w-1/2 text-right font-medium text-red-500">-{formatCurrency(quotation.discount_type === 'percentage' ? (quotation.subtotal * quotation.discount / 100) : quotation.discount)}</div>
                     </div>
                   )}
-                  <div className="flex text-sm border-b border-gray-300">
-                      <div className="w-1/2 p-2 bg-gray-50 font-bold border-r border-gray-300" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>Total IVA</div>
-                      <div className="w-1/2 p-2 text-right">{formatCurrency(quotation.vat_total)}</div>
+                  <div className="flex text-sm py-3 border-b border-slate-200">
+                      <div className="w-1/2 font-bold text-slate-600">Total IVA</div>
+                      <div className="w-1/2 text-right font-medium text-slate-900">{formatCurrency(quotation.vat_total)}</div>
                   </div>
-                  <div className="flex text-lg">
-                      <div className="w-1/2 p-3 bg-gray-800 text-white font-bold border-r border-gray-300" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>TOTAL FINAL</div>
-                      <div className="w-1/2 p-3 text-right font-bold bg-gray-100" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>{formatCurrency(quotation.grand_total)}</div>
+                  <div className="flex text-lg mt-4 bg-slate-50 p-4 rounded-lg border border-slate-200" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>
+                      <div className="w-1/2 font-bold text-slate-900">TOTAL FINAL</div>
+                      <div className="w-1/2 text-right font-bold text-slate-900">{formatCurrency(quotation.grand_total)}</div>
                   </div>
               </div>
           </div>
 
-          <div className="mt-auto grid grid-cols-1 md:grid-cols-2 gap-12 text-sm">
+          {/* Footer Notes */}
+          <div className="mt-auto grid grid-cols-1 md:grid-cols-2 gap-12 text-sm pt-8 border-t border-slate-200">
               <div>
-                  <h4 className="font-bold border-b-2 border-gray-800 pb-1 mb-2 uppercase text-xs">Termos & Condições</h4>
-                  <div className="text-xs text-gray-600 whitespace-pre-wrap">
-                      {quotation.terms || 'Nenhum termo especificado.'}
-                  </div>
+                  {quotation.terms && (
+                    <div className="mb-6">
+                      <h4 className="font-bold text-slate-900 mb-2 uppercase text-xs tracking-wider">Termos & Condições</h4>
+                      <div className="text-xs text-slate-600 whitespace-pre-wrap leading-relaxed">{quotation.terms}</div>
+                    </div>
+                  )}
                   {quotation.notes && (
-                      <div className="mt-4">
-                          <h4 className="font-bold border-b-2 border-gray-800 pb-1 mb-2 uppercase text-xs">Notas Adicionais</h4>
-                          <div className="text-xs text-gray-600 whitespace-pre-wrap">{quotation.notes}</div>
+                      <div>
+                          <h4 className="font-bold text-slate-900 mb-2 uppercase text-xs tracking-wider">Notas Adicionais</h4>
+                          <div className="text-xs text-slate-600 whitespace-pre-wrap leading-relaxed">{quotation.notes}</div>
                       </div>
                   )}
               </div>
-              <div className="flex flex-col justify-end">
-                  <h4 className="font-bold border-b-2 border-gray-800 pb-1 mb-12 uppercase text-xs">Assinatura Autorizada</h4>
-                  <div className="border-b border-gray-400 w-full mb-2"></div>
-                  <p className="text-xs text-gray-600 text-center">{company.name} / Data</p>
+              <div className="flex flex-col justify-end items-end">
+                  <div className="w-48 border-b-2 border-slate-800 mb-3" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}></div>
+                  <p className="text-xs font-semibold text-slate-900 uppercase tracking-widest">Assinatura Autorizada</p>
+                  <p className="text-xs text-slate-500 mt-1">{company.name}</p>
               </div>
           </div>
       </div>
       
       {company.show_branding !== false && (
-        <div className="p-4 text-center border-t border-slate-200 print:hidden bg-slate-50 mt-4">
-          <p className="text-slate-500 text-[10px] font-semibold tracking-wide uppercase">Powered by Proforma360</p>
+        <div className="bg-slate-900 p-4 text-center print:hidden" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>
+          <p className="text-slate-400 text-[10px] font-semibold tracking-widest uppercase">Powered by Proforma360</p>
         </div>
       )}
     </div>
