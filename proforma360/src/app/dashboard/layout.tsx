@@ -299,6 +299,25 @@ export default function DashboardLayout({
     fetchSettings();
   }, [runtimeReady, clientsLength, productsLength, quotations.length, fetchClients, fetchProducts, fetchQuotations, fetchSettings]);
 
+  // Sync actual backup date from Google Drive on boot
+  useEffect(() => {
+    if (!runtimeReady || isOffline) return;
+    async function syncRealBackupDate() {
+      try {
+        const res = await fetch("/api/drive/status");
+        if (res.ok) {
+          const data = await res.json();
+          if (data.lastSyncDate) {
+            setLastSyncDate(data.lastSyncDate);
+          }
+        }
+      } catch (err) {
+        console.error("Failed to fetch real backup date from Drive:", err);
+      }
+    }
+    syncRealBackupDate();
+  }, [runtimeReady, isOffline, setLastSyncDate]);
+
   // Check for due follow-up notifications
   useEffect(() => {
     if (!runtimeReady) return;
