@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { useClientsStore, useQuotationsStore, useInteractionsStore, useCompanyStore } from "@/stores";
 import { InteractionType, INTERACTION_TYPES, QuotationHistory } from "@/lib/types";
@@ -60,6 +60,20 @@ export default function ClientDetailsPage() {
   const [snoozeMenuOpen, setSnoozeMenuOpen] = useState<string | null>(null);
   const [engageMetrics, setEngageMetrics] = useState<any>(null);
   const [emailTemplateOpen, setEmailTemplateOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setWhatsappTemplateOpen(false);
+        setEmailTemplateOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   useEffect(() => {
     fetchClients();
@@ -288,7 +302,7 @@ export default function ClientDetailsPage() {
         <div className="flex items-center gap-2">
           <span className="text-xs font-bold uppercase tracking-wide text-teal-800">Companion de Comunicação</span>
         </div>
-        <div className="flex flex-wrap gap-2">
+        <div ref={dropdownRef} className="flex flex-wrap gap-2">
           {client.phone && (
             <>
               <a 
@@ -425,33 +439,33 @@ export default function ClientDetailsPage() {
           
           {/* Top Analytical Cards */}
           <div className="lg:col-span-3 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="bg-white p-5 rounded-xl border border-slate-150 shadow-sm">
+            <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm overflow-hidden">
               <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wide mb-2">Total de Proformas</h3>
-              <p className="text-2xl font-bold text-slate-800">{stats.totalQuotations}</p>
+              <p className="text-2xl font-bold text-slate-800 truncate" title={String(stats.totalQuotations)}>{stats.totalQuotations}</p>
             </div>
             
-            <div className="bg-white p-5 rounded-xl border border-slate-150 shadow-sm">
+            <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm overflow-hidden">
               <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wide mb-2">Valor de Negociação</h3>
-              <p className="text-2xl font-bold text-slate-800">{formatCurrency(stats.totalValue)}</p>
+              <p className="text-2xl font-bold text-slate-800 truncate" title={formatCurrency(stats.totalValue)}>{formatCurrency(stats.totalValue)}</p>
             </div>
 
-            <div className="bg-white p-5 rounded-xl border border-slate-150 shadow-sm">
+            <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm overflow-hidden">
               <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wide mb-2">Lifetime Value (LTV)</h3>
-              <p className="text-2xl font-bold text-emerald-600">
+              <p className="text-2xl font-bold text-emerald-600 truncate" title={relationshipMetrics ? formatCurrency(relationshipMetrics.ltv) : "0,00 MTn"}>
                 {relationshipMetrics ? formatCurrency(relationshipMetrics.ltv) : "0,00 MTn"}
               </p>
             </div>
 
-            <div className="bg-white p-5 rounded-xl border border-slate-150 shadow-sm">
+            <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm overflow-hidden">
               <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Última Atividade</h3>
-              <p className="text-sm font-bold text-slate-700 mt-2 truncate">{formatDate(stats.lastActivity)}</p>
+              <p className="text-sm font-bold text-slate-700 mt-2 truncate" title={formatDate(stats.lastActivity)}>{formatDate(stats.lastActivity)}</p>
             </div>
           </div>
 
           <div className="lg:col-span-2 space-y-6">
             
             {/* Contact Details Card */}
-            <div className="bg-white p-6 rounded-xl border border-slate-150 shadow-sm">
+            <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
               <h2 className="text-sm font-bold text-slate-800 uppercase tracking-wider mb-4">Informações de Contacto</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="flex items-start gap-3">
@@ -480,7 +494,7 @@ export default function ClientDetailsPage() {
 
             {/* Inactivity warnings & engagement scores */}
             {activeQuotationForAction && engageMetrics && (
-              <div className="bg-white p-6 rounded-xl border border-slate-150 shadow-sm">
+              <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
                 <h2 className="text-sm font-bold text-slate-800 uppercase tracking-wider mb-4">Comportamento Comercial</h2>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                   <div className="bg-slate-50 p-3 rounded-lg text-center">
@@ -503,7 +517,7 @@ export default function ClientDetailsPage() {
           <div className="lg:col-span-1 space-y-6">
             
             {/* Tags Box */}
-            <div className="bg-white p-6 rounded-xl border border-slate-150 shadow-sm">
+            <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
               <h2 className="text-sm font-bold text-slate-800 uppercase tracking-wider mb-4">Segmentação / Tags</h2>
               {client.tags && client.tags.length > 0 ? (
                 <div className="flex flex-wrap gap-1.5">
@@ -520,7 +534,7 @@ export default function ClientDetailsPage() {
 
             {/* Internal Notes Box */}
             {client.notes && (
-              <div className="bg-white p-6 rounded-xl border border-slate-150 shadow-sm">
+              <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
                 <h2 className="text-sm font-bold text-slate-800 uppercase tracking-wider mb-3">Notas Profiling</h2>
                 <p className="text-xs font-medium text-slate-600 bg-slate-50 p-3 rounded-lg whitespace-pre-wrap leading-relaxed">
                   {client.notes}
@@ -533,7 +547,7 @@ export default function ClientDetailsPage() {
       )}
 
       {activeTab === "quotations" && (
-        <div className="bg-white rounded-xl border border-slate-150 shadow-sm overflow-hidden">
+        <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
           {clientQuotations.length === 0 ? (
             <div className="p-8 text-center">
               <FileText className="w-12 h-12 text-slate-300 mx-auto mb-3" />
@@ -543,7 +557,7 @@ export default function ClientDetailsPage() {
           ) : (
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="bg-slate-50 text-slate-400 text-[10px] font-black uppercase tracking-wider border-b border-slate-150">
+                <tr className="bg-slate-50 text-slate-400 text-[10px] font-black uppercase tracking-wider border-b border-slate-200">
                   <th className="px-6 py-4">Número</th>
                   <th className="px-6 py-4">Data</th>
                   <th className="px-6 py-4">Estado</th>
@@ -591,7 +605,7 @@ export default function ClientDetailsPage() {
       {activeTab === "crm" && (
         <div className="space-y-6">
           {/* Add Interaction Form */}
-          <div className="bg-white rounded-xl border border-slate-150 shadow-sm p-5">
+          <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
             <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Registar Interação</h3>
             <div className="flex flex-wrap gap-2 mb-3">
               {INTERACTION_TYPES.map((t) => (
@@ -638,7 +652,7 @@ export default function ClientDetailsPage() {
           </div>
 
           {/* Chronological Unified timeline */}
-          <div className="bg-white rounded-xl border border-slate-150 shadow-sm p-5">
+          <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
             <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-5">Atividade Cronológica Viva</h3>
             <ActivityTimeline clientId={id} />
           </div>

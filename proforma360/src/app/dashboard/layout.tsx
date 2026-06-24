@@ -855,7 +855,7 @@ export default function DashboardLayout({
              <Link
                href="/dashboard/quotations/new"
                prefetch={true}
-               className="hidden lg:flex items-center gap-2 px-5 py-2.5 bg-[var(--color-primary)] text-white rounded-md font-medium hover:bg-[#003ea8] transition-colors elevation-1 shadow-sm"
+               className="hidden lg:flex items-center gap-2 px-5 py-2.5 bg-teal-600 text-white rounded-md font-medium hover:bg-teal-700 transition-colors shadow-sm"
              >
                <Plus className="w-4 h-4" />
                Nova Proforma
