@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Proforma360 — Recuperação de Emergência</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0b0f19;
+      color: #f8fafc;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding: 2rem;
+    }
+    .card {
+      background: #151f32;
+      border: 1px solid #1e293b;
+      border-radius: 1rem;
+      max-width: 600px;
+      width: 100%;
+      padding: 2.5rem;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+      margin-bottom: 2rem;
+    }
+    .icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      color: #f59e0b;
+    }
+    h1 {
+      font-size: 1.5rem;
+      font-weight: 800;
+      margin-bottom: 0.75rem;
+      color: #ffffff;
+      letter-spacing: -0.025em;
+    }
+    p {
+      font-size: 0.95rem;
+      color: #94a3b8;
+      line-height: 1.6;
+      margin-bottom: 1.5rem;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      background: #f59e0b;
+      color: #0b0f19;
+      border: none;
+      border-radius: 0.5rem;
+      font-size: 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn:hover { background: #d97706; transform: translateY(-1px); }
+    .btn-secondary {
+      background: #334155;
+      color: #ffffff;
+      margin-left: 0.5rem;
+    }
+    .btn-secondary:hover { background: #475569; }
+    .emergency-list {
+      margin-top: 1.5rem;
+      background: #0f172a;
+      border-radius: 0.75rem;
+      border: 1px solid #1e293b;
+      padding: 1rem;
+      max-height: 300px;
+      overflow-y: auto;
+      text-align: left;
+    }
+    .emergency-item {
+      padding: 0.75rem;
+      border-bottom: 1px solid #1e293b;
+      font-size: 0.85rem;
+    }
+    .emergency-item:last-child { border-bottom: none; }
+    .item-title { font-weight: bold; color: #ffffff; }
+    .item-meta { color: #64748b; font-size: 0.75rem; margin-top: 0.25rem; }
+    .status {
+      display: inline-block;
+      margin-top: 1rem;
+      font-size: 0.8rem;
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      background: #1e293b;
+      color: #94a3b8;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="icon">🛠️</div>
+    <h1>Ecrã de Recuperação Offline</h1>
+    <p>
+      Ocorreu uma falha ao iniciar o runtime React do Proforma360 ou está sem ligação. 
+      Como o sistema é local-first, os seus dados permanecem seguros no dispositivo. 
+      Pode aceder aos registos de emergência ou exportar a base de dados SQLite abaixo.
+    </p>
+    
+    <div>
+      <button class="btn" onclick="exportDatabase()">
+        💾 Exportar Base de Dados (.sqlite)
+      </button>
+      <button class="btn btn-secondary" onclick="loadEmergencyData()">
+        🔍 Ler Dados Locais
+      </button>
+      <button class="btn btn-secondary" onclick="window.location.reload()">
+        🔄 Tentar Recarregar
+      </button>
+    </div>
+
+    <div id="status" class="status">Estado: Pronto</div>
+    
+    <div id="emergency-container" style="display: none;">
+      <h2 style="font-size: 1rem; margin-top: 1.5rem; color: #ffffff;">Clientes Encontrados (SQLite-WASM):</h2>
+      <div id="list" class="emergency-list">
+        A carregar dados...
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const DB_NAME = "proforma360_db";
+    const STORE_NAME = "sqlite_file";
+    const FILE_KEY = "database.sqlite";
+
+    function updateStatus(text) {
+      document.getElementById("status").innerText = "Estado: " + text;
+    }
+
+    // Export database directly from IndexedDB object store
+    function exportDatabase() {
+      updateStatus("A ler IndexedDB...");
+      const request = indexedDB.open(DB_NAME);
+      
+      request.onerror = () => updateStatus("Erro ao abrir IndexedDB");
+      request.onsuccess = (e) => {
+        const db = e.target.result;
+        try {
+          const transaction = db.transaction(STORE_NAME, "readonly");
+          const store = transaction.objectStore(STORE_NAME);
+          const getReq = store.get(FILE_KEY);
+          
+          getReq.onsuccess = () => {
+            const data = getReq.result;
+            if (data) {
+              const blob = new Blob([data], { type: "application/octet-stream" });
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement("a");
+              a.href = url;
+              a.download = "proforma360_backup_emergencia.sqlite";
+              document.body.appendChild(a);
+              a.click();
+              document.body.removeChild(a);
+              URL.revokeObjectURL(url);
+              updateStatus("Exportado com sucesso!");
+            } else {
+              updateStatus("Nenhum ficheiro SQLite encontrado na base de dados local.");
+            }
+          };
+          getReq.onerror = () => updateStatus("Erro ao ler ficheiro SQLite");
+        } catch (err) {
+          updateStatus("Tabela não encontrada. A criar base de dados limpa?");
+        }
+      };
+    }
+
+    // Parse SQLite directly in JS is not possible without sql.js wasm,
+    // so we fall back to extracting what we can or logging the list.
+    function loadEmergencyData() {
+      document.getElementById("emergency-container").style.display = "block";
+      const listEl = document.getElementById("list");
+      listEl.innerHTML = "A carregar dados brutos... Para abrir completamente, tente recarregar.";
+      
+      const request = indexedDB.open(DB_NAME);
+      request.onsuccess = (e) => {
+        const db = e.target.result;
+        try {
+          const transaction = db.transaction("action_queue", "readonly");
+          const store = transaction.objectStore("action_queue");
+          const req = store.getAll();
+          req.onsuccess = () => {
+            const actions = req.result || [];
+            if (actions.length === 0) {
+              listEl.innerHTML = "Nenhuma ação pendente na fila local.";
+              return;
+            }
+            listEl.innerHTML = actions.map(act => `
+              <div class="emergency-item">
+                <span class="item-title">${act.type} (${act.priority})</span>
+                <div class="item-meta">ID: ${act.id} | Estado: ${act.status}</div>
+              </div>
+            `).join("");
+          };
+        } catch (err) {
+          listEl.innerHTML = "Não foi possível ler as tabelas de dados brutos sem o runtime. Recomenda-se exportar a base de dados acima.";
+        }
+      };
+    }
+  </script>
+</body>
+</html>

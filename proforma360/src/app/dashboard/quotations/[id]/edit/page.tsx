@@ -130,7 +130,7 @@ export default function EditQuotationPage() {
 
           const qty = updatedItem.quantity || 0;
           const price = updatedItem.unit_price || 0;
-          updatedItem.total = FinanceMath.toFloat(FinanceMath.multiply(FinanceMath.toCents(qty), FinanceMath.toCents(price)) / 100);
+          updatedItem.total = FinanceMath.toFloat(Math.round(qty * FinanceMath.toCents(price)));
           
           return updatedItem;
         }

@@ -152,7 +152,7 @@ export default function NewQuotationPage() {
           // Recalculate total for this line
           const qty = updatedItem.quantity || 0;
           const price = updatedItem.unit_price || 0;
-          updatedItem.total = qty * price;
+          updatedItem.total = FinanceMath.toFloat(Math.round(qty * FinanceMath.toCents(price)));
           
           return updatedItem;
         }
