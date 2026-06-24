@@ -6,7 +6,7 @@ import { useSyncStore } from "@/stores/sync";
 
 const DB_NAME = "proforma360_db";
 const STORE_NAME = "sqlite_file";
-const FILE_KEY = "database.sqlite";
+// FILE_KEY is now dynamic per tenant
 
 class DatabaseClient {
   private db: Database | null = null;
@@ -15,6 +15,50 @@ class DatabaseClient {
   public isNewDatabase = false;
   private isInitializing = false;
   private initPromise: Promise<void> | null = null;
+  private fileKey = "database.sqlite"; // Default legacy, overwritten by setTenantHash
+
+  public async setTenantHash(tenantHash: string): Promise<void> {
+    const newFileKey = `database_${tenantHash}.sqlite`;
+    if (this.fileKey === newFileKey && this.isInitialized) return;
+
+    if (this.isInitialized) {
+      if (this.db) {
+        this.db.close();
+        this.db = null;
+      }
+      this.isInitialized = false;
+      this.initPromise = null;
+    }
+
+    if (!this.idb) {
+      this.idb = await openDB(DB_NAME, 2, {
+        upgrade(db, oldVersion, newVersion, transaction) {
+          if (oldVersion < 1) db.createObjectStore(STORE_NAME);
+          if (oldVersion < 2) db.createObjectStore('action_queue', { keyPath: 'id' });
+        },
+      });
+    }
+
+    // Migration logic
+    const existingTenantData = await this.idb.get(STORE_NAME, newFileKey);
+    if (!existingTenantData) {
+      const legacyData = await this.idb.get(STORE_NAME, "database.sqlite");
+      const migrationStamp = localStorage.getItem('legacy_migrated_to');
+      
+      if (legacyData && (!migrationStamp || migrationStamp === tenantHash)) {
+        // Migrate ONLY if never migrated OR if the stamp matches this tenant
+        // (re-migration for the rightful owner after a cache clear)
+        await this.idb.put(STORE_NAME, legacyData, newFileKey);
+        localStorage.setItem('legacy_migrated_to', tenantHash);
+        console.log(`[Database] Legacy database safely migrated to runtime owner: ${tenantHash}`);
+      } else if (legacyData && migrationStamp && migrationStamp !== tenantHash) {
+        // Legacy DB belongs to a different tenant — DO NOT migrate
+        console.log(`[Database] Legacy DB belongs to tenant ${migrationStamp}, skipping migration for ${tenantHash}`);
+      }
+    }
+    
+    this.fileKey = newFileKey;
+  }
 
   async init(): Promise<void> {
     if (this.isInitialized) return;
@@ -47,7 +91,7 @@ class DatabaseClient {
       });
 
       // 3. Try to load existing database from IndexedDB
-      const savedData = await this.idb.get(STORE_NAME, FILE_KEY);
+      const savedData = await this.idb.get(STORE_NAME, this.fileKey);
 
       if (savedData) {
         // Load existing
@@ -105,6 +149,78 @@ class DatabaseClient {
         safeRun("ALTER TABLE quotations ADD COLUMN last_contact_at TEXT");
         safeRun("ALTER TABLE quotations ADD COLUMN reminders_enabled INTEGER DEFAULT 1");
         
+        // Migration 11: Pipeline Operations Phase 2 & Calendar Sync Fields
+        safeRun("ALTER TABLE quotations ADD COLUMN assigned_user TEXT");
+        safeRun("ALTER TABLE quotations ADD COLUMN followup_status TEXT DEFAULT 'pending'");
+        safeRun("ALTER TABLE quotations ADD COLUMN reminder_offset TEXT DEFAULT '15m'");
+        safeRun("ALTER TABLE quotations ADD COLUMN completed_at TEXT");
+        safeRun("ALTER TABLE quotations ADD COLUMN calendar_sync_enabled INTEGER DEFAULT 0");
+        safeRun("ALTER TABLE quotations ADD COLUMN external_calendar_provider TEXT");
+        safeRun("ALTER TABLE quotations ADD COLUMN calendar_sync_status TEXT");
+        safeRun("ALTER TABLE quotations ADD COLUMN calendar_sync_date TEXT");
+        safeRun("ALTER TABLE quotations ADD COLUMN external_calendar_event_id TEXT");
+        safeRun("ALTER TABLE quotations ADD COLUMN calendar_sync_error TEXT");
+        
+        // Migration 12: Telemetry & Persistent Sync Queue
+        this.db?.run(`
+          CREATE TABLE IF NOT EXISTS proposal_telemetry (
+            quotation_id TEXT PRIMARY KEY,
+            views_count INTEGER DEFAULT 0,
+            downloads_count INTEGER DEFAULT 0,
+            last_viewed_at TEXT,
+            FOREIGN KEY(quotation_id) REFERENCES quotations(id)
+          )
+        `);
+        this.db?.run(`
+          CREATE TABLE IF NOT EXISTS persistent_sync_queue (
+            id TEXT PRIMARY KEY,
+            event_type TEXT NOT NULL,
+            payload TEXT,
+            status TEXT DEFAULT 'pending',
+            retries INTEGER DEFAULT 0,
+            next_attempt_at TEXT,
+            priority TEXT DEFAULT 'medium',
+            idempotency_key TEXT UNIQUE,
+            version INTEGER DEFAULT 1,
+            created_at TEXT
+          )
+        `);
+        
+        // Migration 13: Runtime Diagnostics Log
+        this.db?.run(`
+          CREATE TABLE IF NOT EXISTS runtime_diagnostics (
+            id TEXT PRIMARY KEY,
+            type TEXT NOT NULL,
+            message TEXT,
+            timestamp TEXT
+          )
+        `);
+
+        // Migration 15: Replay Determinism Receipts
+        this.db?.run(`
+          CREATE TABLE IF NOT EXISTS document_execution_receipts (
+            id TEXT PRIMARY KEY,
+            quotation_id TEXT,
+            semantic_schema_signature TEXT,
+            execution_plan_signature TEXT,
+            totals_ast_signature TEXT,
+            runtime_kernel_version TEXT,
+            timestamp TEXT
+          )
+        `);
+        this.db?.run(`
+          CREATE TABLE IF NOT EXISTS runtime_replay_receipts (
+            id TEXT PRIMARY KEY,
+            quotation_id TEXT,
+            replay_context TEXT,
+            determinism_result TEXT,
+            semantic_schema_signature TEXT,
+            execution_plan_signature TEXT,
+            totals_ast_signature TEXT,
+            timestamp TEXT
+          )
+        `);
+        
         await this.save();
       } else {
         // Create new
@@ -116,8 +232,14 @@ class DatabaseClient {
       }
 
       this.isInitialized = true;
-    } catch (error) {
+    } catch (error: any) {
       console.error("Failed to initialize database:", error);
+      try {
+        const { storageRecoverySemantics } = await import("@/lib/runtime/storageRecovery");
+        await storageRecoverySemantics.handleStorageError(error, "DatabaseInitialization");
+      } catch (recoveryError) {
+        console.error("Critical failure in storage recovery semantics:", recoveryError);
+      }
       throw error;
     } finally {
       this.isInitializing = false;
@@ -184,6 +306,12 @@ class DatabaseClient {
         id TEXT PRIMARY KEY,
         quotation_number TEXT NOT NULL,
         client_id TEXT,
+        document_context TEXT DEFAULT 'GENERAL',
+        schema_version TEXT DEFAULT 'v1',
+        semantic_schema_signature TEXT,
+        execution_plan_signature TEXT,
+        totals_ast_signature TEXT,
+        dynamic_fields TEXT,
         date TEXT,
         expiry_date TEXT,
         status TEXT DEFAULT 'draft',
@@ -195,6 +323,16 @@ class DatabaseClient {
         last_activity_at TEXT,
         last_contact_at TEXT,
         reminders_enabled INTEGER DEFAULT 1,
+        assigned_user TEXT,
+        followup_status TEXT DEFAULT 'pending',
+        reminder_offset TEXT DEFAULT '15m',
+        completed_at TEXT,
+        calendar_sync_enabled INTEGER DEFAULT 0,
+        external_calendar_provider TEXT,
+        calendar_sync_status TEXT,
+        calendar_sync_date TEXT,
+        external_calendar_event_id TEXT,
+        calendar_sync_error TEXT,
         subtotal REAL,
         discount REAL DEFAULT 0,
         discount_type TEXT DEFAULT 'percentage',
@@ -220,6 +358,7 @@ class DatabaseClient {
         vat_rate REAL,
         total REAL,
         sort_order INTEGER,
+        dynamic_fields TEXT,
         FOREIGN KEY(quotation_id) REFERENCES quotations(id),
         FOREIGN KEY(product_id) REFERENCES products(id)
       );
@@ -249,6 +388,34 @@ class DatabaseClient {
         created_at TEXT,
         FOREIGN KEY(client_id) REFERENCES clients(id)
       );
+
+      CREATE TABLE IF NOT EXISTS proposal_telemetry (
+        quotation_id TEXT PRIMARY KEY,
+        views_count INTEGER DEFAULT 0,
+        downloads_count INTEGER DEFAULT 0,
+        last_viewed_at TEXT,
+        FOREIGN KEY(quotation_id) REFERENCES quotations(id)
+      );
+
+      CREATE TABLE IF NOT EXISTS persistent_sync_queue (
+        id TEXT PRIMARY KEY,
+        event_type TEXT NOT NULL,
+        payload TEXT,
+        status TEXT DEFAULT 'pending',
+        retries INTEGER DEFAULT 0,
+        next_attempt_at TEXT,
+        priority TEXT DEFAULT 'medium',
+        idempotency_key TEXT UNIQUE,
+        version INTEGER DEFAULT 1,
+        created_at TEXT
+      );
+
+      CREATE TABLE IF NOT EXISTS runtime_diagnostics (
+        id TEXT PRIMARY KEY,
+        type TEXT NOT NULL,
+        message TEXT,
+        timestamp TEXT
+      );
     `);
   }
 
@@ -257,8 +424,19 @@ class DatabaseClient {
     await this.init();
     if (!this.db) throw new Error("Database not initialized");
 
+    // Replace undefined with null in params, as sql.js does not accept undefined
+    let safeParams: any[] = [];
+    if (params) {
+      safeParams = params.map(p => {
+        if (p === undefined) return null;
+        if (typeof p === 'boolean') return p ? 1 : 0;
+        if (p instanceof Date) return p.toISOString();
+        return p;
+      });
+    }
+
     try {
-      this.db.run(query, params);
+      this.db.run(query, safeParams);
       await this.save();
       
       // Notify sync store that changes happened
@@ -285,7 +463,7 @@ class DatabaseClient {
               timestamp: Date.now(),
               mutation_version: 1,
               query,
-              params
+              params: safeParams
             }, 'MEDIUM');
           });
         }
@@ -297,27 +475,53 @@ class DatabaseClient {
   }
 
   // For read-only queries
-  async query(query: string, params?: any[]) {
+  public async query(sql: string, params: any[] = []): Promise<any[]> {
     await this.init();
     if (!this.db) throw new Error("Database not initialized");
 
-    try {
-      const stmt = this.db.prepare(query);
-      if (params) {
-        stmt.bind(params);
-      }
-
-      const results: any[] = [];
-      while (stmt.step()) {
-        results.push(stmt.getAsObject());
-      }
-      stmt.free();
-      return results;
-    } catch (error) {
-      console.error("Query error:", error);
-      throw error;
+    const stmt = this.db.prepare(sql);
+    const results = [];
+    
+    // Bind parameters if provided
+    if (params && params.length > 0) {
+      const safeParams = params.map(p => {
+        if (p === undefined) return null;
+        if (typeof p === 'boolean') return p ? 1 : 0;
+        if (p instanceof Date) return p.toISOString();
+        return p;
+      });
+      stmt.bind(safeParams);
     }
+    
+    while (stmt.step()) {
+      results.push(stmt.getAsObject());
+    }
+    stmt.free();
+    return results;
   }
+
+  // --- RECOVERY PACK METHODS ---
+  
+  public async exportRawDatabase(): Promise<Uint8Array> {
+    await this.init();
+    if (!this.db) throw new Error("Database not initialized");
+    return this.db.export();
+  }
+
+  public async importRawDatabase(data: Uint8Array): Promise<void> {
+    if (!this.idb) throw new Error("IndexedDB not initialized");
+    // Save to IDB immediately, bypassing normal lifecycle
+    await this.idb.put(STORE_NAME, data, this.fileKey);
+    // Force re-init on next query
+    if (this.db) {
+      this.db.close();
+      this.db = null;
+    }
+    this.isInitialized = false;
+    this.initPromise = null;
+    await this.init();
+  }
+  // -----------------------------
 
   async getOne(query: string, params?: any[]) {
     const results = await this.query(query, params);
@@ -327,7 +531,7 @@ class DatabaseClient {
   private async save() {
     if (!this.db || !this.idb) return;
     const data = this.db.export();
-    await this.idb.put(STORE_NAME, data, FILE_KEY);
+    await this.idb.put(STORE_NAME, data, this.fileKey);
   }
 
   // Export DB for Google Drive backup
@@ -353,7 +557,23 @@ class DatabaseClient {
     // Save to IndexedDB
     await this.save();
   }
+
+  // Wipes out the current tenant database for extreme tenant isolation
+  async destroyTenantDatabase(): Promise<void> {
+    if (this.db) {
+      this.db.close();
+      this.db = null;
+    }
+    if (this.idb) {
+      await this.idb.delete(STORE_NAME, this.fileKey);
+      this.isInitialized = false;
+      this.initPromise = null;
+    }
+  }
 }
 
-// Singleton instance
-export const dbClient = new DatabaseClient();
+import { createChaosAwareDbAdapter } from "../runtime/chaos/chaosDbAdapter";
+
+const realDbClient = new DatabaseClient();
+// Singleton instance, proxied by Chaos Adapter
+export const dbClient = createChaosAwareDbAdapter(realDbClient);
