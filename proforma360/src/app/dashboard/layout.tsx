@@ -461,7 +461,7 @@ export default function DashboardLayout({
       setRuntimeReady(false);
       setOfflineSession(null);
 
-      const performCleanup = async () => {
+      const performLocalCleanup = async () => {
         try {
           // Destrói a base de dados de forma segura seguindo a Fase 8 de Isolamento
           const { tenantIsolationManager } = await import("@/lib/runtime/tenantIsolation");
@@ -479,18 +479,24 @@ export default function DashboardLayout({
 
           // Clear local states and in-memory tenant hash
           await runtimeOwnership.runtimeTeardown(true);
-          // Sign out using NextAuth without auto redirect
-          await signOut({ redirect: false });
         } catch (e) {
           console.error("Cleanup error:", e);
         }
       };
       
-      // Execute cleanup — give enough time for IndexedDB operations
+      // Execute local cleanup — give enough time for IndexedDB operations
       await Promise.race([
-        performCleanup(),
+        performLocalCleanup(),
         new Promise(resolve => setTimeout(resolve, 2000))
       ]);
+      
+      // Perform NextAuth signout independent of IDB race condition
+      try {
+        await signOut({ redirect: false });
+      } catch (e) {
+        console.error("Network error during NextAuth signout:", e);
+      }
+
       
       // Navigation is handled manually to prevent loops
       window.location.href = "/";
