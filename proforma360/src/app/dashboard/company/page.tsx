@@ -11,15 +11,14 @@ import { cn } from "@/lib/utils";
 
 export default function CompanyPage() {
   const { company, fetchCompany, updateCompany, isLoading } = useCompanyStore();
-  const { businessProfile, fetchSettings, updateBusinessProfile, isLoading: isSettingsLoading } = useAppSettingsStore();
+  const { businessProfile, updateBusinessProfile, isLoading: isSettingsLoading } = useAppSettingsStore();
   const [formData, setFormData] = useState<Partial<Company>>({});
   const [localProfile, setLocalProfile] = useState<BusinessProfile>("GENERAL");
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     fetchCompany();
-    fetchSettings();
-  }, [fetchCompany, fetchSettings]);
+  }, [fetchCompany]);
 
   useEffect(() => {
     if (company) {

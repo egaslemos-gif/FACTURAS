@@ -150,14 +150,20 @@ export default function DashboardLayout({
   const { fetchLicense, isAdmin } = useLicenseStore();
   const [offlineSession, setOfflineSession] = useState<any>(null);
 
-  // --- ALL HOOKS MUST BE CALLED UNCONDITIONALLY (React Rules of Hooks) ---
-  const { hasUnsyncedChanges, lastSyncDate, setHasUnsyncedChanges, setLastSyncDate } = useSyncStore();
-  const { clients, fetchClients } = useClientsStore();
-  const { products, fetchProducts } = useProductsStore();
-  const { quotations, fetchQuotations } = useQuotationsStore();
+  const hasUnsyncedChanges = useSyncStore(state => state.hasUnsyncedChanges);
+  const lastSyncDate = useSyncStore(state => state.lastSyncDate);
+  const setHasUnsyncedChanges = useSyncStore(state => state.setHasUnsyncedChanges);
+  const setLastSyncDate = useSyncStore(state => state.setLastSyncDate);
 
-  const [searchQuery, setSearchQuery] = useState("");
-  const [showSearchResults, setShowSearchResults] = useState(false);
+  const clientsLength = useClientsStore(state => state.clients.length);
+  const fetchClients = useClientsStore(state => state.fetchClients);
+
+  const productsLength = useProductsStore(state => state.products.length);
+  const fetchProducts = useProductsStore(state => state.fetchProducts);
+
+  const quotations = useQuotationsStore(state => state.quotations);
+  const fetchQuotations = useQuotationsStore(state => state.fetchQuotations);
+
   const [unsyncedQueueCount, setUnsyncedQueueCount] = useState(0);
   const [isShareAppModalOpen, setIsShareAppModalOpen] = useState(false);
   const [notifiedSet] = useState(new Set<string>());
@@ -169,7 +175,9 @@ export default function DashboardLayout({
     });
   }, []);
 
-  const { businessProfile, fetchSettings, isLoading: isSettingsLoading } = useAppSettingsStore();
+  const businessProfile = useAppSettingsStore(state => state.businessProfile);
+  const fetchSettings = useAppSettingsStore(state => state.fetchSettings);
+  const isSettingsLoading = useAppSettingsStore(state => state.isLoading);
   const semanticProfile = getSemanticProfile(businessProfile);
 
   useEffect(() => {
@@ -284,12 +292,12 @@ export default function DashboardLayout({
   useEffect(() => {
     if (!runtimeReady) return;
     // Fetch data for global search if not already fetched
-    if (clients.length === 0) fetchClients();
-    if (products.length === 0) fetchProducts();
+    if (clientsLength === 0) fetchClients();
+    if (productsLength === 0) fetchProducts();
     if (quotations.length === 0) fetchQuotations();
     // Re-fetch settings now that the database is accessible
     fetchSettings();
-  }, [runtimeReady, fetchClients, fetchProducts, fetchQuotations, fetchSettings]);
+  }, [runtimeReady, clientsLength, productsLength, quotations.length, fetchClients, fetchProducts, fetchQuotations, fetchSettings]);
 
   // Check for due follow-up notifications
   useEffect(() => {
@@ -419,16 +427,7 @@ export default function DashboardLayout({
     }
   }, [status, isOffline, isChecking, router]);
 
-  const searchResults = () => {
-    if (!searchQuery) return { clients: [], products: [], quotations: [], total: 0 };
-    const q = searchQuery.toLowerCase();
-    const c = clients.filter(c => c.name.toLowerCase().includes(q) || c.email?.toLowerCase().includes(q) || c.tax_number?.includes(q)).slice(0, 3);
-    const p = products.filter(p => p.name.toLowerCase().includes(q) || p.code?.toLowerCase().includes(q)).slice(0, 3);
-    const quo = quotations.filter(quo => quo.quotation_number.toLowerCase().includes(q) || quo.client_name?.toLowerCase().includes(q)).slice(0, 3);
-    return { clients: c, products: p, quotations: quo, total: c.length + p.length + quo.length };
-  };
-
-  const results = searchResults();
+  // Removed unused search logic
 
   // Enforce Hydration Governance: DO NOT render children before RUNTIME_READY and Settings loaded
   if (!runtimeReady || isSettingsLoading) {
@@ -771,9 +770,9 @@ export default function DashboardLayout({
                ></div>
                <div className="absolute top-12 right-0 mt-2 w-80 bg-[var(--color-surface-elevated)] rounded-xl shadow-elevated border border-gray-100 overflow-hidden z-50">
                  <div className="p-4 border-b border-gray-100 bg-[var(--color-surface-elevated)]">
-                   <p className="text-sm font-semibold text-[var(--color-on-surface)]">Sincronização Google Drive</p>
+                   <p className="text-sm font-semibold text-[var(--color-on-surface)]">Backup Google Drive</p>
                    <p className="text-xs text-[var(--color-on-surface-variant)] mt-1">
-                     {lastSyncDate ? `Última sincronização: ${new Date(lastSyncDate).toLocaleDateString('pt-PT')} às ${new Date(lastSyncDate).toLocaleTimeString('pt-PT', {hour:'2-digit', minute:'2-digit'})}` : "Nunca sincronizado"}
+                     {lastSyncDate ? `Último backup: ${new Date(lastSyncDate).toLocaleDateString('pt-PT')} às ${new Date(lastSyncDate).toLocaleTimeString('pt-PT', {hour:'2-digit', minute:'2-digit'})}` : "Nunca foi feito backup"}
                    </p>
                    
                    {lastSyncDate && Date.now() - new Date(lastSyncDate).getTime() > 7 * 24 * 60 * 60 * 1000 && (
@@ -894,9 +893,9 @@ export default function DashboardLayout({
                     ></div>
                     <div className="absolute top-12 right-0 mt-2 w-80 bg-[var(--color-surface-elevated)] rounded-xl shadow-elevated border border-gray-100 overflow-hidden z-50">
                       <div className="p-4 border-b border-gray-100 bg-[var(--color-surface-elevated)]">
-                        <p className="text-sm font-semibold text-[var(--color-on-surface)]">Sincronização Google Drive</p>
+                        <p className="text-sm font-semibold text-[var(--color-on-surface)]">Backup Google Drive</p>
                         <p className="text-xs text-[var(--color-on-surface-variant)] mt-1">
-                          {lastSyncDate ? `Última sincronização: ${new Date(lastSyncDate).toLocaleDateString('pt-PT')} às ${new Date(lastSyncDate).toLocaleTimeString('pt-PT', {hour:'2-digit', minute:'2-digit'})}` : "Nunca sincronizado"}
+                          {lastSyncDate ? `Último backup: ${new Date(lastSyncDate).toLocaleDateString('pt-PT')} às ${new Date(lastSyncDate).toLocaleTimeString('pt-PT', {hour:'2-digit', minute:'2-digit'})}` : "Nunca foi feito backup"}
                         </p>
                         
                         {lastSyncDate && Date.now() - new Date(lastSyncDate).getTime() > 7 * 24 * 60 * 60 * 1000 && (
