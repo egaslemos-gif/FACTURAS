@@ -1,161 +1,188 @@
 "use client";
 
-import React, { useState } from "react";
 import { useLicenseStore } from "@/stores/licenseStore";
+import { Check, X, ShieldAlert, Sparkles, Zap } from "lucide-react";
+import { useState } from "react";
 
 export default function UpgradeModal() {
   const { showModal, hideUpgradeModal, license } = useLicenseStore();
-  const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const [formData, setFormData] = useState({
-    company_name: license?.company_name || "",
-    requested_quota: "10",
-    phone: "",
-    message: ""
-  });
+  const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">("monthly");
 
   if (!showModal) return null;
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setError(null);
+  const currentPlan = license?.plan || "free";
 
-    try {
-      const res = await fetch("/api/licensing/upgrade", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData)
-      });
-      
-      if (!res.ok) throw new Error("Erro ao enviar pedido. Tente novamente mais tarde.");
-      
-      setSuccess(true);
-    } catch (err: any) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
+  const plans = [
+    {
+      id: "free",
+      name: "Free",
+      price: "0 MTn",
+      desc: "Ideal para testar e pequenos volumes.",
+      quotations: "1 proforma / mês",
+      features: [
+        { name: "1 Proforma", allowed: true },
+        { name: "5 Clientes", allowed: true },
+        { name: "10 Produtos", allowed: true },
+        { name: "PDF com marca d'água", allowed: false },
+        { name: "WhatsApp Companion", allowed: false },
+        { name: "CRM Timeline", allowed: false },
+        { name: "Sincronização de Calendários", allowed: false }
+      ]
+    },
+    {
+      id: "starter",
+      name: "Starter",
+      price: billingCycle === "monthly" ? "3.200 MTn" : "2.560 MTn",
+      desc: "Excelente para freelancers em início de atividade.",
+      quotations: "50 proformas / mês",
+      features: [
+        { name: "50 Proformas", allowed: true },
+        { name: "25 Clientes", allowed: true },
+        { name: "50 Produtos", allowed: true },
+        { name: "Exportação PDF Sem Branding", allowed: false },
+        { name: "WhatsApp Companion", allowed: false },
+        { name: "CRM Timeline", allowed: false },
+        { name: "Sincronização de Calendários", allowed: false }
+      ]
+    },
+    {
+      id: "business",
+      name: "Business",
+      price: billingCycle === "monthly" ? "9.800 MTn" : "7.840 MTn",
+      desc: "Ideal para empresas com foco em conversão ativa.",
+      quotations: "500 proformas / mês",
+      featured: true,
+      features: [
+        { name: "500 Proformas", allowed: true },
+        { name: "100 Clientes", allowed: true },
+        { name: "250 Produtos", allowed: true },
+        { name: "Exportação PDF Sem Branding", allowed: true },
+        { name: "WhatsApp Companion", allowed: true },
+        { name: "CRM Timeline Completo", allowed: true },
+        { name: "Sincronização de Calendários", allowed: true }
+      ]
+    },
+    {
+      id: "enterprise",
+      name: "Enterprise",
+      price: "Custom",
+      desc: "Para grandes equipas com volume ilimitado.",
+      quotations: "Proformas ilimitadas",
+      features: [
+        { name: "Proformas Ilimitadas", allowed: true },
+        { name: "Clientes Ilimitados", allowed: true },
+        { name: "Produtos Ilimitados", allowed: true },
+        { name: "Sem Marca d'água / Custom Branding", allowed: true },
+        { name: "WhatsApp Companion Completo", allowed: true },
+        { name: "CRM Advanced & Timeline", allowed: true },
+        { name: "Suporte prioritário e SLAs", allowed: true }
+      ]
     }
-  };
+  ];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm transition-opacity">
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 backdrop-blur-sm p-4 overflow-y-auto animate-fade-in">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-5xl max-h-[95vh] overflow-y-auto flex flex-col scale-in-center">
         
         {/* Header */}
-        <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
-          <div>
-            <h2 className="text-xl font-semibold text-slate-900 tracking-tight">Limite Operacional Atingido</h2>
-            <p className="text-sm text-slate-500 mt-1">
-              A sua empresa atingiu o limite operacional do plano atual.
-            </p>
+        <div className="p-6 border-b border-slate-100 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <ShieldAlert className="w-5 h-5 text-amber-500" />
+            <h2 className="text-base font-black text-slate-900 uppercase tracking-wide">
+              {currentPlan === "free" ? "Atingiu o limite do plano Gratuito" : "Opções de Upgrade do Plano"}
+            </h2>
           </div>
           <button 
             onClick={hideUpgradeModal}
-            className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-colors"
+            className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-lg transition-colors"
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            <X className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Content */}
-        <div className="px-6 py-5">
-          {success ? (
-            <div className="text-center py-6">
-              <div className="w-16 h-16 bg-teal-50 text-teal-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path></svg>
-              </div>
-              <h3 className="text-lg font-medium text-slate-900">Pedido Enviado</h3>
-              <p className="text-slate-500 mt-2">A nossa equipa comercial entrará em contacto consigo brevemente para expandir a capacidade da sua conta.</p>
-              <button 
-                onClick={hideUpgradeModal}
-                className="mt-6 w-full py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-lg font-medium transition-colors"
-              >
-                Fechar
-              </button>
-            </div>
-          ) : (
-            <form onSubmit={handleSubmit} className="space-y-4">
-              {error && (
-                <div className="p-3 bg-red-50 text-red-700 text-sm rounded-lg">
-                  {error}
+        {/* Pricing Cycle Toggle */}
+        <div className="p-6 pb-2 text-center">
+          <div className="inline-flex items-center gap-1 p-1 bg-slate-100 rounded-lg">
+            <button 
+              onClick={() => setBillingCycle("monthly")}
+              className={`px-3 py-1.5 text-xs font-bold rounded-md transition-all ${billingCycle === "monthly" ? "bg-white text-slate-800 shadow-sm" : "text-slate-500 hover:text-slate-800"}`}
+            >
+              Faturação Mensal
+            </button>
+            <button 
+              onClick={() => setBillingCycle("yearly")}
+              className={`px-3 py-1.5 text-xs font-bold rounded-md transition-all flex items-center gap-1 ${billingCycle === "yearly" ? "bg-white text-slate-800 shadow-sm" : "text-slate-500 hover:text-slate-800"}`}
+            >
+              Faturação Anual <span className="bg-teal-100 text-teal-700 text-[9px] font-black px-1 py-0.5 rounded-full shrink-0">Poupança 20%</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Comparison grid */}
+        <div className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 flex-1">
+          {plans.map((plan) => (
+            <div 
+              key={plan.id}
+              className={`rounded-2xl border p-5 flex flex-col justify-between transition-all relative ${
+                plan.id === currentPlan ? "border-slate-200 bg-slate-50/50 opacity-90" : 
+                plan.featured ? "border-teal-500 ring-2 ring-teal-500/10 shadow-lg" : "border-slate-150 hover:border-slate-350"
+              }`}
+            >
+              {plan.featured && (
+                <div className="absolute top-0 right-6 transform -translate-y-1/2 bg-teal-600 text-white text-[9px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full shadow-sm flex items-center gap-1">
+                  <Sparkles className="w-2.5 h-2.5" /> Recomendado
                 </div>
               )}
-              
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Empresa</label>
-                <input 
-                  type="text" 
-                  required
-                  value={formData.company_name}
-                  onChange={e => setFormData({...formData, company_name: e.target.value})}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-teal-500 outline-none"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Telefone</label>
-                  <input 
-                    type="tel" 
-                    required
-                    placeholder="+258..."
-                    value={formData.phone}
-                    onChange={e => setFormData({...formData, phone: e.target.value})}
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-teal-500 outline-none"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Cotações Mensais</label>
-                  <select 
-                    value={formData.requested_quota}
-                    onChange={e => setFormData({...formData, requested_quota: e.target.value})}
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-teal-500 outline-none bg-white"
-                  >
-                    <option value="10">10 cotações/mês</option>
-                    <option value="50">50 cotações/mês</option>
-                    <option value="100">100 cotações/mês</option>
-                    <option value="unlimited">Ilimitado</option>
-                  </select>
-                </div>
-              </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Mensagem Opcional</label>
-                <textarea 
-                  rows={2}
-                  value={formData.message}
-                  onChange={e => setFormData({...formData, message: e.target.value})}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-teal-500 outline-none resize-none"
-                  placeholder="Gostaria de saber mais sobre o plano anual..."
-                ></textarea>
-              </div>
-
-              <div className="pt-2 flex gap-3">
-                <button 
-                  type="button"
-                  onClick={hideUpgradeModal}
-                  className="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg font-medium transition-colors"
-                >
-                  Cancelar
-                </button>
-                <button 
-                  type="submit"
-                  disabled={loading}
-                  className="flex-1 py-2.5 bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white rounded-lg font-medium transition-colors disabled:opacity-70 flex justify-center items-center"
-                >
-                  {loading ? (
-                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                  ) : (
-                    "Solicitar Expansão"
+                <h3 className="text-sm font-black text-slate-900 uppercase tracking-wide mb-1">{plan.name}</h3>
+                <p className="text-xs text-slate-400 font-semibold mb-4 leading-normal min-h-[32px]">{plan.desc}</p>
+                
+                <div className="mb-4">
+                  <span className="text-2xl font-black text-slate-950">{plan.price}</span>
+                  {plan.id !== "free" && plan.id !== "enterprise" && (
+                    <span className="text-xs text-slate-400 font-medium"> / {billingCycle === "monthly" ? "mês" : "ano"}</span>
                   )}
-                </button>
+                </div>
+
+                <div className="text-xs font-bold text-slate-700 bg-slate-50 p-2 rounded-lg mb-4 text-center">
+                  {plan.quotations}
+                </div>
+
+                <ul className="space-y-2.5 mb-6 text-xs text-slate-600 font-medium">
+                  {plan.features.map((f, i) => (
+                    <li key={i} className="flex items-start gap-2">
+                      {f.allowed ? (
+                        <Check className="w-3.5 h-3.5 text-teal-600 shrink-0 mt-0.5" />
+                      ) : (
+                        <X className="w-3.5 h-3.5 text-slate-300 shrink-0 mt-0.5" />
+                      )}
+                      <span>{f.name}</span>
+                    </li>
+                  ))}
+                </ul>
               </div>
-            </form>
-          )}
+
+              {plan.id === currentPlan ? (
+                <button disabled className="w-full py-2 bg-slate-200 text-slate-500 rounded-lg text-xs font-black cursor-not-allowed">
+                  Plano Atual
+                </button>
+              ) : (
+                <button 
+                  onClick={() => {
+                    alert(`Upgrade solicitado para o plano ${plan.name}. Um consultor entrará em contacto para ativação.`);
+                  }}
+                  className={`w-full py-2 rounded-lg text-xs font-black transition-all hover:scale-[1.02] flex items-center justify-center gap-1 ${
+                    plan.featured ? "bg-teal-600 hover:bg-teal-700 text-white shadow-md shadow-teal-500/10" : "bg-slate-900 hover:bg-slate-950 text-white"
+                  }`}
+                >
+                  <Zap className="w-3.5 h-3.5" /> Escolher {plan.name}
+                </button>
+              )}
+            </div>
+          ))}
         </div>
+
       </div>
     </div>
   );

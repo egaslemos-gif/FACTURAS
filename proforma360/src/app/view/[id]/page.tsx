@@ -6,6 +6,7 @@ import { Download, FileText, CheckCircle2, AlertCircle, Building2, Phone, Mail, 
 import Link from 'next/link';
 import PrintButton from '@/components/PrintButton';
 import { fetchSharedProposal } from '@/lib/google/share-fetch';
+import ViewTracker from '@/components/ViewTracker';
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -60,107 +61,119 @@ export async function generateMetadata(
 
 function MinimalTemplate({ quotation, client, company, items, diffDays, isExpiringSoon }: any) {
   return (
-    <div className="card-premium overflow-hidden print:shadow-none print:border-none print:rounded-none">
-      <div className="p-8 sm:p-12 border-b border-gray-100 flex flex-col md:flex-row justify-between items-start gap-8">
-        <div className="space-y-4">
-          {company.logo_url ? (
-            <img src={company.logo_url} alt="Logo" className="max-h-24 object-contain" />
-          ) : (
-            <h2 className="text-3xl font-black text-slate-900 tracking-tight">{company.name}</h2>
-          )}
-          <div className="text-slate-500 text-sm space-y-1">
-            {company.tax_number && <p>NUIT: {company.tax_number}</p>}
-            {company.address && <p className="whitespace-pre-wrap max-w-xs">{company.address}</p>}
-          </div>
-        </div>
-        <div className="text-left md:text-right w-full md:w-auto">
-          <h1 className="text-3xl font-bold text-slate-200 uppercase tracking-widest mb-6">Proposta Comercial</h1>
-          <div className="bg-slate-50 border border-slate-100 rounded-xl p-4 inline-block w-full md:w-auto text-left">
-            <div className="grid grid-cols-2 gap-x-8 gap-y-3 text-sm">
-              <span className="text-slate-500 font-medium">Referência:</span>
-              <span className="font-bold text-slate-900 text-right">{quotation.quotation_number}</span>
-              <span className="text-slate-500 font-medium">Data Emissão:</span>
-              <span className="text-slate-900 font-medium text-right">{formatDate(quotation.date)}</span>
-              <span className="text-slate-500 font-medium">Validade:</span>
-              <span className={`font-semibold text-right flex flex-col items-end ${isExpiringSoon ? 'text-amber-600' : 'text-slate-900'}`}>
-                {formatDate(quotation.expiry_date)}
-                {diffDays > 0 && (
-                  <span className="text-xs mt-0.5 px-2 py-0.5 bg-white border border-current rounded-full">
-                    Expira em {diffDays} {diffDays === 1 ? 'dia' : 'dias'}
-                  </span>
+    <div className="bg-white border border-slate-100 shadow-soft rounded-xl print:shadow-none print:border-none print:rounded-none">
+      <div className="p-8 sm:p-12 flex flex-col">
+        {/* Top Header */}
+        <div className="flex justify-between items-start mb-20">
+            <div>
+                {company.logo_url ? (
+                  <img src={company.logo_url} alt="Logo" className="max-h-12 object-contain mb-2" />
+                ) : (
+                  <div className="text-3xl font-light tracking-tighter mb-1 text-black">{company.name}</div>
                 )}
-              </span>
+                <div className="text-sm text-gray-400 font-light max-w-xs whitespace-pre-wrap">{company.address}</div>
             </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="p-8 sm:p-12 border-b border-gray-100 bg-slate-50/50">
-        <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Preparado Para</h3>
-        <p className="text-xl font-bold text-slate-900 mb-1">{client?.name || quotation.client_name}</p>
-        {client?.tax_number && <p className="text-sm text-slate-500 mb-1">NUIT: {client.tax_number}</p>}
-        {client?.address && <p className="text-sm text-slate-500 max-w-md">{client.address}</p>}
-      </div>
-
-      <div className="p-8 sm:p-12">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="border-b-2 border-slate-200">
-                <th className="py-3 px-2 font-bold text-slate-400 uppercase tracking-wider text-xs w-1/2">Descrição</th>
-                <th className="py-3 px-2 font-bold text-slate-400 uppercase tracking-wider text-xs text-center">Qtd</th>
-                <th className="py-3 px-2 font-bold text-slate-400 uppercase tracking-wider text-xs text-right">Preço Un.</th>
-                <th className="py-3 px-2 font-bold text-slate-400 uppercase tracking-wider text-xs text-right">IVA</th>
-                <th className="py-3 px-2 font-bold text-slate-400 uppercase tracking-wider text-xs text-right">Total</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {items.map((item: any, i: number) => (
-                <tr key={i} className="hover:bg-slate-50/50 transition-colors">
-                  <td className="py-5 px-2"><p className="text-sm font-medium text-slate-900 whitespace-pre-wrap leading-relaxed">{item.description}</p></td>
-                  <td className="py-5 px-2 text-sm text-center text-slate-600 font-medium">{item.quantity}</td>
-                  <td className="py-5 px-2 text-sm text-right text-slate-600 font-medium">{formatCurrency(item.unit_price)}</td>
-                  <td className="py-5 px-2 text-sm text-right text-slate-400">{item.vat_rate}%</td>
-                  <td className="py-5 px-2 text-sm font-bold text-right text-slate-900">{formatCurrency(item.total)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+            <div className="text-right">
+                <div className="text-sm text-gray-800 border border-gray-200 rounded-full px-3 py-1 inline-block mb-4 uppercase tracking-widest text-[10px]">Proforma Invoice</div>
+                <div className="text-sm text-gray-500 font-light">{quotation.quotation_number}</div>
+                <div className="text-sm text-gray-500 font-light">Emitido: {formatDate(quotation.date)}</div>
+                {diffDays > 0 && (
+                  <div className={`text-xs mt-1 font-medium ${isExpiringSoon ? 'text-amber-600' : 'text-gray-400'}`}>
+                    Válido até: {formatDate(quotation.expiry_date)}
+                  </div>
+                )}
+            </div>
         </div>
 
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-end mt-12 gap-8">
-          <div className="w-full md:w-1/2 space-y-4 text-sm text-slate-600 bg-slate-50 p-6 rounded-2xl border border-slate-100">
-            {quotation.notes && (
-              <div>
-                <h4 className="font-bold text-slate-800 mb-1.5 flex items-center gap-2">Notas</h4>
-                <p className="whitespace-pre-wrap leading-relaxed">{quotation.notes}</p>
-              </div>
-            )}
-            {quotation.terms && (
-              <div className={quotation.notes ? "pt-4 border-t border-slate-200" : ""}>
-                <h4 className="font-bold text-slate-800 mb-1.5 flex items-center gap-2">Termos e Condições</h4>
-                <p className="whitespace-pre-wrap leading-relaxed text-slate-500">{quotation.terms}</p>
-              </div>
-            )}
-            {!quotation.notes && !quotation.terms && (
-              <p className="text-slate-400 italic">Nenhuma nota adicional.</p>
-            )}
-          </div>
-          <div className="w-full md:w-80 space-y-3 p-6 bg-slate-50 rounded-2xl border border-slate-100">
-            <div className="flex justify-between text-sm"><span className="text-slate-500 font-medium">Subtotal:</span><span className="font-bold text-slate-900">{formatCurrency(quotation.subtotal)}</span></div>
-            {quotation.discount > 0 && (
-              <div className="flex justify-between text-sm text-red-600"><span className="font-medium">Desconto:</span><span className="font-bold">-{formatCurrency(quotation.discount_type === 'percentage' ? (quotation.subtotal * quotation.discount / 100) : quotation.discount)}</span></div>
-            )}
-            <div className="flex justify-between text-sm"><span className="text-slate-500 font-medium">Total IVA:</span><span className="font-bold text-slate-900">{formatCurrency(quotation.vat_total)}</span></div>
-            <div className="flex justify-between items-end pt-4 mt-2 border-t border-slate-200"><span className="font-black text-slate-900 uppercase tracking-wider text-sm mb-1">Total Final:</span><span className="text-2xl font-black text-[#2563eb]">{formatCurrency(quotation.grand_total)}</span></div>
-          </div>
+        {/* Bill To & Total */}
+        <div className="flex justify-between items-end mb-16">
+            <div>
+                <h3 className="text-xs text-gray-400 uppercase tracking-widest mb-3">Faturar A</h3>
+                <div className="text-base font-medium text-black">{client?.name || quotation.client_name}</div>
+                <div className="text-sm text-gray-500 font-light leading-relaxed">
+                    {client?.address && <p className="whitespace-pre-wrap">{client.address}</p>}
+                    {client?.tax_number && <p>NUIT: {client.tax_number}</p>}
+                </div>
+            </div>
+            <div className="text-right">
+                <h3 className="text-xs text-gray-400 uppercase tracking-widest mb-2">Total a Pagar</h3>
+                <div className="text-5xl font-light tracking-tighter text-black">{formatCurrency(quotation.grand_total)}</div>
+            </div>
+        </div>
+
+        {/* Items Table */}
+        <div className="mb-12 flex-grow">
+            <table className="w-full text-left text-sm">
+                <thead>
+                    <tr>
+                        <th className="py-3 border-b border-black text-xs text-gray-400 uppercase tracking-widest font-normal">Descrição</th>
+                        <th className="py-3 border-b border-black text-xs text-gray-400 uppercase tracking-widest font-normal text-center">Qtd</th>
+                        <th className="py-3 border-b border-black text-xs text-gray-400 uppercase tracking-widest font-normal text-right">Preço Un.</th>
+                        <th className="py-3 border-b border-black text-xs text-gray-400 uppercase tracking-widest font-normal text-right">Total</th>
+                    </tr>
+                </thead>
+                <tbody className="font-light text-gray-800">
+                    {items.map((item: any, i: number) => (
+                      <tr key={i}>
+                          <td className="py-5 border-b border-gray-100 pr-4">
+                            <p className="whitespace-pre-wrap">{item.description}</p>
+                            {item.vat_rate > 0 && <span className="text-[10px] text-gray-400">IVA: {item.vat_rate}%</span>}
+                          </td>
+                          <td className="py-5 border-b border-gray-100 text-center">{item.quantity}</td>
+                          <td className="py-5 border-b border-gray-100 text-right">{formatCurrency(item.unit_price)}</td>
+                          <td className="py-5 border-b border-gray-100 text-right text-black">{formatCurrency(item.total)}</td>
+                      </tr>
+                    ))}
+                </tbody>
+            </table>
+        </div>
+
+        {/* Subtotals */}
+        <div className="flex justify-end mb-16">
+            <div className="w-full sm:w-1/2">
+                <div className="flex justify-between py-2 text-sm text-gray-500 font-light">
+                    <span>Subtotal</span>
+                    <span>{formatCurrency(quotation.subtotal)}</span>
+                </div>
+                {quotation.discount > 0 && (
+                  <div className="flex justify-between py-2 text-sm text-red-500 font-light">
+                      <span>Desconto</span>
+                      <span>-{formatCurrency(quotation.discount_type === 'percentage' ? (quotation.subtotal * quotation.discount / 100) : quotation.discount)}</span>
+                  </div>
+                )}
+                <div className="flex justify-between py-2 text-sm text-gray-500 font-light border-b border-gray-200">
+                    <span>IVA</span>
+                    <span>{formatCurrency(quotation.vat_total)}</span>
+                </div>
+                <div className="flex justify-between py-3 text-base text-black font-medium">
+                    <span>Total Final</span>
+                    <span>{formatCurrency(quotation.grand_total)}</span>
+                </div>
+            </div>
+        </div>
+
+        {/* Footer info */}
+        <div className="mt-auto pt-8 border-t border-gray-200 flex justify-between text-xs text-gray-400 font-light">
+            <div className="max-w-md">
+                {(quotation.notes || quotation.terms) && (
+                  <>
+                    <p className="text-black font-medium mb-1">Notas e Termos</p>
+                    <p className="whitespace-pre-wrap mb-4">{quotation.notes}</p>
+                    <p className="whitespace-pre-wrap">{quotation.terms}</p>
+                  </>
+                )}
+            </div>
+            <div className="text-right">
+                {company.email && <p>{company.email}</p>}
+                {company.phone && <p>{company.phone}</p>}
+                {company.tax_number && <p>NUIT: {company.tax_number}</p>}
+            </div>
         </div>
       </div>
       
       {company.show_branding !== false && (
-        <div className="p-8 bg-slate-900 text-center rounded-b-2xl border-t border-slate-800 print:bg-white print:border-none print:text-left print:p-0 print:pt-8 print:mt-8">
-          <p className="text-slate-400 text-sm print:text-slate-900">Desenvolvido com <Link href="/" className="text-white font-bold hover:underline transition-colors print:text-slate-900">Proforma360</Link></p>
-          <p className="text-slate-500 text-xs mt-1.5 font-medium tracking-wide print:text-slate-500">SOFTWARE PROFISSIONAL DE ORÇAMENTAÇÃO & CRM</p>
+        <div className="p-8 text-center border-t border-slate-100 print:hidden">
+          <p className="text-slate-400 text-xs font-medium tracking-wide">Generated with Proforma360 • Commercial Operating Workspace</p>
         </div>
       )}
     </div>
@@ -169,103 +182,121 @@ function MinimalTemplate({ quotation, client, company, items, diffDays, isExpiri
 
 function ModernTemplate({ quotation, client, company, items, diffDays, isExpiringSoon }: any) {
   return (
-    <div className="card-premium overflow-hidden print:shadow-none print:rounded-none">
-      {/* Header Solid Color */}
-      <div className="bg-[#003d99] p-8 sm:p-12 text-white">
-        <div className="flex flex-col md:flex-row justify-between items-start gap-8">
-          <div className="space-y-4">
-            {company.logo_url ? (
-              <img src={company.logo_url} alt="Logo" className="max-h-20 object-contain bg-white/10 p-2 rounded-lg" />
-            ) : (
-              <h2 className="text-3xl font-black tracking-tight">{company.name}</h2>
-            )}
-            <div className="text-blue-100 text-sm space-y-1">
-              {company.tax_number && <p>NUIT: {company.tax_number}</p>}
-              {company.address && <p className="whitespace-pre-wrap max-w-xs">{company.address}</p>}
-            </div>
-          </div>
-          <div className="text-left md:text-right w-full md:w-auto">
-            <h1 className="text-3xl font-bold uppercase tracking-widest mb-4">Proforma</h1>
-            <div className="space-y-1 text-sm text-blue-100">
-              <p><span className="font-semibold text-white">Nº:</span> {quotation.quotation_number}</p>
-              <p><span className="font-semibold text-white">Data:</span> {formatDate(quotation.date)}</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="p-8 sm:p-12 pb-4">
-        <div className="flex flex-col md:flex-row gap-6">
-          <div className="flex-1 bg-slate-50 rounded-xl p-6 border border-slate-100">
-            <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Faturar A</h3>
-            <p className="text-lg font-bold text-[#003d99] mb-1">{client?.name || quotation.client_name}</p>
-            {client?.tax_number && <p className="text-sm text-slate-600 mb-1">NUIT: {client.tax_number}</p>}
-            {client?.address && <p className="text-sm text-slate-600">{client.address}</p>}
-          </div>
-          <div className="flex-1 bg-slate-50 rounded-xl p-6 border border-slate-100">
-             <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Detalhes</h3>
-             <div className="text-sm text-slate-600 space-y-2">
-               <p><span className="font-medium">Validade:</span> <span className={isExpiringSoon ? 'text-amber-600 font-bold' : ''}>{formatDate(quotation.expiry_date)}</span></p>
-               {diffDays > 0 && <p className="text-xs text-slate-400">Expira em {diffDays} {diffDays === 1 ? 'dia' : 'dias'}</p>}
-             </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="p-8 sm:p-12 pt-4">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="bg-[#003d99] text-white">
-                <th className="py-3 px-4 font-bold uppercase tracking-wider text-xs w-1/2 rounded-tl-lg print:rounded-none">Descrição</th>
-                <th className="py-3 px-2 font-bold uppercase tracking-wider text-xs text-center">Qtd</th>
-                <th className="py-3 px-2 font-bold uppercase tracking-wider text-xs text-right">Preço Un.</th>
-                <th className="py-3 px-2 font-bold uppercase tracking-wider text-xs text-right">IVA</th>
-                <th className="py-3 px-4 font-bold uppercase tracking-wider text-xs text-right rounded-tr-lg print:rounded-none">Total</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {items.map((item: any, i: number) => (
-                <tr key={i} className="even:bg-slate-50 transition-colors">
-                  <td className="py-4 px-4"><p className="text-sm font-medium text-slate-800 whitespace-pre-wrap">{item.description}</p></td>
-                  <td className="py-4 px-2 text-sm text-center text-slate-600">{item.quantity}</td>
-                  <td className="py-4 px-2 text-sm text-right text-slate-600">{formatCurrency(item.unit_price)}</td>
-                  <td className="py-4 px-2 text-sm text-right text-slate-500">{item.vat_rate}%</td>
-                  <td className="py-4 px-4 text-sm font-bold text-right text-slate-900">{formatCurrency(item.total)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        <div className="flex flex-col md:flex-row justify-between items-start mt-8 gap-8">
-          <div className="w-full md:w-1/2 space-y-4 text-sm text-slate-600">
-            {quotation.notes && (
-              <div>
-                <h4 className="font-bold text-slate-800 mb-1">Notas</h4>
-                <p className="whitespace-pre-wrap leading-relaxed">{quotation.notes}</p>
+    <div className="bg-white shadow-soft relative text-slate-900 print:shadow-none print:m-0 font-sans overflow-hidden">
+      {/* Top absolute bar */}
+      <div className="h-2 w-full bg-gradient-to-r from-blue-500 to-indigo-600" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}></div>
+      
+      <div className="p-8 sm:p-12 flex-grow flex flex-col">
+          <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-6 mb-12">
+              <div className="flex items-center gap-4">
+                  {company.logo_url ? (
+                    <img src={company.logo_url} alt="Logo" className="max-h-12 object-contain" />
+                  ) : (
+                    <div className="w-12 h-12 bg-indigo-600 rounded-xl flex items-center justify-center text-white font-bold text-2xl shadow-md" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>
+                        {company.name.charAt(0)}
+                    </div>
+                  )}
+                  <div>
+                      <div className="text-xl font-bold text-slate-900 tracking-tight">{company.name}</div>
+                      <div className="text-sm text-slate-500">{company.email || company.phone}</div>
+                  </div>
               </div>
-            )}
-            {quotation.terms && (
-              <div className={quotation.notes ? "pt-4" : ""}>
-                <h4 className="font-bold text-slate-800 mb-1">Termos e Condições</h4>
-                <p className="whitespace-pre-wrap leading-relaxed text-slate-500">{quotation.terms}</p>
+              <div className="flex flex-col items-start sm:items-end">
+                  <span className="bg-blue-50 text-blue-700 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wide mb-2" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>Proforma</span>
+                  <h2 className="text-2xl font-bold text-slate-400"># {quotation.quotation_number}</h2>
               </div>
-            )}
           </div>
-          <div className="w-full md:w-80 space-y-3 p-6 bg-slate-50 rounded-xl border border-slate-100">
-            <div className="flex justify-between text-sm"><span className="text-slate-500">Subtotal:</span><span className="font-bold text-slate-900">{formatCurrency(quotation.subtotal)}</span></div>
-            {quotation.discount > 0 && (
-              <div className="flex justify-between text-sm text-red-600"><span>Desconto:</span><span className="font-bold">-{formatCurrency(quotation.discount_type === 'percentage' ? (quotation.subtotal * quotation.discount / 100) : quotation.discount)}</span></div>
-            )}
-            <div className="flex justify-between text-sm"><span className="text-slate-500">Total IVA:</span><span className="font-bold text-slate-900">{formatCurrency(quotation.vat_total)}</span></div>
-            <div className="flex justify-between items-end pt-3 mt-1 border-t border-slate-200"><span className="font-bold text-[#003d99] text-sm">TOTAL FINAL:</span><span className="text-xl font-black text-[#003d99]">{formatCurrency(quotation.grand_total)}</span></div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+              <div className="bg-slate-50 rounded-2xl p-6 border border-slate-100" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>
+                  <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">Dados do Cliente</h3>
+                  <div className="font-semibold text-slate-900 text-base">{client?.name || quotation.client_name}</div>
+                  <div className="text-sm text-slate-600 mt-1 whitespace-pre-wrap">{client?.address}</div>
+                  {client?.tax_number && <div className="text-sm text-slate-600 mt-1 font-medium">NUIT: {client.tax_number}</div>}
+              </div>
+              <div className="bg-slate-50 rounded-2xl p-6 border border-slate-100 flex flex-col justify-center" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>
+                  <div className="flex justify-between mb-3">
+                      <span className="text-sm text-slate-500 font-medium">Emissão</span>
+                      <span className="text-sm font-semibold text-slate-900">{formatDate(quotation.date)}</span>
+                  </div>
+                  <div className="flex justify-between mb-3">
+                      <span className="text-sm text-slate-500 font-medium">Válido Até</span>
+                      <span className="text-sm font-semibold text-slate-900 flex items-center gap-2">
+                        {formatDate(quotation.expiry_date)}
+                        {isExpiringSoon && <span className="w-2 h-2 rounded-full bg-amber-500" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}></span>}
+                      </span>
+                  </div>
+                  <div className="flex justify-between">
+                      <span className="text-sm text-slate-500 font-medium">NUIT Emissor</span>
+                      <span className="text-sm font-semibold text-slate-900">{company.tax_number || '---'}</span>
+                  </div>
+              </div>
           </div>
-        </div>
+
+          <div className="mb-10 rounded-xl overflow-hidden border border-slate-200">
+              <table className="w-full text-left text-sm">
+                  <thead className="bg-slate-50" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>
+                      <tr>
+                          <th className="py-4 px-6 text-xs font-semibold text-slate-500 uppercase">Descrição</th>
+                          <th className="py-4 px-6 text-xs font-semibold text-slate-500 uppercase text-center">Qtd</th>
+                          <th className="py-4 px-6 text-xs font-semibold text-slate-500 uppercase text-right">Preço Un.</th>
+                          <th className="py-4 px-6 text-xs font-semibold text-slate-500 uppercase text-right">Total</th>
+                      </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                      {items.map((item: any, i: number) => (
+                        <tr key={i} className="bg-white">
+                            <td className="py-4 px-6">
+                                <div className="font-medium text-slate-900 whitespace-pre-wrap">{item.description}</div>
+                                {item.vat_rate > 0 && <div className="text-slate-500 text-[10px] mt-1 font-medium">IVA: {item.vat_rate}%</div>}
+                            </td>
+                            <td className="py-4 px-6 text-center text-slate-600">{item.quantity}</td>
+                            <td className="py-4 px-6 text-right text-slate-600">{formatCurrency(item.unit_price)}</td>
+                            <td className="py-4 px-6 text-right font-medium text-slate-900">{formatCurrency(item.total)}</td>
+                        </tr>
+                      ))}
+                  </tbody>
+              </table>
+          </div>
+
+          <div className="flex flex-col md:flex-row justify-between items-end mb-8 mt-auto gap-8">
+              <div className="w-full md:w-1/2">
+                  {(quotation.notes || quotation.terms) && (
+                    <>
+                      <h4 className="text-sm font-semibold text-slate-900 mb-2">Notas e Termos</h4>
+                      <div className="text-xs text-slate-600 leading-relaxed bg-blue-50/50 p-4 rounded-xl border border-blue-100/50 whitespace-pre-wrap" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>
+                          {quotation.notes && <p className="mb-2">{quotation.notes}</p>}
+                          {quotation.terms && <p>{quotation.terms}</p>}
+                      </div>
+                    </>
+                  )}
+              </div>
+              <div className="w-full md:w-1/2 bg-slate-900 rounded-2xl p-6 text-white shadow-lg print:bg-slate-900" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>
+                  <div className="flex justify-between py-2 text-sm text-slate-300">
+                      <span>Subtotal</span>
+                      <span>{formatCurrency(quotation.subtotal)}</span>
+                  </div>
+                  {quotation.discount > 0 && (
+                    <div className="flex justify-between py-2 text-sm text-red-300">
+                        <span>Desconto</span>
+                        <span>-{formatCurrency(quotation.discount_type === 'percentage' ? (quotation.subtotal * quotation.discount / 100) : quotation.discount)}</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between py-2 text-sm text-slate-300 border-b border-slate-700 mb-3">
+                      <span>IVA</span>
+                      <span>{formatCurrency(quotation.vat_total)}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                      <span className="text-base font-medium">Total Final</span>
+                      <span className="text-2xl sm:text-3xl font-bold text-white tracking-tight">{formatCurrency(quotation.grand_total)}</span>
+                  </div>
+              </div>
+          </div>
       </div>
+      
       {company.show_branding !== false && (
-        <div className="p-6 bg-slate-50 text-center border-t border-slate-100 print:bg-white print:border-none print:text-left print:p-0 print:pt-8 print:mt-8">
-          <p className="text-slate-400 text-sm">Desenvolvido com <Link href="/" className="text-[#003d99] font-bold hover:underline">Proforma360</Link></p>
+        <div className="p-6 text-center border-t border-slate-100 print:hidden bg-slate-50">
+          <p className="text-slate-500 text-xs font-semibold tracking-wide">Generated with Proforma360 • Commercial Operating Workspace</p>
         </div>
       )}
     </div>
@@ -274,97 +305,118 @@ function ModernTemplate({ quotation, client, company, items, diffDays, isExpirin
 
 function CorporateTemplate({ quotation, client, company, items, diffDays, isExpiringSoon }: any) {
   return (
-    <div className="card-premium overflow-hidden print:shadow-none print:border-none print:m-0">
-      <div className="p-8 sm:p-12 flex flex-col md:flex-row justify-between items-start gap-8">
-        <div className="space-y-4">
-          {company.logo_url ? (
-            <img src={company.logo_url} alt="Logo" className="max-h-20 object-contain" />
-          ) : (
-            <h2 className="text-2xl font-bold text-slate-800 uppercase tracking-wide">{company.name}</h2>
-          )}
-          <div className="text-slate-600 text-sm space-y-1">
-            {company.tax_number && <p>NUIT: {company.tax_number}</p>}
-            {company.address && <p className="whitespace-pre-wrap max-w-xs">{company.address}</p>}
+    <div className="bg-white border border-slate-200/80 shadow-soft rounded-xl print:shadow-none print:border-none print:rounded-none overflow-hidden font-sans text-gray-800">
+      <div className="p-8 sm:p-10 flex flex-col">
+          <div className="border-b-2 border-gray-800 pb-6 mb-8 flex flex-col sm:flex-row justify-between items-start gap-6">
+              <div className="flex flex-col">
+                  <h1 className="text-4xl font-bold text-gray-900 mb-2 uppercase tracking-wide">Proforma</h1>
+                  <p className="text-sm font-bold text-gray-600">Document No: <span className="font-normal text-gray-900">{quotation.quotation_number}</span></p>
+              </div>
+              <div className="text-left sm:text-right">
+                  {company.logo_url ? (
+                    <img src={company.logo_url} alt="Logo" className="max-h-12 object-contain mb-2 sm:ml-auto" />
+                  ) : (
+                    <h2 className="text-2xl font-bold text-indigo-900">{company.name}</h2>
+                  )}
+                  <p className="text-xs text-gray-600 mt-1 whitespace-pre-wrap">{company.address}</p>
+                  {(company.phone || company.email) && <p className="text-xs text-gray-600">{[company.phone, company.email].filter(Boolean).join(" • ")}</p>}
+                  {company.tax_number && <p className="text-xs text-gray-600">NUIT: {company.tax_number}</p>}
+              </div>
           </div>
-        </div>
-        <div className="text-left md:text-right w-full md:w-auto flex flex-col items-start md:items-end">
-          <h1 className="text-2xl font-bold text-slate-800 uppercase tracking-widest mb-6">Proforma</h1>
-          <div className="border border-slate-300 bg-slate-50 p-4 w-full md:w-64 text-left">
-            <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
-              <span className="font-bold text-slate-700">Nº Doc:</span>
-              <span className="text-slate-900 text-right">{quotation.quotation_number}</span>
-              <span className="font-bold text-slate-700">Data:</span>
-              <span className="text-slate-900 text-right">{formatDate(quotation.date)}</span>
-              <span className="font-bold text-slate-700">Validade:</span>
-              <span className={`text-right ${isExpiringSoon ? 'text-amber-600 font-bold' : 'text-slate-900'}`}>{formatDate(quotation.expiry_date)}</span>
-            </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+              <div className="border border-gray-300 p-4 relative pt-6">
+                  <h3 className="text-xs font-bold bg-gray-100 px-3 py-1.5 absolute top-0 left-0 border-b border-r border-gray-300 uppercase" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>Faturar A</h3>
+                  <p className="font-bold text-sm mt-2">{client?.name || quotation.client_name}</p>
+                  <p className="text-sm whitespace-pre-wrap">{client?.address}</p>
+                  {client?.tax_number && <p className="text-sm mt-2 font-bold">NUIT: <span className="font-normal">{client.tax_number}</span></p>}
+              </div>
+              <div className="border border-gray-300 p-0">
+                  <div className="grid grid-cols-2 text-sm h-full">
+                      <div className="p-3 border-r border-b border-gray-300 bg-gray-50 font-bold" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>Data Emissão:</div>
+                      <div className="p-3 border-b border-gray-300">{formatDate(quotation.date)}</div>
+                      
+                      <div className="p-3 border-r border-b border-gray-300 bg-gray-50 font-bold" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>Válido Até:</div>
+                      <div className="p-3 border-b border-gray-300">{formatDate(quotation.expiry_date)}</div>
+                      
+                      <div className="p-3 border-r border-gray-300 bg-gray-50 font-bold" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>Moeda:</div>
+                      <div className="p-3 border-gray-300">MZN</div>
+                  </div>
+              </div>
           </div>
-        </div>
-      </div>
 
-      <div className="px-8 sm:px-12">
-        <h3 className="text-sm font-bold text-slate-800 uppercase tracking-widest mb-2">Faturar A</h3>
-        <hr className="border-slate-300 mb-4" />
-        <p className="text-lg font-bold text-slate-900 mb-1">{client?.name || quotation.client_name}</p>
-        {client?.tax_number && <p className="text-sm text-slate-700 mb-1">NUIT: {client.tax_number}</p>}
-        {client?.address && <p className="text-sm text-slate-700 max-w-md">{client.address}</p>}
-      </div>
+          <div className="mb-8">
+              <table className="w-full text-sm border-collapse border border-gray-300">
+                  <thead>
+                      <tr className="bg-gray-800 text-white" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>
+                          <th className="border border-gray-300 p-2 text-left">Descrição</th>
+                          <th className="border border-gray-300 p-2 text-center w-16">Qtd</th>
+                          <th className="border border-gray-300 p-2 text-right w-28">Preço Un.</th>
+                          <th className="border border-gray-300 p-2 text-right w-16">IVA</th>
+                          <th className="border border-gray-300 p-2 text-right w-32">Total</th>
+                      </tr>
+                  </thead>
+                  <tbody>
+                      {items.map((item: any, i: number) => (
+                        <tr key={i}>
+                            <td className="border border-gray-300 p-2 font-medium whitespace-pre-wrap">{item.description}</td>
+                            <td className="border border-gray-300 p-2 text-center">{item.quantity}</td>
+                            <td className="border border-gray-300 p-2 text-right">{formatCurrency(item.unit_price)}</td>
+                            <td className="border border-gray-300 p-2 text-right text-gray-500 text-xs">{item.vat_rate}%</td>
+                            <td className="border border-gray-300 p-2 text-right font-bold">{formatCurrency(item.total)}</td>
+                        </tr>
+                      ))}
+                  </tbody>
+              </table>
+          </div>
 
-      <div className="p-8 sm:p-12 mt-4">
-        <div className="overflow-x-auto border border-slate-300">
-          <table className="w-full text-left border-collapse bg-white">
-            <thead className="bg-slate-100 border-b border-slate-300">
-              <tr>
-                <th className="py-2 px-3 font-bold text-slate-800 text-xs w-1/2 border-r border-slate-300">Descrição</th>
-                <th className="py-2 px-3 font-bold text-slate-800 text-xs text-center border-r border-slate-300">Qtd</th>
-                <th className="py-2 px-3 font-bold text-slate-800 text-xs text-right border-r border-slate-300">Preço Un.</th>
-                <th className="py-2 px-3 font-bold text-slate-800 text-xs text-right border-r border-slate-300">IVA</th>
-                <th className="py-2 px-3 font-bold text-slate-800 text-xs text-right">Total</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-300">
-              {items.map((item: any, i: number) => (
-                <tr key={i}>
-                  <td className="py-3 px-3 border-r border-slate-300"><p className="text-sm text-slate-800 whitespace-pre-wrap">{item.description}</p></td>
-                  <td className="py-3 px-3 text-sm text-center text-slate-800 border-r border-slate-300">{item.quantity}</td>
-                  <td className="py-3 px-3 text-sm text-right text-slate-800 border-r border-slate-300">{formatCurrency(item.unit_price)}</td>
-                  <td className="py-3 px-3 text-sm text-right text-slate-800 border-r border-slate-300">{item.vat_rate}%</td>
-                  <td className="py-3 px-3 text-sm font-bold text-right text-slate-900">{formatCurrency(item.total)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+          <div className="flex justify-end mb-12">
+              <div className="w-full sm:w-1/2 md:w-2/5 border border-gray-300">
+                  <div className="flex text-sm border-b border-gray-300">
+                      <div className="w-1/2 p-2 bg-gray-50 font-bold border-r border-gray-300" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>Subtotal</div>
+                      <div className="w-1/2 p-2 text-right">{formatCurrency(quotation.subtotal)}</div>
+                  </div>
+                  {quotation.discount > 0 && (
+                    <div className="flex text-sm border-b border-gray-300">
+                        <div className="w-1/2 p-2 bg-gray-50 font-bold border-r border-gray-300 text-red-600" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>Desconto</div>
+                        <div className="w-1/2 p-2 text-right text-red-600">-{formatCurrency(quotation.discount_type === 'percentage' ? (quotation.subtotal * quotation.discount / 100) : quotation.discount)}</div>
+                    </div>
+                  )}
+                  <div className="flex text-sm border-b border-gray-300">
+                      <div className="w-1/2 p-2 bg-gray-50 font-bold border-r border-gray-300" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>Total IVA</div>
+                      <div className="w-1/2 p-2 text-right">{formatCurrency(quotation.vat_total)}</div>
+                  </div>
+                  <div className="flex text-lg">
+                      <div className="w-1/2 p-3 bg-gray-800 text-white font-bold border-r border-gray-300" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>TOTAL FINAL</div>
+                      <div className="w-1/2 p-3 text-right font-bold bg-gray-100" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>{formatCurrency(quotation.grand_total)}</div>
+                  </div>
+              </div>
+          </div>
 
-        <div className="flex flex-col md:flex-row justify-between items-start mt-8 gap-8">
-          <div className="w-full md:w-1/2 space-y-4 text-sm text-slate-700">
-            {quotation.notes && (
+          <div className="mt-auto grid grid-cols-1 md:grid-cols-2 gap-12 text-sm">
               <div>
-                <h4 className="font-bold text-slate-900 mb-1 uppercase text-xs">Notas</h4>
-                <p className="whitespace-pre-wrap">{quotation.notes}</p>
+                  <h4 className="font-bold border-b-2 border-gray-800 pb-1 mb-2 uppercase text-xs">Termos & Condições</h4>
+                  <div className="text-xs text-gray-600 whitespace-pre-wrap">
+                      {quotation.terms || 'Nenhum termo especificado.'}
+                  </div>
+                  {quotation.notes && (
+                      <div className="mt-4">
+                          <h4 className="font-bold border-b-2 border-gray-800 pb-1 mb-2 uppercase text-xs">Notas Adicionais</h4>
+                          <div className="text-xs text-gray-600 whitespace-pre-wrap">{quotation.notes}</div>
+                      </div>
+                  )}
               </div>
-            )}
-            {quotation.terms && (
-              <div className={quotation.notes ? "pt-4" : ""}>
-                <h4 className="font-bold text-slate-900 mb-1 uppercase text-xs">Termos e Condições</h4>
-                <p className="whitespace-pre-wrap">{quotation.terms}</p>
+              <div className="flex flex-col justify-end">
+                  <h4 className="font-bold border-b-2 border-gray-800 pb-1 mb-12 uppercase text-xs">Assinatura Autorizada</h4>
+                  <div className="border-b border-gray-400 w-full mb-2"></div>
+                  <p className="text-xs text-gray-600 text-center">{company.name} / Data</p>
               </div>
-            )}
           </div>
-          <div className="w-full md:w-72 p-4 bg-slate-50 border border-slate-300">
-            <div className="flex justify-between text-sm mb-2"><span className="text-slate-700">Subtotal:</span><span className="font-medium text-slate-900">{formatCurrency(quotation.subtotal)}</span></div>
-            {quotation.discount > 0 && (
-              <div className="flex justify-between text-sm text-slate-700 mb-2"><span>Desconto:</span><span className="font-medium">-{formatCurrency(quotation.discount_type === 'percentage' ? (quotation.subtotal * quotation.discount / 100) : quotation.discount)}</span></div>
-            )}
-            <div className="flex justify-between text-sm mb-4"><span className="text-slate-700">Total IVA:</span><span className="font-medium text-slate-900">{formatCurrency(quotation.vat_total)}</span></div>
-            <hr className="border-slate-300 mb-3" />
-            <div className="flex justify-between items-end"><span className="font-bold text-slate-900 text-sm">TOTAL FINAL:</span><span className="text-lg font-bold text-slate-900">{formatCurrency(quotation.grand_total)}</span></div>
-          </div>
-        </div>
       </div>
+      
       {company.show_branding !== false && (
-        <div className="p-4 border-t border-slate-300 text-center print:bg-white print:border-none print:text-left print:p-0 print:pt-8 print:mt-8">
-          <p className="text-slate-500 text-xs">Desenvolvido com <Link href="/" className="font-bold hover:underline text-slate-700">Proforma360</Link></p>
+        <div className="p-4 text-center border-t border-slate-200 print:hidden bg-slate-50 mt-4">
+          <p className="text-slate-500 text-[10px] font-semibold tracking-wide uppercase">Powered by Proforma360</p>
         </div>
       )}
     </div>
@@ -423,6 +475,7 @@ export default async function ViewProposalPage({ params }: Props) {
 
   return (
     <div className="min-h-screen bg-[#f1f5f9] font-sans selection:bg-blue-100 selection:text-blue-900 pb-20">
+      <ViewTracker quotationId={quotation.id} />
       
       {/* Top Banner (Action Bar) */}
       <div className="bg-white border-b border-gray-200 sticky top-0 z-40 shadow-sm print:hidden">

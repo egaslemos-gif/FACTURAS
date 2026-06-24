@@ -1,5 +1,6 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { persist, createJSONStorage } from 'zustand/middleware';
+import { namespaceStorage } from '@/lib/runtime/namespaceStorage';
 import { dbClient } from '@/lib/db/client';
 
 export interface License {
@@ -55,74 +56,41 @@ export const useLicenseStore = create<LicenseState>()(
         }
 
         try {
-          const res = await fetch('/api/licensing/check', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' }
-          });
-          
-          if (!res.ok) throw new Error('Failed to fetch license');
-          
-          const data = await res.json();
-          let used_this_month = data.license?.used_this_month || 0;
-          
+          let localThisMonth = 0;
           try {
             const localQuotes = await dbClient.query("SELECT created_at FROM quotations");
-            const now = new Date();
-            const localThisMonth = localQuotes.filter(q => {
+            const d = new Date();
+            localThisMonth = localQuotes.filter(q => {
                if (!q.created_at) return false;
                const date = new Date(q.created_at);
-               return date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear();
+               return date.getMonth() === d.getMonth() && date.getFullYear() === d.getFullYear();
             }).length;
-            used_this_month = Math.max(used_this_month, localThisMonth);
           } catch(e) {
             console.warn("Failed to check local usage", e);
           }
 
-          if (data.license) {
-            data.license.used_this_month = used_this_month;
-            set({ 
-              license: data.license, 
-              isAdmin: data.isAdmin || false, 
-              lastChecked: now,
-              // Check if limit is reached during fetch
-              isLimitReached: !data.license.unlimited && data.license.used_this_month >= data.license.monthly_limit
-            });
-          }
+          // To maintain compatibility with old UI without rewriting every component,
+          // we mock the License response using local data and the new Governance baseline.
+          set({ 
+            license: {
+              user_id: 'local',
+              email: 'local',
+              company_name: '',
+              plan: 'free',
+              monthly_limit: 1,
+              used_this_month: localThisMonth,
+              unlimited: false,
+              can_export_pdf: true,
+              can_share: true,
+              remove_branding: false,
+              is_active: true
+            } as any,
+            isAdmin: false,
+            lastChecked: now,
+            isLimitReached: localThisMonth >= 1
+          });
         } catch (error) {
           console.error('Offline or error checking license:', error);
-          // Prevent UI from hanging forever if Google Script is failing or offline
-          if (!get().license) {
-            
-            let localThisMonth = 0;
-            try {
-              const localQuotes = await dbClient.query("SELECT created_at FROM quotations");
-              const now = new Date();
-              localThisMonth = localQuotes.filter(q => {
-                 if (!q.created_at) return false;
-                 const date = new Date(q.created_at);
-                 return date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear();
-              }).length;
-            } catch(e) {}
-            
-            set({ 
-              license: {
-                user_id: 'local-fallback',
-                email: 'local-fallback',
-                company_name: '',
-                plan: 'free',
-                monthly_limit: 3,
-                used_this_month: localThisMonth,
-                unlimited: false,
-                can_export_pdf: true,
-                can_share: true,
-                remove_branding: false,
-                is_active: true
-              } as any,
-              isAdmin: false,
-              lastChecked: now,
-              isLimitReached: localThisMonth >= 3
-            });
-          }
         }
       },
 
@@ -136,33 +104,17 @@ export const useLicenseStore = create<LicenseState>()(
         }
 
         try {
-          const res = await fetch('/api/licensing/increment', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' }
-          });
-          
-          const data = await res.json();
-          
-          if (res.status === 403 || data.error === 'LIMIT_REACHED') {
-            set({ showModal: true, isLimitReached: true });
-            return false;
-          }
-          
-          if (res.ok && data.license) {
+          if (license) {
+            const newUsage = license.used_this_month + 1;
             set({ 
-              license: data.license, 
+              license: { ...license, used_this_month: newUsage }, 
               lastChecked: Date.now(),
-              isLimitReached: !data.license.unlimited && data.license.used_this_month >= data.license.monthly_limit
+              isLimitReached: !license.unlimited && newUsage >= license.monthly_limit
             });
-            return true;
           }
-          
-          throw new Error('Unknown error during increment');
+          return true;
         } catch (error) {
-          console.error('Failed to increment usage remotely', error);
-          // If offline, we let it pass for UX, but log it locally if we want.
-          // Because of the offline-first philosophy, if fetch fails (network error), we return true to allow offline PDF generation.
-          // If it returns a 403 from the server, we return false.
+          console.error('Failed to increment usage locally', error);
           return true; 
         }
       },
@@ -172,6 +124,7 @@ export const useLicenseStore = create<LicenseState>()(
     }),
     {
       name: 'proforma360-license-storage',
+      storage: createJSONStorage(() => namespaceStorage),
       partialize: (state) => ({ 
         license: state.license, 
         isAdmin: state.isAdmin, 

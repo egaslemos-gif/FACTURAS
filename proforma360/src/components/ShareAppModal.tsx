@@ -71,10 +71,10 @@ https://proforma360.vercel.app/`;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/60 backdrop-blur-sm transition-opacity animate-in fade-in">
-      <div className="bg-[var(--color-surface-elevated)] w-full max-w-lg rounded-xl shadow-elevated border border-gray-100 overflow-hidden flex flex-col slide-in-from-bottom-4 animate-in">
+      <div className="bg-[var(--color-surface-elevated)] w-full max-w-lg rounded-[var(--radius-lg)] elevation-3 border border-[var(--color-outline-variant)] overflow-hidden flex flex-col slide-in-from-bottom-4 animate-in">
         
         {/* Header */}
-        <div className="flex items-center justify-between p-5 border-b border-gray-100">
+        <div className="flex items-center justify-between p-5 border-b border-[var(--color-outline-variant)]">
           <div>
             <h3 className="text-xl font-bold text-gray-900 tracking-tight">Recomendar Proforma360</h3>
             <p className="text-sm text-gray-500 mt-0.5">Partilhe o sistema com os seus parceiros</p>

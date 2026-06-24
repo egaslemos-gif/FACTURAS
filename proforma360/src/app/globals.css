@@ -39,6 +39,13 @@
   --color-info-soft: #EFF6FF;
   --color-info-text: #1E40AF;
 
+  /* --- Colors: Operational Severity --- */
+  --color-severity-healthy: #10B981; /* emerald-500 */
+  --color-severity-attention: #F59E0B; /* amber-500 */
+  --color-severity-critical: #EF4444; /* red-500 */
+  --color-severity-frozen: #8B5CF6; /* violet-500 */
+  --color-severity-muted: #94A3B8; /* slate-400 */
+
   /* --- Colors: Neutral --- */
   --color-background: #FAFAF8;
   --color-on-background: #0f172a;
@@ -79,11 +86,14 @@
   --radius-xl: 16px;
   --radius-full: 9999px;
 
-  /* --- Shadows (Layered Surfaces - Linear/Stripe Style) --- */
+  /* --- Shadows (Operational Surface System - 3 Levels Max) --- */
   --shadow-none: 0 0 transparent;
-  --shadow-soft: 0 4px 12px -2px rgba(0, 0, 0, 0.03); /* Elevation 1: Headers during scroll, subtle hovers */
-  --shadow-card: 0 8px 16px -4px rgba(0, 0, 0, 0.04), 0 2px 4px -1px rgba(0, 0, 0, 0.02); /* Elevation 2: Cards and standard surfaces */
-  --shadow-elevated: 0 24px 48px -12px rgba(0, 0, 0, 0.08), 0 4px 12px -2px rgba(0, 0, 0, 0.04); /* Elevation 3: Modals, Popovers, Dropdowns */
+  --shadow-surface-0: 0 0 transparent; /* Backgrounds */
+  --shadow-surface-1: 0 1px 3px 0 rgba(0, 0, 0, 0.08), 0 1px 2px -1px rgba(0, 0, 0, 0.04); /* Cards, Action Hubs */
+  --shadow-surface-2: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.05); /* Overlays, Modals, Popovers */
+  --shadow-soft: var(--shadow-surface-1); /* Backwards compat */
+  --shadow-card: var(--shadow-surface-1); /* Backwards compat */
+  --shadow-elevated: var(--shadow-surface-2); /* Backwards compat */
 
   /* --- Spacing --- */
   --space-2: 8px;
@@ -133,9 +143,37 @@
    BASE STYLES
    ======================================== */
 
+@layer utilities {
+  .table-unified {
+    @apply w-full text-sm text-left;
+  }
+  .th-unified {
+    @apply sticky top-0 bg-[var(--color-surface-dim)] text-[var(--color-on-surface-variant)] font-bold uppercase tracking-wider text-[11px] py-3 px-4 border-b border-[var(--color-outline-variant)] z-10;
+  }
+  .td-unified {
+    @apply py-3 px-4 border-b border-[var(--color-outline-variant)] text-[var(--color-on-surface)] group-hover:bg-[var(--color-surface-dim)] transition-colors;
+  }
+  .tr-unified {
+    @apply transition-colors;
+  }
+}
+
 :root {
-  --color-warning: #f59e0b;
-  --color-warning-container: #fef3c7;
+  /* Operational Tokens */
+  --text-primary: #0f172a; /* slate-900 */
+  --text-secondary: #475569; /* slate-600 */
+  --text-muted: #94a3b8; /* slate-400 */
+  --severity-attention: #f59e0b; /* amber-500 */
+  --severity-attention-bg: #fef3c7; /* amber-50 */
+  --severity-critical: #ef4444; /* red-500 */
+  --severity-critical-bg: #fef2f2; /* red-50 */
+  --severity-frozen: #8b5cf6; /* violet-500 */
+  --severity-frozen-bg: #f5f3ff; /* violet-50 */
+  --spacing-compact: 0.5rem;
+  --spacing-dense: 0.25rem;
+  
+  --color-warning: var(--severity-attention);
+  --color-warning-container: var(--severity-attention-bg);
   --color-on-warning: #ffffff;
   --color-on-warning-container: #92400e;
   --background: oklch(1 0 0);
@@ -373,43 +411,45 @@ body {
    ======================================== */
 .dashboard-section {
   background: rgba(255, 255, 255, 0.92);
-  border-radius: 16px;
-  padding: 20px;
+  border-radius: 12px;
+  padding: 16px;
   border: 1px solid rgba(15, 23, 42, 0.04);
-  box-shadow: 0 2px 4px -2px rgba(15, 23, 42, 0.02), 0 4px 12px -4px rgba(15, 23, 42, 0.03);
-  margin-bottom: 24px;
+  box-shadow: 0 1px 2px -1px rgba(15, 23, 42, 0.02), 0 2px 8px -2px rgba(15, 23, 42, 0.03);
+  margin-bottom: 20px;
 }
 @media (min-width: 768px) {
   .dashboard-section {
-    padding: 24px;
-    margin-bottom: 32px;
+    padding: 20px;
+    margin-bottom: 24px;
   }
 }
 
 .dashboard-section-header {
-  margin-bottom: 16px;
+  margin-bottom: 12px;
 }
 .dashboard-section-title {
-  font-size: 1rem;
+  font-size: 0.9375rem;
   font-weight: 600;
-  letter-spacing: -0.015em;
+  letter-spacing: -0.01em;
   color: #0f172a;
 }
 .dashboard-section-subtitle {
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   color: #64748b;
-  margin-top: 4px;
+  margin-top: 2px;
 }
 
 .dashboard-card {
   background-color: #FCFCFD;
-  border: 1px solid rgba(15, 23, 42, 0.04);
-  border-radius: 16px;
-  transition: all 0.2s ease;
+  border: 1px solid rgba(15, 23, 42, 0.06);
+  border-radius: 12px;
+  padding: 16px;
+  transition: all 0.15s ease;
 }
 .dashboard-card:hover {
   background-color: #F8FAFC;
-  border-color: rgba(15, 23, 42, 0.08);
+  border-color: rgba(15, 23, 42, 0.1);
+  box-shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.03);
 }
 
 .btn-primary {
@@ -544,4 +584,12 @@ body {
   --sidebar-accent: oklch(0.269 0 0);
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
+}
+
+/* Hide Vercel Feedback Toolbar / Comments FAB in view mode */
+vercel-live-feedback, 
+[class*="vercel-"], 
+[id*="vercel-"], 
+#vercel-live-feedback {
+  display: none !important;
 }

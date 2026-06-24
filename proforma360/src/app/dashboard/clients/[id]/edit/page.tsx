@@ -79,7 +79,7 @@ export default function EditClientPage() {
         <div>
           <h1 className="text-headline-lg text-[var(--color-on-surface)]">Editar Cliente</h1>
           <p className="text-body-md text-[var(--color-on-surface-variant)] mt-1">
-            Atualize as informações do cliente
+            Atualize as informações da entidade
           </p>
         </div>
       </div>
@@ -87,12 +87,12 @@ export default function EditClientPage() {
       <form onSubmit={handleSubmit} className="bg-white p-6 md:p-8 rounded-[var(--radius-lg)] elevation-1 border border-[var(--color-outline-variant)]">
         <div className="flex items-center gap-3 mb-6">
           <User className="w-6 h-6 text-[var(--color-primary)]" />
-          <h2 className="text-headline-sm">Detalhes do Cliente</h2>
+          <h2 className="text-headline-sm">Informação da Entidade</h2>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="col-span-1 md:col-span-2">
-            <label className="block text-label-md mb-2">Nome Completo / Empresa *</label>
+            <label className="block text-label-md mb-2">Entidade Comercial ou Nome Completo *</label>
             <input
               type="text"
               name="name"
@@ -100,19 +100,19 @@ export default function EditClientPage() {
               value={formData.name}
               onChange={handleChange}
               className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-md focus:ring-2 focus:ring-[var(--color-primary)] outline-none"
-              placeholder="Ex: João Silva ou Empresa XYZ"
+              placeholder="Ex: Acme Lda. ou João Silva"
             />
           </div>
 
           <div>
-            <label className="block text-label-md mb-2">NUIT / NIF</label>
+            <label className="block text-label-md mb-2">NUIT / NIF da Entidade</label>
             <input
               type="text"
               name="tax_number"
               value={formData.tax_number}
               onChange={handleChange}
               className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-md focus:ring-2 focus:ring-[var(--color-primary)] outline-none"
-              placeholder="Ex: 400123456"
+              placeholder="Recomendado para faturação B2B"
             />
           </div>
 
@@ -129,14 +129,14 @@ export default function EditClientPage() {
           </div>
 
           <div className="col-span-1 md:col-span-2">
-            <label className="block text-label-md mb-2">E-mail</label>
+            <label className="block text-label-md mb-2">E-mail Comercial</label>
             <input
               type="email"
               name="email"
               value={formData.email}
               onChange={handleChange}
               className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-md focus:ring-2 focus:ring-[var(--color-primary)] outline-none"
-              placeholder="cliente@email.com"
+              placeholder="contacto@entidade.com"
             />
           </div>
 
@@ -153,19 +153,19 @@ export default function EditClientPage() {
           </div>
 
           <div className="col-span-1 md:col-span-2">
-            <label className="block text-label-md mb-2">Notas Internas (Opcional)</label>
+            <label className="block text-label-md mb-2">Notas Internas de Negócio (Opcional)</label>
             <textarea
               name="notes"
               value={formData.notes}
               onChange={handleChange}
               rows={2}
               className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-md focus:ring-2 focus:ring-[var(--color-primary)] outline-none resize-none"
-              placeholder="Informação adicional sobre este cliente..."
+              placeholder="Pontos de contacto, decisores, condições especiais..."
             />
           </div>
 
           <div>
-            <label className="block text-label-md mb-2">Origem do Cliente</label>
+            <label className="block text-label-md mb-2">Canal de Aquisição</label>
             <select
               name="origin"
               value={formData.origin}
@@ -173,23 +173,23 @@ export default function EditClientPage() {
               className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-md focus:ring-2 focus:ring-[var(--color-primary)] outline-none bg-white"
             >
               <option value="">Selecione...</option>
-              <option value="website">Website</option>
-              <option value="referral">Recomendação</option>
-              <option value="social">Redes Sociais</option>
-              <option value="direct">Contacto Direto</option>
-              <option value="other">Outro</option>
+              <option value="website">Inbound / Website</option>
+              <option value="referral">Parceiro / Recomendação</option>
+              <option value="social">LinkedIn / Redes Sociais</option>
+              <option value="direct">Prospeção Direta / Outbound</option>
+              <option value="other">Outro Canal</option>
             </select>
           </div>
 
           <div>
-            <label className="block text-label-md mb-2">Tags (Separadas por vírgula)</label>
+            <label className="block text-label-md mb-2">Segmentação / Tags (Separadas por vírgula)</label>
             <input
               type="text"
               name="tagsInput"
               value={formData.tagsInput}
               onChange={handleChange}
               className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-md focus:ring-2 focus:ring-[var(--color-primary)] outline-none"
-              placeholder="Ex: VIP, Retalho, B2B"
+              placeholder="Ex: B2B, Key Account, Sector Público"
             />
           </div>
         </div>

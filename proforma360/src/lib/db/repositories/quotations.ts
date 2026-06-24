@@ -50,9 +50,22 @@ export const quotationsRepo = {
       updated_at: timestamp,
     };
 
+    const { DocumentSignature } = await import("../../documents/documentSignature");
+    const signatures = await DocumentSignature.generateSignatures(newQuotation as unknown as Quotation);
+    
+    newQuotation.semantic_schema_signature = signatures.semantic_schema_signature;
+    newQuotation.execution_plan_signature = signatures.execution_plan_signature;
+    newQuotation.totals_ast_signature = signatures.totals_ast_signature;
+
     const keys = Object.keys(newQuotation).join(", ");
     const placeholders = Object.keys(newQuotation).fill("?").join(", ");
     const values = Object.values(newQuotation);
+
+    const { RuntimeConsistencyCheckpoint } = await import("../../runtime/runtimeConsistencyCheckpoint");
+    await RuntimeConsistencyCheckpoint.validateBeforeSave(newQuotation as unknown as Quotation);
+
+    const { RuntimeReplayReceipt } = await import("../../runtime/runtimeReplayReceipt");
+    await RuntimeReplayReceipt.logExecutionReceipt(quotationId, signatures);
 
     // Use transaction-like behavior by building a block of queries
     // Since sql.js allows multiple statements separated by ;, but bind parameters might be tricky for batch
@@ -95,8 +108,23 @@ export const quotationsRepo = {
   ): Promise<void> {
     const timestamp = now();
     
+    // Recalculate signatures using current state merged with updates
+    const currentQData = await dbClient.getOne("SELECT * FROM quotations WHERE id = ?", [id]);
+    if (currentQData) {
+      const mergedQuotation = { ...currentQData, ...quotationData };
+      const { DocumentSignature } = await import("../../documents/documentSignature");
+      const signatures = await DocumentSignature.generateSignatures(mergedQuotation as unknown as Quotation);
+      quotationData.semantic_schema_signature = signatures.semantic_schema_signature;
+      quotationData.execution_plan_signature = signatures.execution_plan_signature;
+      quotationData.totals_ast_signature = signatures.totals_ast_signature;
+    }
+
     // Update Quotation
     if (Object.keys(quotationData).length > 0) {
+      const { RuntimeConsistencyCheckpoint } = await import("../../runtime/runtimeConsistencyCheckpoint");
+      const currentSnapshot = await dbClient.getOne("SELECT * FROM quotations WHERE id = ?", [id]);
+      await RuntimeConsistencyCheckpoint.validateBeforeSave({ ...currentSnapshot, ...quotationData } as unknown as Quotation);
+
       const updates: string[] = [];
       const values: any[] = [];
 
@@ -114,6 +142,15 @@ export const quotationsRepo = {
       values.push(id);
 
       await dbClient.executeWrite(`UPDATE quotations SET ${updates.join(", ")} WHERE id = ?`, values);
+
+      if (quotationData.semantic_schema_signature) {
+        const { RuntimeReplayReceipt } = await import("../../runtime/runtimeReplayReceipt");
+        await RuntimeReplayReceipt.logExecutionReceipt(id, {
+          semantic_schema_signature: quotationData.semantic_schema_signature as string,
+          execution_plan_signature: quotationData.execution_plan_signature as string,
+          totals_ast_signature: quotationData.totals_ast_signature as string,
+        });
+      }
     }
 
     // Update Items (delete all and re-insert)

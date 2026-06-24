@@ -51,13 +51,8 @@ export default function ShareQuotationModal({ isOpen, onClose, quotation, compan
     async function generateShareLink() {
       const { isOnline } = useNetworkStore.getState();
 
-      if (quotation.status === 'draft') {
-        const canShare = await useLicenseStore.getState().incrementUsage();
-        if (!canShare) {
-          if (isMounted) onClose();
-          return;
-        }
-      }
+      // O limite é verificado rigorosamente na criação da proforma.
+      // O utilizador tem total permissão para partilhar as proformas que conseguiu criar dentro do seu limite.
 
       if (!isOnline) {
         if (isMounted) {
@@ -66,7 +61,7 @@ export default function ShareQuotationModal({ isOpen, onClose, quotation, compan
           const clientName = client?.name || quotation.client_name || 'Cliente';
           const cName = company?.name || 'A Empresa';
           
-          let wText = `📄 *Proposta Comercial ${quotation.quotation_number}*\n\nOlá ${clientName},\nSegue a nossa proposta comercial para sua apreciação.\n\n*Valor Total:* ${formatCurrency(quotation.grand_total)}\n*Válida até:* ${expiryDateFormatted} (${validityDays} dias)\n\n(O ficheiro PDF segue em anexo.)\n\nCom os melhores cumprimentos,\n${cName}`;
+          let wText = `📄 *Proposta Comercial ${quotation.quotation_number}*\n\nOlá ${clientName},\nSegue a nossa proposta comercial para sua apreciação.\n\n*Valor Total:* ${formatCurrency(quotation.grand_total)}\n*Válido até:* ${expiryDateFormatted} (${validityDays} dias)\n\n(O ficheiro PDF segue em anexo.)\n\nCom os melhores cumprimentos,\n${cName}`;
 
           if (company.show_branding !== false) {
              wText += `\n\n---\n⚡ Powered by Proforma360`;
@@ -74,7 +69,7 @@ export default function ShareQuotationModal({ isOpen, onClose, quotation, compan
           
           setWhatsappText(wText);
           setEmailSubject(`Proposta Comercial ${quotation.quotation_number} — ${cName}`);
-          setEmailBodyPlain(`Estimado(a) ${clientName},\n\nSegue em anexo a nossa proposta comercial número ${quotation.quotation_number}.\n\nValor: ${formatCurrency(quotation.grand_total)}\nVálida até: ${expiryDateFormatted} (${validityDays} dias)\n\nCaso tenha alguma dúvida, não hesite em contactar-nos.\n\nCom os melhores cumprimentos,\n${cName}`);
+          setEmailBodyPlain(`Estimado(a) ${clientName},\n\nSegue em anexo a nossa proposta comercial número ${quotation.quotation_number}.\n\nValor: ${formatCurrency(quotation.grand_total)}\nVálido até: ${expiryDateFormatted} (${validityDays} dias)\n\nCaso tenha alguma dúvida, não hesite em contactar-nos.\n\nCom os melhores cumprimentos,\n${cName}`);
         }
         return;
       }
@@ -112,7 +107,7 @@ export default function ShareQuotationModal({ isOpen, onClose, quotation, compan
           const clientName = client?.name || quotation.client_name || 'Cliente';
           const cName = company?.name || 'A Empresa';
           
-          let wText = `📄 *Proposta Comercial ${quotation.quotation_number}*\n\nOlá ${clientName},\nA sua proposta comercial já se encontra disponível para consulta.\n\n*Valor Total:* ${formatCurrency(quotation.grand_total)}\n*Válida até:* ${expiryDateFormatted} (${validityDays} dias)\n\n🔗 *Ver proposta e PDF:*\n${url}\n\nCom os melhores cumprimentos,\n${cName}`;
+          let wText = `📄 *Proposta Comercial ${quotation.quotation_number}*\n\nOlá ${clientName},\nA sua proposta comercial já se encontra disponível para consulta.\n\n*Valor Total:* ${formatCurrency(quotation.grand_total)}\n*Válido até:* ${expiryDateFormatted} (${validityDays} dias)\n\n🔗 *Ver proposta e PDF:*\n${url}\n\nCom os melhores cumprimentos,\n${cName}`;
 
           if (company.show_branding !== false) {
              wText += `\n\n---\n⚡ Powered by Proforma360\nGestão comercial moderna para empresas.\nhttps://proforma360.vercel.app`;
@@ -121,7 +116,7 @@ export default function ShareQuotationModal({ isOpen, onClose, quotation, compan
           setWhatsappText(wText);
           
           setEmailSubject(`Proposta Comercial ${quotation.quotation_number} — ${cName}`);
-          setEmailBodyPlain(`Estimado(a) ${clientName},\n\nSegue a nossa proposta comercial número ${quotation.quotation_number}.\n\nValor: ${formatCurrency(quotation.grand_total)}\nVálida até: ${expiryDateFormatted} (${validityDays} dias)\n\nPode aceder à proposta no link abaixo:\n${url}\n\nCaso tenha alguma dúvida, não hesite em contactar-nos.\n\nCom os melhores cumprimentos,\n${cName}`);
+          setEmailBodyPlain(`Estimado(a) ${clientName},\n\nSegue a nossa proposta comercial número ${quotation.quotation_number}.\n\nValor: ${formatCurrency(quotation.grand_total)}\nVálido até: ${expiryDateFormatted} (${validityDays} dias)\n\nPode aceder à proposta no link abaixo:\n${url}\n\nCaso tenha alguma dúvida, não hesite em contactar-nos.\n\nCom os melhores cumprimentos,\n${cName}`);
           
           setIsLoading(false);
         }
@@ -246,10 +241,10 @@ export default function ShareQuotationModal({ isOpen, onClose, quotation, compan
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/60 backdrop-blur-sm transition-opacity">
-      <div className="bg-[var(--color-surface-elevated)] w-full max-w-2xl rounded-xl shadow-elevated border border-gray-100 overflow-hidden flex flex-col max-h-[95vh] sm:max-h-[85vh]">
+      <div className="bg-[var(--color-surface-elevated)] w-full max-w-2xl rounded-[var(--radius-lg)] elevation-3 border border-[var(--color-outline-variant)] overflow-hidden flex flex-col max-h-[95vh] sm:max-h-[85vh]">
         
         {/* Header */}
-        <div className="flex items-center justify-between p-5 border-b border-gray-100 bg-[var(--color-surface-elevated)]">
+        <div className="flex items-center justify-between p-5 border-b border-[var(--color-outline-variant)] bg-[var(--color-surface-elevated)]">
           <div>
             <h3 className="text-xl font-bold text-gray-900 tracking-tight">Partilhar Proposta</h3>
             <p className="text-sm text-gray-500 mt-0.5">{quotation.quotation_number}</p>
@@ -321,7 +316,7 @@ export default function ShareQuotationModal({ isOpen, onClose, quotation, compan
               </div>
             )}
             {/* Tabs */}
-            <div className="flex p-3 gap-2 border-b border-gray-100 bg-[var(--color-surface-elevated)] overflow-x-auto no-scrollbar">
+            <div className="flex p-3 gap-2 border-b border-[var(--color-outline-variant)] bg-[var(--color-surface-elevated)] overflow-x-auto no-scrollbar">
               <button 
                 onClick={() => setActiveTab('email')}
                 className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold whitespace-nowrap transition-all ${activeTab === 'email' ? 'bg-blue-600 text-white shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}
@@ -408,7 +403,7 @@ export default function ShareQuotationModal({ isOpen, onClose, quotation, compan
                           <table width="100%" cellPadding="0" cellSpacing="0" border={0}>
                             <tbody>
                               <tr>
-                                <td style={{ paddingBottom: '8px', fontSize: '14px', color: '#64748b' }}>Referência:</td>
+                                <td style={{ paddingBottom: '8px', fontSize: '14px', color: '#64748b' }}>Ref.:</td>
                                 <td style={{ paddingBottom: '8px', fontSize: '14px', fontWeight: '600', color: '#0f172a', textAlign: 'right' }}>{quotation.quotation_number}</td>
                               </tr>
                               <tr>
@@ -416,7 +411,7 @@ export default function ShareQuotationModal({ isOpen, onClose, quotation, compan
                                 <td style={{ paddingBottom: '8px', fontSize: '15px', fontWeight: 'bold', color: '#2563eb', textAlign: 'right' }}>{formatCurrency(quotation.grand_total)}</td>
                               </tr>
                               <tr>
-                                <td style={{ fontSize: '14px', color: '#64748b' }}>Validade:</td>
+                                <td style={{ fontSize: '14px', color: '#64748b' }}>Válido até:</td>
                                 <td style={{ fontSize: '14px', fontWeight: '600', color: '#0f172a', textAlign: 'right' }}>{expiryDateFormatted} ({validityDays} dias)</td>
                               </tr>
                             </tbody>

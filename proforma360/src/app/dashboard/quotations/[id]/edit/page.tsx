@@ -8,6 +8,8 @@ import { ArrowLeft, Save, Plus, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { cn, formatCurrency } from "@/lib/utils";
 import { requestNotificationPermission } from "@/lib/pipeline/notifications";
+import { getSemanticProfile } from "@/lib/ui/semanticPresentationRegistry";
+import { useAppSettingsStore } from "@/stores/appSettings";
 
 interface LineItem {
   id: string;
@@ -28,6 +30,8 @@ export default function EditQuotationPage() {
   const { clients, fetchClients } = useClientsStore();
   const { products, fetchProducts } = useProductsStore();
   const { fetchCompany } = useCompanyStore();
+  const { businessProfile } = useAppSettingsStore();
+  const profile = getSemanticProfile(businessProfile);
 
   const [isSaving, setIsSaving] = useState(false);
   const [headerData, setHeaderData] = useState({
@@ -218,9 +222,9 @@ export default function EditQuotationPage() {
             <ArrowLeft className="w-6 h-6" />
           </Link>
           <div>
-            <h1 className="text-headline-lg text-[var(--color-on-surface)]">Editar Proforma</h1>
+            <h1 className="text-headline-lg text-[var(--color-on-surface)]">Editar {profile.quotationLabel}</h1>
             <p className="text-body-md text-[var(--color-on-surface-variant)] mt-1">
-              Atualizar documento {headerData.quotation_number}
+              Atualizar documento comercial {headerData.quotation_number}
             </p>
           </div>
         </div>

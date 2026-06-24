@@ -28,6 +28,7 @@ export default function QuotationDetailPage() {
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
   const [isDuplicating, setIsDuplicating] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [showFullHistory, setShowFullHistory] = useState(false);
 
   useEffect(() => {
     fetchCompany();
@@ -94,6 +95,8 @@ export default function QuotationDetailPage() {
       const newId = await createQuotation({
         ...quotationDataToCopy,
         quotation_number: newNumber,
+        document_context: quotation.document_context || "GENERAL",
+        schema_version: quotation.schema_version || "v1",
         date: newDate,
         expiry_date: expiryDate,
         status: 'draft',
@@ -113,7 +116,7 @@ export default function QuotationDetailPage() {
 
   return (
     <>
-    <div className="max-w-5xl mx-auto animate-fade-in pb-20">
+    <div className="max-w-7xl mx-auto animate-fade-in pb-20">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
         <div className="flex items-center gap-4">
@@ -136,14 +139,24 @@ export default function QuotationDetailPage() {
           </div>
         </div>
 
-        <div className="flex items-center gap-2 overflow-x-auto hide-scrollbar pb-2 md:pb-0">
-          <button onClick={() => window.open(`/dashboard/pdf-preview/${quotation.id}`, '_blank')} title="Imprimir" className="flex items-center justify-center p-2.5 border border-[var(--color-outline-variant)] bg-white hover:bg-gray-50 rounded-lg transition-colors shrink-0">
-            <Printer className="w-5 h-5 text-gray-700" />
+        {/* Desktop Actions */}
+        <div className="hidden md:flex gap-2">
+          <button 
+            onClick={() => setIsShareModalOpen(true)}
+            title="Partilhar"
+            className="flex items-center justify-center p-2.5 border border-gray-300 bg-white hover:bg-gray-50 text-gray-700 rounded-lg transition-colors shrink-0"
+          >
+            <Send className="w-5 h-5" />
           </button>
-          
-          <Link href={`/dashboard/pdf-preview/${quotation.id}`} title="Gerar PDF" className="flex items-center justify-center p-2.5 border border-[var(--color-primary)] bg-[var(--color-primary-container)] hover:bg-[var(--color-primary)] hover:text-white text-[var(--color-primary)] rounded-lg transition-colors shrink-0">
-            <FileText className="w-5 h-5" />
-          </Link>
+
+          <a 
+            href={`/api/view/${quotation.id}`} 
+            target="_blank" 
+            title="Imprimir / PDF"
+            className="flex items-center justify-center p-2.5 border border-gray-300 bg-white hover:bg-gray-50 text-gray-700 rounded-lg transition-colors shrink-0"
+          >
+            <Printer className="w-5 h-5" />
+          </a>
 
           <button 
             onClick={handleDuplicate}
@@ -179,9 +192,9 @@ export default function QuotationDetailPage() {
                 onClick={() => handleStatusChange('sent')}
                 disabled={isUpdatingStatus}
                 title="Marcar como Enviada"
-                className="flex items-center justify-center p-2.5 bg-[var(--color-primary)] hover:bg-[#003ea8] text-white rounded-lg transition-colors shrink-0 disabled:opacity-50"
+                className="flex items-center justify-center gap-2 px-4 py-2.5 bg-teal-600 hover:bg-teal-700 text-white font-bold rounded-lg transition-colors shrink-0 disabled:opacity-50"
               >
-                <Send className="w-5 h-5" />
+                <Send className="w-4 h-4" /> Enviar
               </button>
             </>
           )}
@@ -191,9 +204,9 @@ export default function QuotationDetailPage() {
               onClick={() => handleStatusChange('approved')}
               disabled={isUpdatingStatus}
               title="Aprovar"
-              className="flex items-center justify-center p-2.5 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors shrink-0 disabled:opacity-50"
+              className="flex items-center justify-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg transition-colors shrink-0 disabled:opacity-50"
             >
-              <CheckCircle2 className="w-5 h-5" />
+              <CheckCircle2 className="w-4 h-4" /> Aprovar
             </button>
           )}
 
@@ -224,10 +237,41 @@ export default function QuotationDetailPage() {
           )}
         </div>
       </div>
+      
+      {/* Mobile Sticky Bottom Bar */}
+      <div className="md:hidden fixed bottom-16 left-0 right-0 p-3 bg-white border-t border-slate-200 shadow-[0_-4px_15px_-3px_rgb(0,0,0,0.1)] z-40 flex items-center gap-2 overflow-x-auto hide-scrollbar pb-safe">
+        {quotation.status === 'draft' && (
+          <button 
+            onClick={() => handleStatusChange('sent')}
+            disabled={isUpdatingStatus}
+            className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-teal-600 text-white font-bold rounded-xl active:bg-teal-700 transition-colors"
+          >
+            <Send className="w-4 h-4" /> Enviar
+          </button>
+        )}
+        {quotation.status === 'sent' && (
+          <button 
+            onClick={() => handleStatusChange('approved')}
+            disabled={isUpdatingStatus}
+            className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-emerald-600 text-white font-bold rounded-xl active:bg-emerald-700 transition-colors"
+          >
+            <CheckCircle2 className="w-4 h-4" /> Aprovar
+          </button>
+        )}
+        <Link href={`/dashboard/quotations/${quotation.id}/edit`} className="flex items-center justify-center p-3 border border-slate-200 bg-slate-50 text-slate-700 rounded-xl">
+          <Edit2 className="w-5 h-5" />
+        </Link>
+        <button onClick={() => setIsShareModalOpen(true)} className="flex items-center justify-center p-3 border border-slate-200 bg-slate-50 text-slate-700 rounded-xl">
+          <Send className="w-5 h-5" />
+        </button>
+        <a href={`/api/view/${quotation.id}`} target="_blank" className="flex items-center justify-center p-3 border border-slate-200 bg-slate-50 text-slate-700 rounded-xl">
+          <Printer className="w-5 h-5" />
+        </a>
+      </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="flex flex-col gap-8">
         {/* Main Document View */}
-        <div className="lg:col-span-2 space-y-6">
+        <div className="w-full space-y-6">
           <div className="bg-white p-8 rounded-[var(--radius-lg)] elevation-1 border border-[var(--color-outline-variant)]">
             <div className="flex justify-between items-start mb-10 pb-6 border-b border-[var(--color-outline-variant)]">
               <div>
@@ -237,8 +281,8 @@ export default function QuotationDetailPage() {
               </div>
               <div className="text-right">
                 <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2">Detalhes</h3>
-                <p className="text-gray-600">Data: <span className="font-medium text-gray-900">{formatDate(quotation.date)}</span></p>
-                <p className="text-gray-600">Validade: <span className="font-medium text-gray-900">{formatDate(quotation.expiry_date)}</span></p>
+                <p className="text-gray-600">Emitido em: <span className="font-medium text-gray-900">{formatDate(quotation.date)}</span></p>
+                <p className="text-gray-600">Válido até: <span className="font-medium text-gray-900">{formatDate(quotation.expiry_date)}</span></p>
               </div>
             </div>
 
@@ -315,8 +359,8 @@ export default function QuotationDetailPage() {
           </div>
         </div>
 
-        {/* Sidebar */}
-        <div className="lg:col-span-1 space-y-6">
+        {/* Bottom Actions & History */}
+        <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
           
           {/* Quick Actions */}
           <div className="bg-white p-6 rounded-[var(--radius-lg)] elevation-1 border border-[var(--color-outline-variant)]">
@@ -339,10 +383,10 @@ export default function QuotationDetailPage() {
             </div>
 
             <div className="space-y-6">
-              {history.map((record, index) => (
+              {history.slice(0, showFullHistory ? undefined : 3).map((record, index, arr) => (
                 <div key={record.id} className="relative pl-6">
                   {/* Linha conectora */}
-                  {index !== history.length - 1 && (
+                  {index !== arr.length - 1 && (
                     <div className="absolute left-2 top-6 bottom-[-24px] w-0.5 bg-gray-200"></div>
                   )}
                   {/* Ponto */}
@@ -357,6 +401,24 @@ export default function QuotationDetailPage() {
                   </div>
                 </div>
               ))}
+              
+              {history.length > 3 && !showFullHistory && (
+                <button 
+                  onClick={() => setShowFullHistory(true)}
+                  className="w-full mt-4 py-2 text-sm text-[var(--color-primary)] font-medium hover:bg-teal-50 rounded-lg transition-colors border border-transparent hover:border-teal-100"
+                >
+                  Ver todo o histórico ({history.length - 3} mais)
+                </button>
+              )}
+
+              {showFullHistory && history.length > 3 && (
+                <button 
+                  onClick={() => setShowFullHistory(false)}
+                  className="w-full mt-4 py-2 text-sm text-gray-500 font-medium hover:bg-gray-50 rounded-lg transition-colors"
+                >
+                  Ocultar histórico
+                </button>
+              )}
               
               {history.length === 0 && (
                 <p className="text-sm text-gray-500 italic text-center py-4">Nenhum histórico registado.</p>

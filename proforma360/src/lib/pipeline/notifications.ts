@@ -16,22 +16,37 @@ export async function requestNotificationPermission(): Promise<boolean> {
   return false;
 }
 
-export function sendLocalNotification(title: string, options?: NotificationOptions) {
+export async function sendLocalNotification(title: string, options?: NotificationOptions) {
   if (!("Notification" in window)) return;
   
   if (Notification.permission === "granted") {
-    const notification = new Notification(title, {
-      icon: "/icons/icon-192x192.png",
-      badge: "/icons/icon-192x192.png",
-      ...options
-    });
-    
-    // Optional: click handler to focus tab
-    notification.onclick = function(event) {
-      event.preventDefault();
-      window.focus();
-      notification.close();
-    };
+    try {
+      if ('serviceWorker' in navigator) {
+        const reg = await navigator.serviceWorker.getRegistration();
+        if (reg && reg.showNotification) {
+          await reg.showNotification(title, {
+            icon: "/icons/icon-192x192.png",
+            badge: "/icons/icon-192x192.png",
+            ...options
+          });
+          return;
+        }
+      }
+
+      const notification = new Notification(title, {
+        icon: "/icons/icon-192x192.png",
+        badge: "/icons/icon-192x192.png",
+        ...options
+      });
+      
+      notification.onclick = function(event) {
+        event.preventDefault();
+        window.focus();
+        notification.close();
+      };
+    } catch (e) {
+      console.warn("Failed to send local notification:", e);
+    }
   }
 }
 

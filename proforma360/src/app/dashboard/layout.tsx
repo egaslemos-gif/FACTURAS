@@ -1,7 +1,7 @@
 "use client";
 
 import { useSession, signOut } from "next-auth/react";
-import { redirect, usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
 import { 
@@ -25,6 +25,8 @@ import {
   CloudDownload,
   RefreshCw, 
   WifiOff,
+  Wifi,
+  CloudCog,
   Kanban,
   MoreHorizontal,
   CircleHelp,
@@ -38,38 +40,63 @@ import { useSyncStore, useClientsStore, useProductsStore, useQuotationsStore } f
 import { dbClient } from "@/lib/db/client";
 import { PWAInstallPrompt } from "@/components/PWAInstallPrompt";
 import { useNetworkStatus } from "@/hooks/useNetworkStatus";
-import { saveOfflineSession, getOfflineSession } from "@/lib/db/session";
+import { saveOfflineSession, getOfflineSession, clearOfflineSession } from "@/lib/db/session";
 import OnboardingTour from "@/components/OnboardingTour";
 import { useLicenseStore } from "@/stores/licenseStore";
+import { useAppSettingsStore } from "@/stores/appSettings";
+import { getSemanticProfile } from "@/lib/ui/semanticPresentationRegistry";
 import UpgradeModal from "@/components/UpgradeModal";
 import { GlobalSearchModal } from "@/components/search/GlobalSearchModal";
 import { checkDueFollowUps } from "@/lib/pipeline/notifications";
+import { generateTenantHash } from "@/lib/runtime/runtimeNamespace";
+import { runtimeOwnership } from "@/lib/runtime/runtimeOwnership";
+import { runtimeBootstrapGuard } from "@/lib/runtime/runtimeBootstrapGuard";
+import { useRuntimeStateMachine } from "@/lib/runtime/runtimeStateMachine";
 
-const NAV_ITEMS = [
-  { name: "Dashboard", href: "/dashboard", icon: Home },
-  { name: "Proformas", href: "/dashboard/quotations", icon: FileText },
-  { name: "Pipeline", href: "/dashboard/pipeline", icon: Kanban },
-  { name: "Clientes", href: "/dashboard/clients", icon: Users },
-  { name: "Produtos", href: "/dashboard/products", icon: Package },
-  { name: "A Minha Empresa", href: "/dashboard/company", icon: Building2 },
-  { name: "Planos & Subscrição", href: "/dashboard/subscription", icon: CreditCard },
-  { name: "Definições", href: "/dashboard/settings", icon: Settings },
+// We will compute these dynamically inside the component to support semantic profiles
+const BASE_NAV_GROUPS = [
+  {
+    label: "Comercial",
+    items: [
+      { id: "dashboard", name: "Dashboard", href: "/dashboard", icon: Home },
+      { id: "quotations", name: "Proformas", href: "/dashboard/quotations", icon: FileText },
+      { id: "pipeline", name: "Pipeline", href: "/dashboard/pipeline", icon: Kanban },
+    ]
+  },
+  {
+    label: "Catálogo",
+    items: [
+      { id: "clients", name: "Clientes", href: "/dashboard/clients", icon: Users },
+      { id: "products", name: "Catálogo Comercial", href: "/dashboard/products", icon: Package },
+    ]
+  },
+  {
+    label: "Empresa",
+    items: [
+      { id: "company", name: "Minha Empresa", href: "/dashboard/company", icon: Building2 },
+      { id: "subscription", name: "Subscrição", href: "/dashboard/subscription", icon: CreditCard },
+    ]
+  },
+  {
+    label: "Sistema",
+    items: [
+      { id: "settings", name: "Definições", href: "/dashboard/settings", icon: Settings },
+    ]
+  }
 ];
 
-// Items shown directly in mobile bottom nav
-const MOBILE_NAV_ITEMS = [
-  { name: "Dashboard", href: "/dashboard", icon: Home },
-  { name: "Proformas", href: "/dashboard/quotations", icon: FileText },
-  { name: "Clientes", href: "/dashboard/clients", icon: Users },
-  { name: "Produtos", href: "/dashboard/products", icon: Package },
+const BASE_MOBILE_NAV = [
+  { id: "dashboard", name: "Dashboard", href: "/dashboard", icon: Home },
+  { id: "quotations", name: "Proformas", href: "/dashboard/quotations", icon: FileText },
+  { id: "clients", name: "Clientes", href: "/dashboard/clients", icon: Users },
+  { id: "products", name: "Produtos", href: "/dashboard/products", icon: Package },
 ];
 
-// Items hidden behind "More" menu on mobile
-const MOBILE_MORE_ITEMS = [
-  { name: "Pipeline", href: "/dashboard/pipeline", icon: Kanban },
-  { name: "A Minha Empresa", href: "/dashboard/company", icon: Building2 },
-  { name: "Planos & Subscrição", href: "/dashboard/subscription", icon: CreditCard },
-  { name: "Definições", href: "/dashboard/settings", icon: Settings },
+const BASE_MOBILE_MORE = [
+  { id: "pipeline", name: "Pipeline", href: "/dashboard/pipeline", icon: Kanban },
+  { id: "company", name: "A Minha Empresa", href: "/dashboard/company", icon: Building2 },
+  { id: "subscription", name: "Planos & Subscrição", href: "/dashboard/subscription", icon: CreditCard },
+  { id: "settings", name: "Definições", href: "/dashboard/settings", icon: Settings },
 ];
 
 export default function DashboardLayout({
@@ -80,6 +107,7 @@ export default function DashboardLayout({
   const { data: session, status } = useSession();
   const router = useRouter();
   const pathname = usePathname();
+  // const dispatch = useRuntimeStateMachine(state => state.dispatch); // Temporarily disabled to debug
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const [isSyncMenuOpen, setIsSyncMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
@@ -122,12 +150,50 @@ export default function DashboardLayout({
   const { fetchLicense, isAdmin } = useLicenseStore();
   const [offlineSession, setOfflineSession] = useState<any>(null);
 
+  // --- ALL HOOKS MUST BE CALLED UNCONDITIONALLY (React Rules of Hooks) ---
+  const { hasUnsyncedChanges, lastSyncDate, setHasUnsyncedChanges, setLastSyncDate } = useSyncStore();
+  const { clients, fetchClients } = useClientsStore();
+  const { products, fetchProducts } = useProductsStore();
+  const { quotations, fetchQuotations } = useQuotationsStore();
+
+  const [searchQuery, setSearchQuery] = useState("");
+  const [showSearchResults, setShowSearchResults] = useState(false);
+  const [unsyncedQueueCount, setUnsyncedQueueCount] = useState(0);
+  const [isShareAppModalOpen, setIsShareAppModalOpen] = useState(false);
+  const [notifiedSet] = useState(new Set<string>());
+
   useEffect(() => {
     // Attempt to load offline session immediately
     getOfflineSession().then(data => {
       if (data) setOfflineSession(data);
     });
   }, []);
+
+  const { businessProfile, fetchSettings } = useAppSettingsStore();
+  const semanticProfile = getSemanticProfile(businessProfile);
+
+  useEffect(() => {
+    fetchSettings();
+  }, [fetchSettings]);
+
+  // Compute dynamic navigation groups based on semantic profile
+  const navGroups = BASE_NAV_GROUPS.map(group => ({
+    ...group,
+    items: group.items.map(item => {
+      if (item.id === "products") return { ...item, name: semanticProfile.itemPluralLabel, icon: semanticProfile.icon };
+      return item;
+    })
+  }));
+
+  const mobileNavItems = BASE_MOBILE_NAV.map(item => {
+    if (item.id === "products") return { ...item, name: semanticProfile.navLabel, icon: semanticProfile.icon };
+    return item;
+  });
+
+  const mobileMoreItems = BASE_MOBILE_MORE.map(item => {
+    if (item.id === "products") return { ...item, name: semanticProfile.navLabel, icon: semanticProfile.icon };
+    return item;
+  });
 
   useEffect(() => {
     if (session?.user?.email) {
@@ -145,24 +211,89 @@ export default function DashboardLayout({
     }
   }, [session, isOffline]);
 
-  const { hasUnsyncedChanges, lastSyncDate, setHasUnsyncedChanges, setLastSyncDate } = useSyncStore();
-  const { clients, fetchClients } = useClientsStore();
-  const { products, fetchProducts } = useProductsStore();
-  const { quotations, fetchQuotations } = useQuotationsStore();
+  const activeSession = session || offlineSession;
+  const [runtimeReady, setRuntimeReady] = useState(false);
 
-  const [searchQuery, setSearchQuery] = useState("");
-  const [showSearchResults, setShowSearchResults] = useState(false);
+  // Runtime Governance Boot Sequence
+  useEffect(() => {
+    async function resolveRuntime() {
+      if (status === "loading" && !isOffline) return;
+      if (!activeSession?.user?.email) return;
+      
+      try {
+        // GUARD: If we have both a live session and an offline session,
+        // verify they belong to the same user. If not, the offline session
+        // is stale from a previous user and must be purged.
+        if (session?.user?.email && offlineSession?.user?.email 
+            && session.user.email !== offlineSession.user.email) {
+          console.warn("[Boot] Offline session belongs to a different user. Purging.");
+          await clearOfflineSession();
+          setOfflineSession(null);
+          // Continue with the live session
+        }
+
+        const email = activeSession.user.email;
+        // Use providerAccountId (stable Google ID) as primary identifier,
+        // fallback to user.id, then email as last resort
+        const providerId = (activeSession as any).providerAccountId || activeSession.user.id || email;
+        const provider = "google"; // Matches the actual OAuth provider
+
+        const hash = await generateTenantHash(provider, providerId);
+        
+        // State Machine Transition
+        runtimeOwnership.setState('AUTH_RESOLVED');
+        runtimeOwnership.emitOwnershipResolved(hash);
+        
+        // Rehydrate Zustand stores now that storage is namespaced
+        await useLicenseStore.persist.rehydrate();
+        await useSyncStore.persist.rehydrate();
+        
+        // Initialize User Scoped DB
+        await dbClient.setTenantHash(hash);
+        await dbClient.init();
+        
+        runtimeOwnership.setState('RUNTIME_READY');
+        
+        setRuntimeReady(true);
+        
+        // Safe to fetch admin status now
+        fetchLicense(true);
+      } catch (err) {
+        console.error("[Boot] Failed to resolve runtime:", err);
+      }
+    }
+    resolveRuntime();
+  }, [activeSession, status, isOffline]);
 
   useEffect(() => {
+    if (!runtimeReady) return;
+    async function updateQueueCount() {
+      try {
+        const { PersistentSyncQueue } = await import("@/lib/sync/persistentSyncQueue");
+        const count = await PersistentSyncQueue.getUnsyncedCount();
+        setUnsyncedQueueCount(count);
+      } catch (err) {
+        console.error("Failed to check queue count", err);
+      }
+    }
+    updateQueueCount();
+    const interval = setInterval(updateQueueCount, 5000);
+    return () => clearInterval(interval);
+  }, [runtimeReady]);
+
+  useEffect(() => {
+    if (!runtimeReady) return;
     // Fetch data for global search if not already fetched
     if (clients.length === 0) fetchClients();
     if (products.length === 0) fetchProducts();
     if (quotations.length === 0) fetchQuotations();
-  }, [fetchClients, fetchProducts, fetchQuotations]);
+    // Re-fetch settings now that the database is accessible
+    fetchSettings();
+  }, [runtimeReady, fetchClients, fetchProducts, fetchQuotations, fetchSettings]);
 
   // Check for due follow-up notifications
-  const [notifiedSet] = useState(new Set<string>());
   useEffect(() => {
+    if (!runtimeReady) return;
     if (quotations.length === 0) return;
     checkDueFollowUps(quotations, notifiedSet);
     
@@ -177,18 +308,7 @@ export default function DashboardLayout({
       clearInterval(interval);
       window.removeEventListener('focus', onFocus);
     };
-  }, [quotations, notifiedSet]);
-
-  const searchResults = () => {
-    if (!searchQuery) return { clients: [], products: [], quotations: [], total: 0 };
-    const q = searchQuery.toLowerCase();
-    const c = clients.filter(c => c.name.toLowerCase().includes(q) || c.email?.toLowerCase().includes(q) || c.tax_number?.includes(q)).slice(0, 3);
-    const p = products.filter(p => p.name.toLowerCase().includes(q) || p.code?.toLowerCase().includes(q)).slice(0, 3);
-    const quo = quotations.filter(quo => quo.quotation_number.toLowerCase().includes(q) || quo.client_name?.toLowerCase().includes(q)).slice(0, 3);
-    return { clients: c, products: p, quotations: quo, total: c.length + p.length + quo.length };
-  };
-
-  const results = searchResults();
+  }, [runtimeReady, quotations, notifiedSet]);
 
   // Listen for Cmd+K / Ctrl+K to open search globally
   useEffect(() => {
@@ -203,8 +323,6 @@ export default function DashboardLayout({
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
-
-  const [isShareAppModalOpen, setIsShareAppModalOpen] = useState(false);
 
   const handleBackup = async () => {
     try {
@@ -265,8 +383,6 @@ export default function DashboardLayout({
     }
   };
 
-  const activeSession = session || offlineSession;
-
   useEffect(() => {
     // Check if new database and suggest restore
     if (dbClient.isNewDatabase && activeSession && !isOffline && !isChecking) {
@@ -293,37 +409,89 @@ export default function DashboardLayout({
         getOfflineSession().then(offSession => {
           if (!offSession) {
             // No cached session at all — must go online to login
-            redirect("/");
+            router.push("/");
           }
           // If offSession exists, activeSession will be derived from it
         });
       } else {
-        redirect("/");
+        router.push("/");
       }
     }
-  }, [status, isOffline, isChecking]);
+  }, [status, isOffline, isChecking, router]);
 
-  // Loading timeout: if loading takes more than 5s when offline, proceed with offline session
-  const [loadingTimedOut, setLoadingTimedOut] = useState(false);
-  useEffect(() => {
-    if ((status === "loading" || !activeSession) && isOffline) {
-      const timeout = setTimeout(() => setLoadingTimedOut(true), 2000);
-      return () => clearTimeout(timeout);
-    }
-  }, [status, activeSession, isOffline]);
+  const searchResults = () => {
+    if (!searchQuery) return { clients: [], products: [], quotations: [], total: 0 };
+    const q = searchQuery.toLowerCase();
+    const c = clients.filter(c => c.name.toLowerCase().includes(q) || c.email?.toLowerCase().includes(q) || c.tax_number?.includes(q)).slice(0, 3);
+    const p = products.filter(p => p.name.toLowerCase().includes(q) || p.code?.toLowerCase().includes(q)).slice(0, 3);
+    const quo = quotations.filter(quo => quo.quotation_number.toLowerCase().includes(q) || quo.client_name?.toLowerCase().includes(q)).slice(0, 3);
+    return { clients: c, products: p, quotations: quo, total: c.length + p.length + quo.length };
+  };
 
-  if ((status === "loading" || !activeSession) && !isOffline && !loadingTimedOut) {
+  const results = searchResults();
+
+  // Enforce Hydration Governance: DO NOT render children before RUNTIME_READY
+  if (!runtimeReady) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[var(--color-surface-container-lowest)]">
-        <div className="w-12 h-12 border-4 border-[var(--color-primary)] border-t-transparent rounded-full animate-spin"></div>
+      <div className="min-h-screen flex flex-col items-center justify-center bg-[var(--color-surface-container-lowest)]">
+        <div className="w-12 h-12 border-4 border-[var(--color-primary)] border-t-transparent rounded-full animate-spin mb-4"></div>
+        <p className="text-sm font-medium text-[var(--color-on-surface-variant)] animate-pulse">
+          Validando cofre seguro...
+        </p>
       </div>
     );
   }
+
+
+
+
+
+  // Removed legacy loading check since we now use runtimeReady
 
   const userInitials = activeSession?.user?.name
     ? activeSession.user.name.split(" ").map((n: string) => n[0]).join("").toUpperCase().slice(0, 2)
     : "U";
 
+  const handleLogout = async () => {
+    try {
+      setIsProfileMenuOpen(false);
+      setIsSidebarCollapsed(true);
+      
+      // Immediately block runtime to prevent resolveRuntime from using stale session
+      setRuntimeReady(false);
+      setOfflineSession(null);
+
+      const performCleanup = async () => {
+        try {
+          // Destrói a base de dados de forma segura seguindo a Fase 8 de Isolamento
+          const { tenantIsolationManager } = await import("@/lib/runtime/tenantIsolation");
+          await tenantIsolationManager.teardownTenant("STRICT_SHARED_DEVICE");
+          
+          // Clear offline db first (might hang if idb is blocked)
+          await clearOfflineSession();
+          // Clear local states and in-memory tenant hash
+          await runtimeOwnership.runtimeTeardown(true);
+          // Sign out without next-auth router wrapper
+          await signOut({ redirect: false });
+        } catch (e) {
+          console.error("Cleanup error:", e);
+        }
+      };
+      
+      // Execute cleanup — give enough time for IndexedDB operations
+      await Promise.race([
+        performCleanup(),
+        new Promise(resolve => setTimeout(resolve, 2000))
+      ]);
+      
+      // Force hard redirect to home/login
+      window.location.href = "/";
+    } catch (error) {
+      console.error("Erro no logout:", error);
+      // Fallback
+      window.location.href = "/";
+    }
+  };
 
   return (
     <div className="min-h-screen bg-[var(--color-surface-container-lowest)] flex">
@@ -347,58 +515,115 @@ export default function DashboardLayout({
           </button>
         </div>
 
-        <nav className="flex-1 space-y-1.5 px-3 py-4 overflow-y-auto">
-          {NAV_ITEMS.map((item) => {
-            const isActive = pathname === item.href || (item.href !== '/dashboard' && pathname?.startsWith(item.href));
-            const Icon = item.icon;
-            return (
-              <Link
-                key={item.name}
-                href={item.href}
-                prefetch={true}
-                className={cn(
-                  "flex items-center px-3 py-2.5 rounded-lg transition-all duration-200 group relative",
-                  isActive 
-                    ? "bg-slate-900 text-white font-medium shadow-sm" 
-                    : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
-                )}
-              >
-                {isActive && (
-                  <div className="absolute left-0 top-2 bottom-2 w-1 bg-teal-400 rounded-r-full"></div>
-                )}
-                <Icon className={cn(
-                  "w-5 h-5 transition-colors", 
-                  !isSidebarCollapsed && "mr-3",
-                  isActive ? "text-teal-400" : "text-slate-400 group-hover:text-slate-600"
-                )} />
-                {!isSidebarCollapsed && <span className="text-sm tracking-wide">{item.name}</span>}
-              </Link>
-            );
-          })}
-          
-          {isAdmin && (
+        <nav className="flex-1 space-y-1.5 py-4 overflow-y-auto">
+          {navGroups.map((group, idx) => (
+            <div key={group.label} className={cn(isSidebarCollapsed ? "px-2" : "px-4", idx > 0 && "mt-6")}>
+              {!isSidebarCollapsed && (
+                <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-3 px-3">
+                  {group.label}
+                </h3>
+              )}
+              <div className="space-y-1">
+                {group.items.map((item) => {
+                  const isActive = item.href === '/dashboard'
+                    ? pathname === '/dashboard'
+                    : pathname === item.href || pathname?.startsWith(item.href + '/');
+                  const Icon = item.icon;
+                  return (
+                    <Link
+                      key={item.name}
+                      href={item.href}
+                      prefetch={true}
+                      className={cn(
+                        "flex items-center rounded-lg transition-all duration-200 group relative",
+                        isSidebarCollapsed ? "justify-center py-3" : "px-3 py-2.5",
+                        isActive 
+                          ? "bg-slate-900 text-white font-medium shadow-surface-1 ring-1 ring-slate-800" 
+                          : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                      )}
+                      title={isSidebarCollapsed ? item.name : undefined}
+                    >
+                      {isActive && (
+                        <div className="absolute left-0 top-1/2 -translate-y-1/2 h-2/3 w-1 bg-teal-400 rounded-r-full shadow-[0_0_8px_rgba(45,212,191,0.5)]"></div>
+                      )}
+                      <Icon className={cn(
+                        "w-5 h-5 transition-colors shrink-0", 
+                        !isSidebarCollapsed && "mr-3",
+                        isActive ? "text-teal-400" : "text-slate-400 group-hover:text-slate-600"
+                      )} />
+                      {!isSidebarCollapsed && <span className="text-sm tracking-wide">{item.name}</span>}
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+      </nav>
+
+        {isAdmin && (
              <Link
                href="/dashboard/admin"
                prefetch={true}
                className={cn(
-                 "flex items-center px-3 py-2.5 rounded-lg transition-all duration-200 group relative mt-4 border border-teal-100",
+                 "flex items-center rounded-lg transition-all duration-200 group relative mt-4 mx-4 mb-4 border border-teal-100",
+                 isSidebarCollapsed ? "justify-center py-3 px-0" : "px-3 py-2.5",
                  pathname === '/dashboard/admin' 
                    ? "bg-teal-50 text-teal-700 font-medium shadow-sm" 
                    : "text-slate-600 hover:bg-teal-50 hover:text-teal-700"
                )}
+               title={isSidebarCollapsed ? "Admin Panel" : undefined}
              >
                {pathname === '/dashboard/admin' && (
                  <div className="absolute left-0 top-2 bottom-2 w-1 bg-teal-500 rounded-r-full"></div>
                )}
                <Settings className={cn(
-                 "w-5 h-5 transition-colors", 
+                 "w-5 h-5 transition-colors shrink-0", 
                  !isSidebarCollapsed && "mr-3",
                  pathname === '/dashboard/admin' ? "text-teal-500" : "text-teal-400 group-hover:text-teal-600"
                )} />
                {!isSidebarCollapsed && <span className="text-sm tracking-wide">Admin Panel</span>}
              </Link>
           )}
-        </nav>
+
+        {/* --- Contextual Operational State --- */}
+        {!isSidebarCollapsed && (
+          <div className="px-4 mt-auto mb-2 shrink-0">
+            <div className={cn(
+              "p-3 rounded-lg border flex items-center gap-3 transition-colors shadow-surface-1",
+              isOffline 
+                ? "bg-red-50 border-red-100" 
+                : unsyncedQueueCount > 0 
+                  ? "bg-amber-50 border-amber-100" 
+                  : "bg-emerald-50 border-emerald-100"
+            )}>
+              {isOffline ? (
+                <WifiOff className="w-5 h-5 text-red-600 shrink-0" />
+              ) : unsyncedQueueCount > 0 ? (
+                <div className="relative shrink-0">
+                  <CloudCog className="w-5 h-5 text-amber-600 animate-[spin_3s_linear_infinite]" />
+                  <span className="absolute -top-1 -right-1 w-2 h-2 bg-amber-500 rounded-full animate-pulse border border-white"></span>
+                </div>
+              ) : (
+                <Wifi className="w-5 h-5 text-emerald-600 shrink-0" />
+              )}
+              
+              <div className="min-w-0 flex-1">
+                <p className={cn(
+                  "text-[10px] font-bold uppercase tracking-wider leading-tight",
+                  isOffline ? "text-red-700" : unsyncedQueueCount > 0 ? "text-amber-700" : "text-emerald-700"
+                )}>
+                  {isOffline ? "Offline" : unsyncedQueueCount > 0 ? "A Sincronizar" : "Online"}
+                </p>
+                <p className={cn(
+                  "text-[11px] font-medium truncate leading-tight",
+                  isOffline ? "text-red-600/80" : unsyncedQueueCount > 0 ? "text-amber-600/80" : "text-emerald-600/80"
+                )}>
+                  {unsyncedQueueCount > 0 ? `${unsyncedQueueCount} pendentes` : isOffline ? "Aguardando rede" : "Sistemas normais"}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
 
         <div className="p-4 border-t border-[var(--color-outline-variant)] shrink-0 space-y-2">
           <button 
@@ -423,12 +648,9 @@ export default function DashboardLayout({
             <CircleHelp className="w-5 h-5 shrink-0" />
             {!isSidebarCollapsed && <span>Ajuda</span>}
           </button>
+
           <button 
-            onClick={async () => {
-              localStorage.removeItem('proforma360-license-storage');
-              await signOut({ redirect: false });
-              window.location.href = "/";
-            }}
+            onClick={handleLogout}
             className={cn(
               "flex items-center gap-3 w-full px-3 py-2 text-sm font-medium text-[var(--color-on-surface-variant)] hover:bg-[var(--color-surface-container)] hover:text-[var(--color-on-surface)] rounded-md transition-colors",
               isSidebarCollapsed && "justify-center px-0"
@@ -465,23 +687,27 @@ export default function DashboardLayout({
              <Search className="w-5 h-5" />
            </button>
            <button 
-             onClick={() => setIsSyncMenuOpen(!isSyncMenuOpen)}
-             className={cn(
-               "relative p-1.5 rounded-full transition-colors",
-               hasUnsyncedChanges 
-                 ? "text-amber-600 bg-amber-50" 
-                 : "text-gray-500 hover:text-gray-700"
-             )}
-             title="Sincronização Cloud"
-           >
-             <Cloud className="w-5 h-5" />
-             {hasUnsyncedChanges && (
-               <span className="absolute -top-0.5 -right-0.5 flex h-2.5 w-2.5">
-                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                 <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500"></span>
-               </span>
-             )}
-           </button>
+              onClick={() => setIsSyncMenuOpen(!isSyncMenuOpen)}
+              className={cn(
+                "relative p-1.5 rounded-full transition-colors",
+                unsyncedQueueCount > 0 || hasUnsyncedChanges 
+                  ? "text-amber-600 bg-amber-50" 
+                  : "text-gray-500 hover:text-gray-700"
+              )}
+              title="Sincronização Cloud"
+            >
+              <Cloud className="w-5 h-5" />
+              {unsyncedQueueCount > 0 ? (
+                <span className="absolute -top-1 -right-1 bg-amber-500 text-white text-[8px] font-black w-4.5 h-4.5 rounded-full flex items-center justify-center animate-pulse">
+                  {unsyncedQueueCount}
+                </span>
+              ) : hasUnsyncedChanges ? (
+                <span className="absolute -top-0.5 -right-0.5 flex h-2.5 w-2.5">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500"></span>
+                </span>
+              ) : null}
+            </button>
            <button 
              onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
              className="focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] rounded-full"
@@ -517,9 +743,9 @@ export default function DashboardLayout({
                    <Share2 className="w-4 h-4" /> Partilhar Proforma360
                  </button>
                  <div className="border-t border-[var(--color-outline-variant)]"></div>
-                 <button onClick={async () => { await signOut({ redirect: false }); window.location.href = "/"; }} className="flex items-center gap-3 w-full text-left px-4 py-3 text-sm font-medium text-red-600 hover:bg-red-50 transition-colors">
-                   <LogOut className="w-4 h-4" /> Terminar Sessão
-                 </button>
+                  <button onClick={handleLogout} className="flex items-center gap-3 w-full text-left px-4 py-3 text-sm font-medium text-red-600 hover:bg-red-50 transition-colors">
+                    <LogOut className="w-4 h-4" /> Terminar Sessão
+                  </button>
                </div>
            )}
 
@@ -541,12 +767,17 @@ export default function DashboardLayout({
                      <p className="text-xs text-amber-600 mt-1 font-medium">⚠️ Último backup há mais de 7 dias!</p>
                    )}
 
-                   {hasUnsyncedChanges && (
-                     <div className="mt-2 text-xs font-medium text-amber-700 bg-amber-50 p-2 rounded border border-amber-200 flex items-center gap-1.5">
-                       <span className="w-2 h-2 bg-amber-500 rounded-full animate-pulse"></span>
-                       Existem alterações locais pendentes.
-                     </div>
-                   )}
+                    {unsyncedQueueCount > 0 ? (
+                      <div className="mt-2 text-xs font-semibold text-amber-700 bg-amber-50 p-2 rounded border border-amber-200 flex items-center gap-1.5">
+                        <span className="w-2 h-2 bg-amber-500 rounded-full animate-pulse"></span>
+                        {unsyncedQueueCount} ações de sincronização pendentes.
+                      </div>
+                    ) : hasUnsyncedChanges ? (
+                      <div className="mt-2 text-xs font-medium text-amber-700 bg-amber-50 p-2 rounded border border-amber-200 flex items-center gap-1.5">
+                        <span className="w-2 h-2 bg-amber-500 rounded-full animate-pulse"></span>
+                        Existem alterações locais pendentes.
+                      </div>
+                    ) : null}
                  </div>
                  <div className="p-2 space-y-1">
                    <button 
@@ -622,7 +853,7 @@ export default function DashboardLayout({
                   onClick={() => setIsSyncMenuOpen(!isSyncMenuOpen)}
                   className={cn(
                     "flex items-center gap-2 px-3 py-2 rounded-md transition-colors border",
-                    hasUnsyncedChanges 
+                    unsyncedQueueCount > 0 || hasUnsyncedChanges 
                       ? "bg-amber-50 border-amber-200 text-amber-700 hover:bg-amber-100" 
                       : "bg-white border-[var(--color-outline-variant)] text-[var(--color-on-surface-variant)] hover:bg-[var(--color-surface-container)]"
                   )}
@@ -630,12 +861,16 @@ export default function DashboardLayout({
                 >
                   <Cloud className="w-4 h-4" />
                   <span className="text-sm font-medium">Sync</span>
-                  {hasUnsyncedChanges && (
+                  {unsyncedQueueCount > 0 ? (
+                    <span className="bg-amber-500 text-white text-[9px] font-black px-1.5 py-0.5 rounded-full ml-1 animate-pulse">
+                      {unsyncedQueueCount}
+                    </span>
+                  ) : hasUnsyncedChanges ? (
                     <span className="flex h-2 w-2 relative">
                       <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
                       <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
                     </span>
-                  )}
+                  ) : null}
                 </button>
 
                 {isSyncMenuOpen && (
@@ -655,12 +890,17 @@ export default function DashboardLayout({
                           <p className="text-xs text-amber-600 mt-1 font-medium">⚠️ Último backup há mais de 7 dias!</p>
                         )}
 
-                        {hasUnsyncedChanges && (
+                        {unsyncedQueueCount > 0 ? (
+                          <div className="mt-2 text-xs font-semibold text-amber-700 bg-amber-50 p-2 rounded border border-amber-200 flex items-center gap-1.5">
+                            <span className="w-2 h-2 bg-amber-500 rounded-full animate-pulse"></span>
+                            {unsyncedQueueCount} ações de sincronização pendentes.
+                          </div>
+                        ) : hasUnsyncedChanges ? (
                           <div className="mt-2 text-xs font-medium text-amber-700 bg-amber-50 p-2 rounded border border-amber-200 flex items-center gap-1.5">
                             <span className="w-2 h-2 bg-amber-500 rounded-full animate-pulse"></span>
                             Existem alterações locais pendentes.
                           </div>
-                        )}
+                        ) : null}
 
                         <div className="mt-3 text-[11px] text-gray-500 bg-gray-50 p-2 rounded leading-tight">
                           <strong>Dica de Uso:</strong> Utilize preferencialmente um dispositivo principal. O sistema foi desenhado para funcionar offline-first e evita conflitos de dados.
@@ -721,7 +961,7 @@ export default function DashboardLayout({
                         <Settings className="w-4 h-4" /> Definições
                       </Link>
                       <div className="border-t border-[var(--color-outline-variant)]"></div>
-                      <button onClick={async () => { await signOut({ redirect: false }); window.location.href = "/"; }} className="flex items-center gap-3 w-full text-left px-4 py-3 text-sm font-medium text-red-600 hover:bg-red-50 transition-colors">
+                      <button onClick={handleLogout} className="flex items-center gap-3 w-full text-left px-4 py-3 text-sm font-medium text-red-600 hover:bg-red-50 transition-colors">
                         <LogOut className="w-4 h-4" /> Terminar Sessão
                       </button>
                     </div>
@@ -737,10 +977,12 @@ export default function DashboardLayout({
       </main>
 
       {/* Mobile Bottom Navigation */}
-      <nav className="md:hidden fixed bottom-0 w-full bg-white/98 backdrop-blur-md border-t border-gray-100 shadow-[0_-4px_24px_-8px_rgba(0,0,0,0.05)] z-40 pb-[env(safe-area-inset-bottom)]">
-        <div className="flex items-center justify-between px-2 h-[60px] relative">
-          {MOBILE_NAV_ITEMS.slice(0, 2).map((item) => {
-            const isActive = pathname === item.href || (item.href !== '/dashboard' && pathname?.startsWith(item.href));
+      <nav className="md:hidden fixed bottom-0 w-full bg-white/98 backdrop-blur-md border-t border-gray-100 shadow-surface-2 z-40 pb-[env(safe-area-inset-bottom)]">
+        <div className="flex justify-around items-center h-full px-2">
+          {mobileNavItems.slice(0, 2).map((item) => {
+            const isActive = item.href === '/dashboard'
+              ? pathname === '/dashboard'
+              : pathname === item.href || pathname?.startsWith(item.href + '/');
             const Icon = item.icon;
             return (
               <Link
@@ -762,11 +1004,11 @@ export default function DashboardLayout({
           
           {/* Center FAB Slot */}
           <div className="w-[20%] flex justify-center items-center h-full relative pointer-events-none">
-            <div className="pointer-events-auto absolute -top-5">
+            <div className="pointer-events-auto absolute -top-10">
               <button
                 onClick={() => setIsQuickActionsOpen(!isQuickActionsOpen)}
                 className={cn(
-                  "w-[56px] h-[56px] bg-[#111827] text-white rounded-full flex items-center justify-center shadow-md border-[3px] border-white transition-all duration-300 active:scale-95",
+                  "w-[60px] h-[60px] bg-[#0f172a] text-white rounded-full flex items-center justify-center shadow-lg border-[4px] border-white transition-all duration-300 active:scale-95",
                   isQuickActionsOpen ? "rotate-45 shadow-none bg-gray-800" : ""
                 )}
               >
@@ -775,8 +1017,10 @@ export default function DashboardLayout({
             </div>
           </div>
 
-          {MOBILE_NAV_ITEMS.slice(2, 4).map((item) => {
-            const isActive = pathname === item.href || (item.href !== '/dashboard' && pathname?.startsWith(item.href));
+          {mobileNavItems.slice(2, 4).map((item) => {
+            const isActive = item.href === '/dashboard'
+              ? pathname === '/dashboard'
+              : pathname === item.href || pathname?.startsWith(item.href + '/');
             const Icon = item.icon;
             return (
               <Link

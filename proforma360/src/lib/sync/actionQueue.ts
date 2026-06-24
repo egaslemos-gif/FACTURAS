@@ -2,6 +2,9 @@ import { openDB, IDBPDatabase } from 'idb';
 import { generateId } from '@/lib/utils';
 import { useNetworkStore } from '@/stores/useNetworkStore';
 
+import { getActiveTenantHash } from '../runtime/runtimeNamespace';
+import { runtimeOwnership } from '../runtime/runtimeOwnership';
+
 const DB_NAME = 'proforma360_db';
 const STORE_NAME = 'action_queue';
 
@@ -16,6 +19,7 @@ export interface ActionItem {
   retryCount: number;
   nextRetryAt: number;
   createdAt: number;
+  tenantHash: string; // Runtime Ownership Binding
 }
 
 const MAX_RETRIES = 5;
@@ -32,6 +36,12 @@ class ActionQueue {
   }
 
   async enqueue(type: string, payload: any, priority: ActionPriority = 'MEDIUM') {
+    const activeTenant = getActiveTenantHash();
+    if (!activeTenant) {
+      console.warn(`[ActionQueue] Blocked enqueue of ${type} due to missing active tenant.`);
+      return;
+    }
+
     await this.init();
     if (!this.idb) return;
 
@@ -44,6 +54,7 @@ class ActionQueue {
       retryCount: 0,
       nextRetryAt: Date.now(),
       createdAt: Date.now(),
+      tenantHash: activeTenant, // Binding
     };
 
     await this.idb.put(STORE_NAME, action);
@@ -56,7 +67,14 @@ class ActionQueue {
 
   async processQueue() {
     if (this.isProcessing) return;
+    if (runtimeOwnership.getState() !== 'RUNTIME_READY') {
+      console.warn(`[ActionQueue] Blocked processing. Runtime state: ${runtimeOwnership.getState()}`);
+      return;
+    }
     
+    const activeTenant = getActiveTenantHash();
+    if (!activeTenant) return;
+
     await this.init();
     if (!this.idb || !useNetworkStore.getState().isOnline) return;
 
@@ -67,7 +85,7 @@ class ActionQueue {
       
       const now = Date.now();
       const pendingActions = allActions
-        .filter(a => a.status === 'PENDING' && a.nextRetryAt <= now)
+        .filter(a => a.status === 'PENDING' && a.nextRetryAt <= now && a.tenantHash === activeTenant)
         .sort((a, b) => {
           // Sort by priority first
           const pWeight = { HIGH: 3, MEDIUM: 2, LOW: 1 };

@@ -11,29 +11,41 @@ import {
   FileText,
   Settings,
   LogOut,
+  Box,
+  Clock,
+  Activity,
 } from "lucide-react";
+import { useCompanyStore } from "@/stores";
+import { useAppSettingsStore } from "@/stores/appSettings";
+import { getSemanticProfile } from "@/lib/ui/semanticPresentationRegistry";
 import { NavItem } from "@/lib/types";
 
-const navItems: NavItem[] = [
-  { label: "Dashboard", href: "/dashboard", icon: "LayoutDashboard" },
-  { label: "Empresa", href: "/dashboard/company", icon: "Building2" },
-  { label: "Clientes", href: "/dashboard/clients", icon: "Users" },
-  { label: "Produtos", href: "/dashboard/products", icon: "Package" },
-  { label: "Proformas", href: "/dashboard/quotations", icon: "FileText" },
-  { label: "Definições", href: "/dashboard/settings", icon: "Settings" },
-];
-
-const iconMap: Record<string, React.ElementType> = {
+const baseIconMap: Record<string, React.ElementType> = {
   LayoutDashboard,
   Building2,
   Users,
   Package,
   FileText,
   Settings,
+  Box,
+  Clock,
+  Activity,
 };
 
 export function Sidebar() {
   const pathname = usePathname();
+  const { businessProfile } = useAppSettingsStore();
+  const profile = getSemanticProfile(businessProfile);
+
+  const navItems: NavItem[] = [
+    { label: "Dashboard", href: "/dashboard", icon: "LayoutDashboard" },
+    { label: "Empresa", href: "/dashboard/company", icon: "Building2" },
+    { label: profile.clientPluralLabel, href: "/dashboard/clients", icon: "Users" },
+    { label: profile.itemPluralLabel, href: "/dashboard/products", icon: "Package" },
+    { label: profile.pipelineLabel, href: "/dashboard/quotations", icon: "FileText" },
+    { label: "Saúde do Sistema", href: "/dashboard/health", icon: "Activity" },
+    { label: "Definições", href: "/dashboard/settings", icon: "Settings" },
+  ];
 
   return (
     <aside className="hidden md:flex flex-col w-[var(--spacing-sidebar-width)] h-screen bg-white border-r border-[var(--color-outline-variant)] fixed left-0 top-0 z-40">
@@ -52,7 +64,7 @@ export function Sidebar() {
       {/* Navigation */}
       <nav className="flex-1 py-6 px-3 space-y-1 overflow-y-auto">
         {navItems.map((item) => {
-          const Icon = iconMap[item.icon];
+          const Icon = baseIconMap[item.icon] || Package;
           const isActive = pathname.startsWith(item.href);
 
           return (

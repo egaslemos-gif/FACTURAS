@@ -37,13 +37,8 @@ export default function PdfPreviewPage() {
   useEffect(() => {
     async function buildPdf() {
       if (currentDetail && company && clients.length > 0) {
-        if (currentDetail.quotation.status === 'draft') {
-          const canExport = await useLicenseStore.getState().incrementUsage();
-          if (!canExport) {
-            router.push(`/dashboard/quotations/${id}`);
-            return;
-          }
-        }
+        // O limite agora é testado rigorosamente na criação da proforma.
+        // Já não barramos a pré-visualização, pois o utilizador tem direito a visualizar e gerar o PDF da proforma que conseguiu criar.
         
         setIsGenerating(true);
         try {

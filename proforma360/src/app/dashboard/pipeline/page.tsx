@@ -7,6 +7,9 @@ import { formatCurrency } from "@/lib/utils";
 import { requestNotificationPermission } from "@/lib/pipeline/notifications";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { ActionEngine } from "@/lib/pipeline/actionEngine";
+import { CalendarSyncOrchestrator } from "@/lib/sync/calendarSync";
+import { calculatePipelineHealth } from "@/lib/pipeline/healthScore";
 import {
   GripVertical,
   ChevronRight,
@@ -69,7 +72,14 @@ function AgingBadge({ age }: { age: number }) {
   );
 }
 
-function PriorityBadge({ priority }: { priority?: "low" | "medium" | "high" }) {
+function PriorityBadge({ priority }: { priority?: "low" | "medium" | "high" | "urgent" }) {
+  if (priority === "urgent") {
+    return (
+      <span className="inline-flex items-center gap-1 text-[10px] text-purple-700 font-bold uppercase tracking-wider bg-purple-50 px-1.5 py-0.5 rounded-sm border border-purple-100 animate-pulse">
+        <span className="w-1.5 h-1.5 rounded-full bg-purple-600 animate-ping" /> Urgente
+      </span>
+    );
+  }
   if (priority === "high") {
     return (
       <span className="inline-flex items-center gap-1 text-[10px] text-red-700 font-bold uppercase tracking-wider bg-red-50 px-1.5 py-0.5 rounded-sm border border-red-100">
@@ -575,6 +585,7 @@ export default function PipelinePage() {
   const handleSaveNextAction = async (action: string | null, date: string | null, time: string | null, reminders: boolean) => {
     if (!actionModal) return;
     await setNextActionFull(actionModal.id, action, date, time, reminders);
+    await CalendarSyncOrchestrator.syncQuotationAction(actionModal.id);
     setActionModal(null);
     await fetchQuotations();
   };
@@ -584,7 +595,8 @@ export default function PipelinePage() {
       if (deal.client_id) {
         await addInteraction(deal.client_id, "note", `Ação concluída: ${deal.next_action}`, null);
       }
-      await setNextActionFull(deal.id, null, null, null, false);
+      await ActionEngine.completeAction(deal.id);
+      await CalendarSyncOrchestrator.syncQuotationAction(deal.id);
       await fetchQuotations();
     } catch (err) {
       console.error(err);
@@ -641,15 +653,23 @@ export default function PipelinePage() {
     return true;
   });
 
+  const health = calculatePipelineHealth(quotations);
+
   return (
     <div className="animate-in fade-in duration-500 flex flex-col h-full min-h-[calc(100vh-80px)]">
       
       {/* Page Header */}
-      <div className="mb-8">
-        <h1 className="text-page-title">Pipeline</h1>
-        <p className="text-page-subtitle">
-          Acompanhamento de negócios e CRM.
-        </p>
+      <div className="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-page-title">Pipeline</h1>
+          <p className="text-page-subtitle">
+            Acompanhamento de negócios e CRM.
+          </p>
+        </div>
+        <div className={`px-4 py-2 border rounded-xl flex items-center gap-2 shrink-0 ${health.color}`}>
+          <span className="text-xs font-black uppercase tracking-wider">{health.label}</span>
+          <span className="bg-white/40 text-xs font-black px-2 py-0.5 rounded-full">{health.score}/100</span>
+        </div>
       </div>
 
       {/* Dashboard "Hoje" - The Operational Hub */}

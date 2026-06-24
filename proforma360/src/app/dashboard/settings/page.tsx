@@ -81,7 +81,7 @@ export default function SettingsPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
         
         {/* Backup Card */}
-        <div className="bg-white rounded-lg border border-[var(--color-outline-variant)] shadow-sm p-6 flex flex-col items-center text-center">
+        <div className="bg-white p-6 md:p-8 rounded-[var(--radius-lg)] elevation-1 border border-[var(--color-outline-variant)] flex flex-col items-center text-center">
           <div className="w-16 h-16 bg-blue-50 text-[var(--color-primary)] rounded-full flex items-center justify-center mb-4">
             <CloudUpload className="w-8 h-8" />
           </div>
@@ -107,7 +107,7 @@ export default function SettingsPage() {
         </div>
 
         {/* Restore Card */}
-        <div className="bg-white rounded-lg border border-[var(--color-outline-variant)] shadow-sm p-6 flex flex-col items-center text-center">
+        <div className="bg-white p-6 md:p-8 rounded-[var(--radius-lg)] elevation-1 border border-[var(--color-outline-variant)] flex flex-col items-center text-center">
           <div className="w-16 h-16 bg-green-50 text-green-600 rounded-full flex items-center justify-center mb-4">
             <CloudDownload className="w-8 h-8" />
           </div>
@@ -138,7 +138,7 @@ export default function SettingsPage() {
           Definições da Aplicação
         </h2>
 
-        <div className="bg-white rounded-lg border border-[var(--color-outline-variant)] shadow-sm p-6">
+        <div className="bg-white p-6 md:p-8 rounded-[var(--radius-lg)] elevation-1 border border-[var(--color-outline-variant)]">
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-lg font-bold text-[var(--color-on-surface)]">Visibilidade da Marca (Brand Visibility)</h3>

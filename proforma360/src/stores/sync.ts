@@ -8,6 +8,9 @@ interface SyncState {
   setLastSyncDate: (date: string) => void;
 }
 
+import { createJSONStorage } from 'zustand/middleware';
+import { namespaceStorage } from '@/lib/runtime/namespaceStorage';
+
 export const useSyncStore = create<SyncState>()(
   persist(
     (set) => ({
@@ -18,6 +21,7 @@ export const useSyncStore = create<SyncState>()(
     }),
     {
       name: 'proforma360-sync-store',
+      storage: createJSONStorage(() => namespaceStorage),
     }
   )
 );

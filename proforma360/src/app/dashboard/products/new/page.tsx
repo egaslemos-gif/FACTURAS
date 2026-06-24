@@ -7,10 +7,14 @@ import { Save, ArrowLeft, Package, Tag, FileText, Layers, Scale } from "lucide-r
 import { toast } from "sonner";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { getSemanticProfile } from "@/lib/ui/semanticPresentationRegistry";
+import { useAppSettingsStore } from "@/stores/appSettings";
 
 export default function NewProductPage() {
   const router = useRouter();
   const { addProduct } = useProductsStore();
+  const { businessProfile } = useAppSettingsStore();
+  const profile = getSemanticProfile(businessProfile);
   const [isSaving, setIsSaving] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
@@ -39,11 +43,11 @@ export default function NewProductPage() {
         price: Number(formData.price),
         vat: Number(formData.vat),
       });
-      toast.success("Produto adicionado com sucesso!");
+      toast.success(`${profile.itemLabel} adicionado com sucesso!`);
       router.push("/dashboard/products");
     } catch (error) {
       console.error(error);
-      toast.error("Erro ao adicionar produto.");
+      toast.error(`Erro ao adicionar ${profile.itemLabel.toLowerCase()}.`);
       setIsSaving(false);
     }
   };
@@ -55,22 +59,22 @@ export default function NewProductPage() {
           <ArrowLeft className="w-6 h-6" />
         </Link>
         <div>
-          <h1 className="text-headline-lg text-[var(--color-on-surface)]">Novo Produto / Serviço</h1>
+          <h1 className="text-headline-lg text-[var(--color-on-surface)]">Novo {profile.itemLabel}</h1>
           <p className="text-body-md text-[var(--color-on-surface-variant)] mt-1">
-            Adicionar um item ao seu catálogo
+            Adicionar um {profile.itemLabel.toLowerCase()} ao seu catálogo
           </p>
         </div>
       </div>
 
       <form onSubmit={handleSubmit} className="bg-white p-6 md:p-8 rounded-[var(--radius-lg)] elevation-1 border border-[var(--color-outline-variant)]">
         <div className="flex items-center gap-3 mb-6">
-          <Package className="w-6 h-6 text-[var(--color-primary)]" />
-          <h2 className="text-headline-sm">Detalhes do Item</h2>
+          <profile.icon className={cn("w-6 h-6", `text-${profile.accentColor}-600`)} />
+          <h2 className="text-headline-sm">Detalhes</h2>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="col-span-1 md:col-span-2">
-            <label className="block text-label-md mb-2">Nome do Produto ou Serviço *</label>
+            <label className="block text-label-md mb-2">Nome ({profile.itemLabel}) *</label>
             <input
               type="text"
               name="name"
@@ -78,7 +82,7 @@ export default function NewProductPage() {
               value={formData.name}
               onChange={handleChange}
               className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-md focus:ring-2 focus:ring-[var(--color-primary)] outline-none"
-              placeholder="Ex: Consultoria em TI (Mensal)"
+              placeholder={profile.placeholders.itemName}
             />
           </div>
 
@@ -90,7 +94,7 @@ export default function NewProductPage() {
               value={formData.code}
               onChange={handleChange}
               className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-md focus:ring-2 focus:ring-[var(--color-primary)] outline-none font-mono"
-              placeholder="Ex: SRV-001"
+              placeholder={profile.placeholders.itemSKU}
             />
           </div>
 
@@ -110,7 +114,7 @@ export default function NewProductPage() {
           </div>
 
           <div>
-            <label className="block text-label-md mb-2">Preço Unitário (MZN) *</label>
+            <label className="block text-label-md mb-2">{profile.priceLabel} (MZN) *</label>
             <input
               type="number"
               name="price"
@@ -146,6 +150,7 @@ export default function NewProductPage() {
                 className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-md focus:ring-2 focus:ring-[var(--color-primary)] outline-none bg-white"
               >
                 <option value="un">un (Unidade)</option>
+                <option value={profile.unitLabel}>{profile.unitLabel}</option>
                 <option value="hr">hr (Hora)</option>
                 <option value="dia">dia (Dia)</option>
                 <option value="mês">mês (Mês)</option>
@@ -163,7 +168,7 @@ export default function NewProductPage() {
               onChange={handleChange}
               rows={3}
               className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-md focus:ring-2 focus:ring-[var(--color-primary)] outline-none resize-none"
-              placeholder="Detalhes que aparecerão na linha da proforma..."
+              placeholder={profile.placeholders.itemDescription}
             />
           </div>
         </div>
@@ -188,7 +193,7 @@ export default function NewProductPage() {
             ) : (
               <Save className="w-5 h-5" />
             )}
-            {isSaving ? "A guardar..." : "Guardar Produto"}
+            {isSaving ? "A guardar..." : `Guardar ${profile.itemLabel}`}
           </button>
         </div>
       </form>

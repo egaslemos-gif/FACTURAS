@@ -1,47 +1,51 @@
-import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { NextResponse } from "next/server";
+import * as jose from 'jose';
+import { FALLBACK_PRIVATE_JWK } from "@/lib/subscriptions/cryptoKeys";
+import { resolveRuntimeNamespace } from "@/lib/runtime/runtimeNamespace";
 
-export async function POST(req: NextRequest) {
+/**
+ * Lightweight Control-Plane: License Issuance
+ * In a real scenario, this is protected by Admin Middleware and pulls data from
+ * the cloud DB to issue a valid offline license payload for the client.
+ */
+export async function POST(req: Request) {
   try {
-    const session = await auth();
-    if (!session || !session.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
     const body = await req.json();
-    const { action, target_user_id, updates } = body;
+    const { userId, plan, deviceId } = body;
 
-    const apiUrl = process.env.LICENSING_API_URL;
-    if (!apiUrl) {
-       return NextResponse.json({ error: "API URL missing" }, { status: 500 });
+    if (!userId || !plan || !deviceId) {
+      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
-    const response = await fetch(apiUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        action: action, // adminListUsers, adminListRequests, adminUpdateUser
-        user_id: session.user.id,
-        email: session.user.email, // Apps Script verifies this email is an admin
-        target_user_id,
-        updates
-      })
+    // Example logic: Allow 7 days of offline usage
+    const issuedAt = Math.floor(Date.now() / 1000);
+    const expiresAt = issuedAt + (7 * 24 * 60 * 60); // 7 days
+
+    const payload = {
+      userId,
+      plan,
+      deviceId,
+      runtimeNamespace: resolveRuntimeNamespace(userId),
+      licenseVersion: 1, // To invalidate old payload formats
+      issuedAt,
+      expiresAt
+    };
+
+    // Sign with Private Key
+    const privateKey = await jose.importJWK(FALLBACK_PRIVATE_JWK, 'ES256');
+    const jwt = await new jose.SignJWT(payload)
+      .setProtectedHeader({ alg: 'ES256' })
+      .setIssuedAt(issuedAt)
+      .setExpirationTime(expiresAt)
+      .sign(privateKey);
+
+    return NextResponse.json({
+      success: true,
+      license: jwt
     });
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const data = await response.json();
-    
-    if (data.status === 403) {
-      return NextResponse.json({ error: "Admin access denied" }, { status: 403 });
-    }
-
-    return NextResponse.json(data);
-
-  } catch (error: any) {
-    console.error("Admin Licensing Error:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error) {
+    console.error("[ControlPlane] Failed to issue license:", error);
+    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }

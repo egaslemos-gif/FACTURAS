@@ -316,9 +316,17 @@ export default function LandingPage() {
           </button>
         </div>
 
+        {/* Mobile Menu Backdrop */}
+        {mobileMenuOpen && (
+          <div 
+            className="md:hidden fixed inset-0 bg-slate-900/20 backdrop-blur-[2px] z-40" 
+            onClick={() => setMobileMenuOpen(false)}
+          />
+        )}
+
         {/* Mobile Menu */}
         {mobileMenuOpen && (
-          <div className="md:hidden absolute top-full left-0 w-full bg-white border-b border-slate-200 shadow-xl py-4 px-6 flex flex-col gap-4">
+          <div className="md:hidden absolute top-full left-0 w-full bg-white border-b border-slate-200 shadow-xl py-4 px-6 flex flex-col gap-4 z-50">
              <a href="#workflow" className="text-slate-600 font-medium py-2" onClick={() => setMobileMenuOpen(false)}>Workspace</a>
              <a href="#pipeline" className="text-slate-600 font-medium py-2" onClick={() => setMobileMenuOpen(false)}>Pipeline</a>
              <a href="#precos" className="text-slate-600 font-medium py-2" onClick={() => setMobileMenuOpen(false)}>Preços</a>

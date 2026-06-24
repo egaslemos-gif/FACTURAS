@@ -7,12 +7,16 @@ import { Save, ArrowLeft, Package } from "lucide-react";
 import { toast } from "sonner";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { getSemanticProfile } from "@/lib/ui/semanticPresentationRegistry";
+import { useAppSettingsStore } from "@/stores/appSettings";
 
 export default function EditProductPage() {
   const router = useRouter();
   const params = useParams();
   const id = params.id as string;
   const { products, fetchProducts, updateProduct } = useProductsStore();
+  const { businessProfile } = useAppSettingsStore();
+  const profile = getSemanticProfile(businessProfile);
   const [isSaving, setIsSaving] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
@@ -60,11 +64,11 @@ export default function EditProductPage() {
         price: Number(formData.price),
         vat: Number(formData.vat),
       });
-      toast.success("Produto atualizado com sucesso!");
+      toast.success(`${profile.itemLabel} atualizado com sucesso!`);
       router.push("/dashboard/products");
     } catch (error) {
       console.error(error);
-      toast.error("Erro ao atualizar produto.");
+      toast.error(`Erro ao atualizar ${profile.itemLabel.toLowerCase()}.`);
       setIsSaving(false);
     }
   };
@@ -76,22 +80,22 @@ export default function EditProductPage() {
           <ArrowLeft className="w-6 h-6" />
         </Link>
         <div>
-          <h1 className="text-headline-lg text-[var(--color-on-surface)]">Editar Produto / Serviço</h1>
+          <h1 className="text-headline-lg text-[var(--color-on-surface)]">Editar {profile.itemLabel}</h1>
           <p className="text-body-md text-[var(--color-on-surface-variant)] mt-1">
-            Atualize as informações do item
+            Atualize as informações do {profile.itemLabel.toLowerCase()}
           </p>
         </div>
       </div>
 
       <form onSubmit={handleSubmit} className="bg-white p-6 md:p-8 rounded-[var(--radius-lg)] elevation-1 border border-[var(--color-outline-variant)]">
         <div className="flex items-center gap-3 mb-6">
-          <Package className="w-6 h-6 text-[var(--color-primary)]" />
-          <h2 className="text-headline-sm">Detalhes do Item</h2>
+          <profile.icon className={cn("w-6 h-6", `text-${profile.accentColor}-600`)} />
+          <h2 className="text-headline-sm">Detalhes</h2>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="col-span-1 md:col-span-2">
-            <label className="block text-label-md mb-2">Nome do Produto ou Serviço *</label>
+            <label className="block text-label-md mb-2">Nome ({profile.itemLabel}) *</label>
             <input
               type="text"
               name="name"
@@ -99,7 +103,7 @@ export default function EditProductPage() {
               value={formData.name}
               onChange={handleChange}
               className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-md focus:ring-2 focus:ring-[var(--color-primary)] outline-none"
-              placeholder="Ex: Consultoria em TI (Mensal)"
+              placeholder={profile.placeholders.itemName}
             />
           </div>
 
@@ -111,7 +115,7 @@ export default function EditProductPage() {
               value={formData.code}
               onChange={handleChange}
               className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-md focus:ring-2 focus:ring-[var(--color-primary)] outline-none font-mono"
-              placeholder="Ex: SRV-001"
+              placeholder={profile.placeholders.itemSKU}
             />
           </div>
 
@@ -131,7 +135,7 @@ export default function EditProductPage() {
           </div>
 
           <div>
-            <label className="block text-label-md mb-2">Preço Unitário (MZN) *</label>
+            <label className="block text-label-md mb-2">{profile.priceLabel} (MZN) *</label>
             <input
               type="number"
               name="price"
@@ -167,6 +171,7 @@ export default function EditProductPage() {
                 className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-md focus:ring-2 focus:ring-[var(--color-primary)] outline-none bg-white"
               >
                 <option value="un">un (Unidade)</option>
+                <option value={profile.unitLabel}>{profile.unitLabel}</option>
                 <option value="hr">hr (Hora)</option>
                 <option value="dia">dia (Dia)</option>
                 <option value="mês">mês (Mês)</option>
@@ -184,7 +189,7 @@ export default function EditProductPage() {
               onChange={handleChange}
               rows={3}
               className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-md focus:ring-2 focus:ring-[var(--color-primary)] outline-none resize-none"
-              placeholder="Detalhes que aparecerão na linha da proforma..."
+              placeholder={profile.placeholders.itemDescription}
             />
           </div>
         </div>

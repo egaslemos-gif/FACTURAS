@@ -56,7 +56,15 @@ export default function LoginPage() {
   const handleGoogleLogin = async () => {
     setIsLoading(true);
     try {
-      await signIn("google", { callbackUrl: "/dashboard" });
+      // Clear any stale NextAuth cookies to force a fresh OAuth flow
+      document.cookie.split(";").forEach((c) => {
+        const name = c.trim().split("=")[0];
+        if (name.startsWith("next-auth") || name.startsWith("__Secure-next-auth")) {
+          document.cookie = `${name}=;expires=${new Date(0).toUTCString()};path=/`;
+        }
+      });
+      // signIn with redirect to /dashboard and force account selection prompt
+      await signIn("google", { callbackUrl: "/dashboard" }, { prompt: "select_account" });
     } catch (error) {
       console.error("Login failed", error);
       setIsLoading(false);

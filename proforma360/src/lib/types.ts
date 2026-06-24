@@ -23,6 +23,7 @@ export interface Company {
   mpesa?: string | null;
   emola?: string | null;
   show_branding: boolean;
+  business_profile?: "SAAS" | "CONSULTING" | "LOGISTICS" | "DEFAULT";
   created_at: string;
   updated_at: string;
 }
@@ -65,17 +66,33 @@ export interface Quotation {
   quotation_number: string;
   client_id: string;
   client_name?: string;
+  document_context: string;
+  schema_version: string;
+  semantic_schema_signature?: string | null;
+  execution_plan_signature?: string | null;
+  totals_ast_signature?: string | null;
+  dynamic_fields?: Record<string, any>;
   date: string;
   expiry_date: string;
   status: QuotationStatus;
   pipeline_stage: PipelineStage;
-  priority?: "low" | "medium" | "high";
+  priority?: "low" | "medium" | "high" | "urgent";
   next_action: string | null;
   next_action_date: string | null;
   next_action_time: string | null;
   last_activity_at: string | null;
   last_contact_at: string | null;
   reminders_enabled: boolean;
+  assigned_user?: string | null;
+  followup_status?: "pending" | "scheduled" | "completed" | "overdue" | null;
+  reminder_offset?: "5m" | "15m" | "30m" | "1h" | "1d" | null;
+  completed_at?: string | null;
+  calendar_sync_enabled?: boolean;
+  external_calendar_provider?: "google" | "outlook" | null;
+  calendar_sync_status?: "synced" | "pending" | "failed" | null;
+  calendar_sync_date?: string | null;
+  external_calendar_event_id?: string | null;
+  calendar_sync_error?: string | null;
   subtotal: number;
   discount: number;
   discount_type: "percentage" | "fixed";
@@ -101,6 +118,7 @@ export interface QuotationItem {
   vat_rate: number;
   total: number;
   sort_order: number;
+  dynamic_fields?: Record<string, any>;
 }
 
 // --- Quotation History ---

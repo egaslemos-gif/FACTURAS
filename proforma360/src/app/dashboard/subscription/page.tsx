@@ -108,13 +108,14 @@ export default function SubscriptionPage() {
                 <div className="flex items-start gap-3 p-4 bg-red-50 text-red-700 rounded-lg border border-red-100 mt-auto">
                   <AlertTriangle className="w-5 h-5 shrink-0 mt-0.5" />
                   <div className="text-sm">
-                    <p className="font-bold mb-1">Limite atingido</p>
-                    <p>Já não pode emitir mais proformas este mês. Aguarde a viragem do mês ou solicite mais limite.</p>
+                    <p className="font-bold mb-1">Modo Restrito de Leitura</p>
+                    <p>O plafond mensal de emissões foi atingido. Pode continuar a aceder ao histórico, mas a criação de novos documentos encontra-se bloqueada até ao próximo ciclo.</p>
                   </div>
                 </div>
               ) : (
-                <div className="text-sm text-slate-500 mt-auto bg-slate-50 p-4 rounded-lg border border-slate-100">
-                  Tem ainda <strong>{license.monthly_limit - license.used_this_month} proformas</strong> disponíveis para partilha ou download de PDF este mês.
+                <div className="text-sm text-slate-600 mt-auto bg-slate-50 p-4 rounded-lg border border-slate-100 flex flex-col gap-2">
+                  <p>Tem ainda <strong className="text-slate-900">{license.monthly_limit - license.used_this_month} documentos</strong> disponíveis para emissão neste ciclo.</p>
+                  <p className="text-xs text-slate-500">Rascunhos (Drafts) não descontam do seu plafond até serem fechados ou enviados.</p>
                 </div>
               )}
             </>

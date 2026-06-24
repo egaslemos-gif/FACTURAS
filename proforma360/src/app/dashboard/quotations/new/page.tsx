@@ -5,11 +5,15 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useQuotationsStore, useClientsStore, useProductsStore, useCompanyStore } from "@/stores";
 import { useLicenseStore } from "@/stores/licenseStore";
+import UpgradeModal from "@/components/UpgradeModal";
+import { FinanceMath } from "@/lib/documents/deterministicFinancialMath";
 import { generateQuotationNumber } from "@/lib/utils";
 import { ArrowLeft, Save, Plus, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { cn, formatCurrency } from "@/lib/utils";
 import { requestNotificationPermission } from "@/lib/pipeline/notifications";
+import { getSemanticProfile } from "@/lib/ui/semanticPresentationRegistry";
+import { useAppSettingsStore } from "@/stores/appSettings";
 
 interface LineItem {
   id: string;
@@ -30,6 +34,8 @@ export default function NewQuotationPage() {
   const { clients, fetchClients } = useClientsStore();
   const { products, fetchProducts } = useProductsStore();
   const { company, fetchCompany } = useCompanyStore();
+  const { businessProfile } = useAppSettingsStore();
+  const profile = getSemanticProfile(businessProfile);
 
   const [isSaving, setIsSaving] = useState(false);
   const [headerData, setHeaderData] = useState(() => {
@@ -39,6 +45,7 @@ export default function NewQuotationPage() {
     return {
       quotation_number: "",
       client_id: "",
+      document_context: "GENERAL",
       date: issueDate.toISOString().split("T")[0],
       expiry_date: expiryDate.toISOString().split("T")[0],
       notes: "",
@@ -154,29 +161,42 @@ export default function NewQuotationPage() {
     );
   };
 
-  // Calculations
-  const subtotal = items.reduce((acc, item) => acc + item.total, 0);
+  // Calculations using FinanceMath to avoid floating point errors
+  const subtotalCents = items.reduce((acc, item) => 
+    FinanceMath.add(acc, FinanceMath.toCents(item.total)), 0
+  );
   
-  let discountAmount = 0;
+  let discountCents = 0;
   if (headerData.discount > 0) {
-    discountAmount = headerData.discount_type === "percentage" 
-      ? subtotal * (headerData.discount / 100)
-      : headerData.discount;
+    if (headerData.discount_type === "percentage") {
+      discountCents = FinanceMath.applyPercentage(subtotalCents, headerData.discount);
+    } else {
+      discountCents = FinanceMath.toCents(headerData.discount);
+    }
   }
   
-  const subtotalAfterDiscount = subtotal - discountAmount;
+  const subtotalAfterDiscountCents = FinanceMath.subtract(subtotalCents, discountCents);
 
   // Calculate VAT based on individual item rates weighted by their proportional contribution
-  // For MVP, we do exact VAT per line
-  let vatTotal = 0;
+  let vatTotalCents = 0;
   items.forEach(item => {
-    // Proportion of this item's total relative to the overall subtotal (to apply discount correctly)
-    const proportion = subtotal > 0 ? item.total / subtotal : 0;
-    const itemTotalAfterDiscount = item.total - (discountAmount * proportion);
-    vatTotal += itemTotalAfterDiscount * (item.vat_rate / 100);
+    const itemTotalCents = FinanceMath.toCents(item.total);
+    let itemDiscountCents = 0;
+    if (subtotalCents > 0) {
+      itemDiscountCents = Math.round((itemTotalCents * discountCents) / subtotalCents);
+    }
+    const itemTotalAfterDiscountCents = FinanceMath.subtract(itemTotalCents, itemDiscountCents);
+    const itemVatCents = FinanceMath.applyPercentage(itemTotalAfterDiscountCents, item.vat_rate);
+    vatTotalCents = FinanceMath.add(vatTotalCents, itemVatCents);
   });
 
-  const grandTotal = subtotalAfterDiscount + vatTotal;
+  const grandTotalCents = FinanceMath.add(subtotalAfterDiscountCents, vatTotalCents);
+
+  const subtotal = FinanceMath.toFloat(subtotalCents);
+  const discountAmount = FinanceMath.toFloat(discountCents);
+  const subtotalAfterDiscount = FinanceMath.toFloat(subtotalAfterDiscountCents);
+  const vatTotal = FinanceMath.toFloat(vatTotalCents);
+  const grandTotal = FinanceMath.toFloat(grandTotalCents);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -205,6 +225,8 @@ export default function NewQuotationPage() {
         {
           quotation_number: headerData.quotation_number,
           client_id: headerData.client_id,
+          document_context: headerData.document_context,
+          schema_version: "v1",
           date: headerData.date,
           expiry_date: headerData.expiry_date,
           status: "draft",
@@ -243,9 +265,9 @@ export default function NewQuotationPage() {
             <ArrowLeft className="w-6 h-6" />
           </Link>
           <div>
-            <h1 className="text-headline-lg text-[var(--color-on-surface)]">Nova Proforma</h1>
+            <h1 className="text-headline-lg text-[var(--color-on-surface)]">Nova {profile.quotationLabel}</h1>
             <p className="text-body-md text-[var(--color-on-surface-variant)] mt-1">
-              Criar um novo documento
+              Criar um novo documento comercial
             </p>
           </div>
         </div>

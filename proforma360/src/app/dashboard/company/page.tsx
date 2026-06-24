@@ -3,24 +3,35 @@
 import { useEffect, useState } from "react";
 import { useCompanyStore } from "@/stores";
 import { Company } from "@/lib/types";
-import { Upload, Save, Building2, FileSignature, LayoutTemplate } from "lucide-react";
+import { useAppSettingsStore } from "@/stores/appSettings";
+import { SEMANTIC_PROFILES, BusinessProfile } from "@/lib/ui/semanticPresentationRegistry";
+import { Upload, Save, Building2, FileSignature, LayoutTemplate, Briefcase } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
 export default function CompanyPage() {
   const { company, fetchCompany, updateCompany, isLoading } = useCompanyStore();
+  const { businessProfile, fetchSettings, updateBusinessProfile, isLoading: isSettingsLoading } = useAppSettingsStore();
   const [formData, setFormData] = useState<Partial<Company>>({});
+  const [localProfile, setLocalProfile] = useState<BusinessProfile>("GENERAL");
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     fetchCompany();
-  }, [fetchCompany]);
+    fetchSettings();
+  }, [fetchCompany, fetchSettings]);
 
   useEffect(() => {
     if (company) {
       setFormData(company);
     }
   }, [company]);
+
+  useEffect(() => {
+    if (businessProfile) {
+      setLocalProfile(businessProfile as BusinessProfile);
+    }
+  }, [businessProfile]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -31,6 +42,7 @@ export default function CompanyPage() {
     setIsSaving(true);
     try {
       await updateCompany(formData);
+      await updateBusinessProfile(localProfile);
       toast.success("Definições da empresa guardadas com sucesso!");
     } catch (error) {
       console.error(error);
@@ -58,8 +70,34 @@ export default function CompanyPage() {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Perfil de Indústria */}
+        <div className="bg-white p-6 md:p-8 rounded-[var(--radius-lg)] elevation-1 border border-[var(--color-outline-variant)]">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-10 h-10 rounded-xl bg-teal-50 flex items-center justify-center">
+              <Briefcase className="w-5 h-5 text-teal-600" />
+            </div>
+            <h2 className="text-lg font-bold text-slate-900">Perfil Comercial</h2>
+          </div>
+          
+          <div className="col-span-1 md:col-span-2">
+            <label className="block text-sm font-semibold text-slate-700 mb-1.5">Sector de Atividade (Adapta a Linguagem do Sistema)</label>
+            <select
+              value={localProfile}
+              onChange={(e) => setLocalProfile(e.target.value as BusinessProfile)}
+              className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-md focus:ring-2 focus:ring-[var(--color-primary)] outline-none"
+            >
+              {Object.values(SEMANTIC_PROFILES).map((profile) => (
+                <option key={profile.id} value={profile.id}>
+                  {profile.name}
+                </option>
+              ))}
+            </select>
+            <p className="text-xs text-slate-500 mt-2">Isto ajustará os termos como "Produtos", "Serviços", ou "Planos" ao longo da aplicação.</p>
+          </div>
+        </div>
+
         {/* Informações Básicas */}
-        <div className="dashboard-section border-none shadow-sm">
+        <div className="bg-white p-6 md:p-8 rounded-[var(--radius-lg)] elevation-1 border border-[var(--color-outline-variant)]">
           <div className="flex items-center gap-3 mb-6">
             <div className="w-10 h-10 rounded-xl bg-teal-50 flex items-center justify-center">
               <Building2 className="w-5 h-5 text-teal-600" />
@@ -75,7 +113,7 @@ export default function CompanyPage() {
                 name="name"
                 value={formData.name || ""}
                 onChange={handleChange}
-                className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 outline-none transition-all shadow-sm bg-slate-50/50 hover:bg-white focus:bg-white text-sm"
+                className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-md focus:ring-2 focus:ring-[var(--color-primary)] outline-none"
                 placeholder="Ex: Proforma360 Lda"
                 required
               />
@@ -88,7 +126,7 @@ export default function CompanyPage() {
                 name="tax_number"
                 value={formData.tax_number || ""}
                 onChange={handleChange}
-                className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 outline-none transition-all shadow-sm bg-slate-50/50 hover:bg-white focus:bg-white text-sm"
+                className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-md focus:ring-2 focus:ring-[var(--color-primary)] outline-none"
                 placeholder="Ex: 400123456"
               />
             </div>
@@ -100,7 +138,7 @@ export default function CompanyPage() {
                 name="phone"
                 value={formData.phone || ""}
                 onChange={handleChange}
-                className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 outline-none transition-all shadow-sm bg-slate-50/50 hover:bg-white focus:bg-white text-sm"
+                className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-md focus:ring-2 focus:ring-[var(--color-primary)] outline-none"
                 placeholder="+258 84 123 4567"
               />
             </div>
@@ -112,7 +150,7 @@ export default function CompanyPage() {
                 name="email"
                 value={formData.email || ""}
                 onChange={handleChange}
-                className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 outline-none transition-all shadow-sm bg-slate-50/50 hover:bg-white focus:bg-white text-sm"
+                className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-md focus:ring-2 focus:ring-[var(--color-primary)] outline-none"
                 placeholder="contacto@empresa.com"
               />
             </div>
@@ -132,7 +170,7 @@ export default function CompanyPage() {
         </div>
 
         {/* Informações Financeiras */}
-        <div className="dashboard-section border-none shadow-sm">
+        <div className="bg-white p-6 md:p-8 rounded-[var(--radius-lg)] elevation-1 border border-[var(--color-outline-variant)]">
           <div className="flex items-center gap-3 mb-6">
             <div className="w-10 h-10 rounded-xl bg-teal-50 flex items-center justify-center">
               <Building2 className="w-5 h-5 text-teal-600" />
@@ -148,7 +186,7 @@ export default function CompanyPage() {
                 name="bank_name"
                 value={formData.bank_name || ""}
                 onChange={handleChange}
-                className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 outline-none transition-all shadow-sm bg-slate-50/50 hover:bg-white focus:bg-white text-sm"
+                className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-md focus:ring-2 focus:ring-[var(--color-primary)] outline-none"
                 placeholder="Ex: Millennium BIM"
               />
             </div>
@@ -160,7 +198,7 @@ export default function CompanyPage() {
                 name="account_holder"
                 value={formData.account_holder || ""}
                 onChange={handleChange}
-                className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 outline-none transition-all shadow-sm bg-slate-50/50 hover:bg-white focus:bg-white text-sm"
+                className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-md focus:ring-2 focus:ring-[var(--color-primary)] outline-none"
                 placeholder="Ex: Proforma360 Lda"
               />
             </div>
@@ -172,7 +210,7 @@ export default function CompanyPage() {
                 name="account_number"
                 value={formData.account_number || ""}
                 onChange={handleChange}
-                className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 outline-none transition-all shadow-sm bg-slate-50/50 hover:bg-white focus:bg-white text-sm"
+                className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-md focus:ring-2 focus:ring-[var(--color-primary)] outline-none"
                 placeholder="Ex: 123456789"
               />
             </div>
@@ -184,7 +222,7 @@ export default function CompanyPage() {
                 name="nib_iban"
                 value={formData.nib_iban || ""}
                 onChange={handleChange}
-                className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 outline-none transition-all shadow-sm bg-slate-50/50 hover:bg-white focus:bg-white text-sm"
+                className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-md focus:ring-2 focus:ring-[var(--color-primary)] outline-none"
                 placeholder="Ex: 000100000012345678912"
               />
             </div>
@@ -196,7 +234,7 @@ export default function CompanyPage() {
                 name="mpesa"
                 value={formData.mpesa || ""}
                 onChange={handleChange}
-                className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 outline-none transition-all shadow-sm bg-slate-50/50 hover:bg-white focus:bg-white text-sm"
+                className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-md focus:ring-2 focus:ring-[var(--color-primary)] outline-none"
                 placeholder="Ex: 84 123 4567"
               />
             </div>
@@ -208,7 +246,7 @@ export default function CompanyPage() {
                 name="emola"
                 value={formData.emola || ""}
                 onChange={handleChange}
-                className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 outline-none transition-all shadow-sm bg-slate-50/50 hover:bg-white focus:bg-white text-sm"
+                className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-md focus:ring-2 focus:ring-[var(--color-primary)] outline-none"
                 placeholder="Ex: 86 123 4567"
               />
             </div>
@@ -216,7 +254,7 @@ export default function CompanyPage() {
         </div>
 
         {/* Identidade Visual */}
-        <div className="dashboard-section border-none shadow-sm">
+        <div className="bg-white p-6 md:p-8 rounded-[var(--radius-lg)] elevation-1 border border-[var(--color-outline-variant)]">
           <div className="flex items-center gap-3 mb-6">
             <div className="w-10 h-10 rounded-xl bg-teal-50 flex items-center justify-center">
               <FileSignature className="w-5 h-5 text-teal-600" />
@@ -332,14 +370,14 @@ export default function CompanyPage() {
               name="footer_text"
               value={formData.footer_text || ""}
               onChange={handleChange}
-              className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 outline-none transition-all shadow-sm bg-slate-50/50 hover:bg-white focus:bg-white text-sm"
+              className="w-full px-4 py-2 border border-[var(--color-outline-variant)] rounded-md focus:ring-2 focus:ring-[var(--color-primary)] outline-none"
               placeholder="Obrigado por escolher os nossos serviços. Processado por computador."
             />
           </div>
         </div>
 
         {/* Estilo da Proforma */}
-        <div className="dashboard-section border-none shadow-sm">
+        <div className="bg-white p-6 md:p-8 rounded-[var(--radius-lg)] elevation-1 border border-[var(--color-outline-variant)]">
           <div className="flex items-center gap-3 mb-6">
             <div className="w-10 h-10 rounded-xl bg-teal-50 flex items-center justify-center">
               <LayoutTemplate className="w-5 h-5 text-teal-600" />

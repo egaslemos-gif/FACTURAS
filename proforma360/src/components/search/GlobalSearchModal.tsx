@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Search, X, FileText, Users, Package, Zap, ArrowRight } from "lucide-react";
 import { useGlobalSearch } from "@/lib/search/useGlobalSearch";
 import { SearchItem } from "@/lib/search/searchIndex";
@@ -17,29 +17,43 @@ export function GlobalSearchModal({ isOpen, onClose }: GlobalSearchModalProps) {
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
   const { query, setQuery, results, recentItems, isEmpty } = useGlobalSearch();
+  const [selectedIndex, setSelectedIndex] = useState(0);
 
-  // Handle Cmd+K / Ctrl+K
+  const displayItems = isEmpty ? recentItems : results;
+
+  // Handle Cmd+K / Ctrl+K and Navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Don't override if inside an input or textarea
-      if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement).tagName)) {
-        return;
+      if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement).tagName) && e.key !== 'Escape') {
+        // Only allow Escape to override inputs if modal is open
+        if (!isOpen) return;
       }
+
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
         e.preventDefault();
-        if (!isOpen) {
-          // Open via a global event or context in layout. For now we just focus input if open, 
-          // or rely on layout to pass isOpen state.
-          // In layout, we should listen to Cmd+K as well to toggle isOpen.
-        }
       }
-      if (e.key === 'Escape' && isOpen) {
+
+      if (!isOpen) return;
+
+      if (e.key === 'Escape') {
         onClose();
+        return;
+      }
+
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        setSelectedIndex(prev => Math.min(prev + 1, displayItems.length - 1));
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        setSelectedIndex(prev => Math.max(prev - 1, 0));
+      } else if (e.key === 'Enter' && displayItems.length > 0) {
+        e.preventDefault();
+        handleItemClick(displayItems[selectedIndex]);
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, onClose]);
+  }, [isOpen, onClose, displayItems, selectedIndex]);
 
   useEffect(() => {
     if (isOpen) {
@@ -48,11 +62,16 @@ export function GlobalSearchModal({ isOpen, onClose }: GlobalSearchModalProps) {
     } else {
       document.body.style.overflow = "";
       setQuery("");
+      setSelectedIndex(0);
     }
     return () => {
       document.body.style.overflow = "";
     };
   }, [isOpen, setQuery]);
+
+  useEffect(() => {
+    setSelectedIndex(0);
+  }, [query]);
 
   if (!isOpen) return null;
 
@@ -75,41 +94,61 @@ export function GlobalSearchModal({ isOpen, onClose }: GlobalSearchModalProps) {
     }
   };
 
-  const renderItem = (item: SearchItem) => (
-    <button
-      key={item.id}
-      onClick={() => handleItemClick(item)}
-      className="w-full flex items-center gap-4 px-4 py-3 hover:bg-slate-50 active:bg-slate-100 transition-colors text-left group"
-    >
-      <div className={cn(
-        "flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center border border-slate-100",
-        item.type === "quotation" && "bg-teal-50",
-        item.type === "client" && "bg-blue-50",
-        item.type === "product" && "bg-amber-50",
-        item.type === "action" && "bg-purple-50"
-      )}>
-        {renderIcon(item.type)}
-      </div>
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center justify-between gap-2">
-          <p className="text-sm font-semibold text-slate-900 truncate">{item.title}</p>
-          {item.amount !== undefined && (
-            <span className="text-sm font-bold text-slate-900 shrink-0">
-              {item.amount.toLocaleString("pt-MZ", { minimumFractionDigits: 2 })} MTn
-            </span>
-          )}
+  const renderItem = (item: SearchItem, index: number) => {
+    const isSelected = index === selectedIndex;
+    return (
+      <button
+        key={item.id}
+        onClick={() => handleItemClick(item)}
+        onMouseEnter={() => setSelectedIndex(index)}
+        className={cn(
+          "w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-colors text-left group",
+          isSelected ? "bg-teal-50" : "hover:bg-slate-50 active:bg-slate-100"
+        )}
+      >
+        <div className={cn(
+          "flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center border",
+          isSelected ? "border-teal-200 bg-white" : "border-slate-100 bg-white",
+          item.type === "quotation" && !isSelected && "bg-teal-50/50",
+          item.type === "client" && !isSelected && "bg-blue-50/50",
+          item.type === "product" && !isSelected && "bg-amber-50/50",
+          item.type === "action" && !isSelected && "bg-purple-50/50"
+        )}>
+          {renderIcon(item.type)}
         </div>
-        <div className="flex items-center gap-2 mt-0.5">
-          {item.subtitle && <p className="text-xs text-slate-500 truncate">{item.subtitle}</p>}
-          {item.status && (
-            <span className="text-[10px] uppercase tracking-wider font-bold text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded">
-              {item.status}
-            </span>
-          )}
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center justify-between gap-2">
+            <p className={cn(
+              "text-sm font-semibold truncate",
+              isSelected ? "text-teal-900" : "text-slate-900"
+            )}>{item.title}</p>
+            {item.amount !== undefined && (
+              <span className={cn(
+                "text-sm font-bold shrink-0",
+                isSelected ? "text-teal-700" : "text-slate-900"
+              )}>
+                {item.amount.toLocaleString("pt-MZ", { minimumFractionDigits: 2 })} MTn
+              </span>
+            )}
+          </div>
+          <div className="flex items-center gap-2 mt-0.5">
+            {item.subtitle && <p className={cn(
+              "text-xs truncate",
+              isSelected ? "text-teal-600/80" : "text-slate-500"
+            )}>{item.subtitle}</p>}
+            {item.status && (
+              <span className={cn(
+                "text-[10px] uppercase tracking-wider font-bold px-1.5 py-0.5 rounded",
+                isSelected ? "bg-teal-100 text-teal-700" : "bg-slate-100 text-slate-500"
+              )}>
+                {item.status}
+              </span>
+            )}
+          </div>
         </div>
-      </div>
-    </button>
-  );
+      </button>
+    );
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center pt-[5vh] sm:pt-[10vh] px-4">
@@ -119,7 +158,7 @@ export function GlobalSearchModal({ isOpen, onClose }: GlobalSearchModalProps) {
         onClick={onClose}
       />
       
-      <div className="relative w-full max-w-2xl bg-white shadow-2xl rounded-2xl overflow-hidden flex flex-col max-h-[85vh] animate-in fade-in slide-in-from-bottom-4 duration-200">
+      <div className="relative w-full max-w-2xl bg-white shadow-surface-2 rounded-2xl overflow-hidden flex flex-col max-h-[85vh] animate-in fade-in zoom-in-95 duration-200">
         {/* Header Input */}
         <div className="flex items-center px-4 py-4 border-b border-slate-100">
           <Search className="w-6 h-6 text-slate-400 shrink-0" />
@@ -129,7 +168,7 @@ export function GlobalSearchModal({ isOpen, onClose }: GlobalSearchModalProps) {
             placeholder="Pesquisar proformas, clientes, ações..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            className="flex-1 bg-transparent border-none focus:ring-0 text-lg md:text-xl font-medium text-slate-900 px-4 placeholder:text-slate-400"
+            className="flex-1 bg-transparent border-none focus:ring-0 text-lg md:text-xl font-medium text-slate-900 px-4 placeholder:text-slate-400 outline-none"
           />
           <button 
             onClick={onClose}
@@ -146,8 +185,8 @@ export function GlobalSearchModal({ isOpen, onClose }: GlobalSearchModalProps) {
               {recentItems.length > 0 && (
                 <div className="px-4 py-2">
                   <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Comandos e Recentes</h3>
-                  <div className="grid gap-1">
-                    {recentItems.map(renderItem)}
+                  <div className="grid gap-1 px-2">
+                    {recentItems.map((item, i) => renderItem(item, i))}
                   </div>
                 </div>
               )}
@@ -157,8 +196,8 @@ export function GlobalSearchModal({ isOpen, onClose }: GlobalSearchModalProps) {
               {results.length > 0 ? (
                 <div className="px-4 py-2">
                   <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Resultados</h3>
-                  <div className="grid gap-1">
-                    {results.map(renderItem)}
+                  <div className="grid gap-1 px-2">
+                    {results.map((item, i) => renderItem(item, i))}
                   </div>
                 </div>
               ) : (
