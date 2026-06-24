@@ -465,14 +465,22 @@ export default function DashboardLayout({
         try {
           // Destrói a base de dados de forma segura seguindo a Fase 8 de Isolamento
           const { tenantIsolationManager } = await import("@/lib/runtime/tenantIsolation");
-          await tenantIsolationManager.teardownTenant("STRICT_SHARED_DEVICE");
+          // Change to PERSISTENT_PERSONAL_DEVICE to keep data in IDB across logouts. 
+          // New accounts will get their own isolated hash.
+          await tenantIsolationManager.teardownTenant("PERSISTENT_PERSONAL_DEVICE");
           
           // Clear offline db first (might hang if idb is blocked)
           await clearOfflineSession();
+          
+          // Reset memory stores to prevent bleeding on back-navigation or re-login without reload
+          useQuotationsStore.setState({ quotations: [], currentDetail: null });
+          useClientsStore.setState({ clients: [] });
+          useProductsStore.setState({ products: [] });
+
           // Clear local states and in-memory tenant hash
           await runtimeOwnership.runtimeTeardown(true);
-          // Sign out without next-auth router wrapper
-          await signOut({ redirect: false });
+          // Sign out using NextAuth and explicitly return to landing page
+          await signOut({ callbackUrl: "/" });
         } catch (e) {
           console.error("Cleanup error:", e);
         }
@@ -484,8 +492,7 @@ export default function DashboardLayout({
         new Promise(resolve => setTimeout(resolve, 2000))
       ]);
       
-      // Force hard redirect to home/login
-      window.location.href = "/";
+      // Navigation is handled by signOut callbackUrl
     } catch (error) {
       console.error("Erro no logout:", error);
       // Fallback

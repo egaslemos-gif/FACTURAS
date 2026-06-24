@@ -10,6 +10,7 @@ import { cn, formatCurrency } from "@/lib/utils";
 import { requestNotificationPermission } from "@/lib/pipeline/notifications";
 import { getSemanticProfile } from "@/lib/ui/semanticPresentationRegistry";
 import { useAppSettingsStore } from "@/stores/appSettings";
+import { FinanceMath } from "@/lib/documents/deterministicFinancialMath";
 
 interface LineItem {
   id: string;
@@ -129,7 +130,7 @@ export default function EditQuotationPage() {
 
           const qty = updatedItem.quantity || 0;
           const price = updatedItem.unit_price || 0;
-          updatedItem.total = qty * price;
+          updatedItem.total = FinanceMath.toFloat(FinanceMath.multiply(FinanceMath.toCents(qty), FinanceMath.toCents(price)) / 100);
           
           return updatedItem;
         }
@@ -138,25 +139,40 @@ export default function EditQuotationPage() {
     );
   };
 
-  const subtotal = items.reduce((acc, item) => acc + item.total, 0);
+  const subtotalCents = items.reduce((acc, item) => 
+    FinanceMath.add(acc, FinanceMath.toCents(item.total)), 0
+  );
   
-  let discountAmount = 0;
+  let discountCents = 0;
   if (headerData.discount > 0) {
-    discountAmount = headerData.discount_type === "percentage" 
-      ? subtotal * (headerData.discount / 100)
-      : headerData.discount;
+    if (headerData.discount_type === "percentage") {
+      discountCents = FinanceMath.applyPercentage(subtotalCents, headerData.discount);
+    } else {
+      discountCents = FinanceMath.toCents(headerData.discount);
+    }
   }
   
-  const subtotalAfterDiscount = subtotal - discountAmount;
+  const subtotalAfterDiscountCents = FinanceMath.subtract(subtotalCents, discountCents);
 
-  let vatTotal = 0;
+  let vatTotalCents = 0;
   items.forEach(item => {
-    const proportion = subtotal > 0 ? item.total / subtotal : 0;
-    const itemTotalAfterDiscount = item.total - (discountAmount * proportion);
-    vatTotal += itemTotalAfterDiscount * (item.vat_rate / 100);
+    const itemTotalCents = FinanceMath.toCents(item.total);
+    let itemDiscountCents = 0;
+    if (subtotalCents > 0) {
+      itemDiscountCents = Math.round((itemTotalCents * discountCents) / subtotalCents);
+    }
+    const itemTotalAfterDiscountCents = FinanceMath.subtract(itemTotalCents, itemDiscountCents);
+    const itemVatCents = FinanceMath.applyPercentage(itemTotalAfterDiscountCents, item.vat_rate);
+    vatTotalCents = FinanceMath.add(vatTotalCents, itemVatCents);
   });
 
-  const grandTotal = subtotalAfterDiscount + vatTotal;
+  const grandTotalCents = FinanceMath.add(subtotalAfterDiscountCents, vatTotalCents);
+
+  const subtotal = FinanceMath.toFloat(subtotalCents);
+  const discountAmount = FinanceMath.toFloat(discountCents);
+  const subtotalAfterDiscount = FinanceMath.toFloat(subtotalAfterDiscountCents);
+  const vatTotal = FinanceMath.toFloat(vatTotalCents);
+  const grandTotal = FinanceMath.toFloat(grandTotalCents);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

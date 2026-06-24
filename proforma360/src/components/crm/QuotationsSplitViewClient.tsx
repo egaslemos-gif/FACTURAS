@@ -124,10 +124,10 @@ export function QuotationsSplitViewClient({ children }: { children: React.ReactN
                           </span>
                           {(isCritical || isWarning) && q.status === "sent" && (
                             <span className={cn(
-                              "px-1.5 py-0.5 rounded text-[9px] font-black uppercase tracking-wider",
+                              "px-1.5 py-0.5 rounded text-[9px] font-black uppercase tracking-wider truncate max-w-[120px]",
                               isCritical ? "bg-[var(--severity-critical-bg)] text-[var(--severity-critical)] ring-1 ring-[var(--severity-critical)]" :
                               "bg-[var(--severity-attention-bg)] text-[var(--severity-attention)] ring-1 ring-[var(--severity-attention)]"
-                            )}>
+                            )} title={severity.reasons[0] || severity.state}>
                               {severity.reasons[0] || severity.state}
                             </span>
                           )}

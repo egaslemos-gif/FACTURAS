@@ -77,11 +77,10 @@ export class SeverityEngine {
       score += 10;
     }
 
-    // 4. Value Risk Multiplier
     const value = quotation.grand_total || 0;
     if (value > 100000) {
       score += 25;
-      reasons.push(`Valor financeiro elevado sob risco (PF > 100.000 MT)`);
+      reasons.push(`Risco Financeiro Elevado (>100k MT)`);
     } else if (value > 50000) {
       score += 15;
       reasons.push("Valor intermédio sob risco (PF > 50.000 MT)");
