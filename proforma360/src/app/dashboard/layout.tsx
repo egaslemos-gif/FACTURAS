@@ -808,10 +808,6 @@ export default function DashboardLayout({
                    <p className="text-xs text-[var(--color-on-surface-variant)] mt-1">
                      {lastSyncDate ? `Último backup: ${new Date(lastSyncDate).toLocaleDateString('pt-PT')} às ${new Date(lastSyncDate).toLocaleTimeString('pt-PT', {hour:'2-digit', minute:'2-digit'})}` : "Nunca foi feito backup"}
                    </p>
-                   
-                   {lastSyncDate && Date.now() - new Date(lastSyncDate).getTime() > 7 * 24 * 60 * 60 * 1000 && (
-                     <p className="text-xs text-amber-600 mt-1 font-medium">⚠️ Último backup há mais de 7 dias!</p>
-                   )}
 
                     {unsyncedQueueCount > 0 ? (
                       <div className="mt-2 text-xs font-semibold text-amber-700 bg-amber-50 p-2 rounded border border-amber-200 flex items-center gap-1.5">
@@ -926,10 +922,6 @@ export default function DashboardLayout({
                         <p className="text-xs text-[var(--color-on-surface-variant)] mt-1">
                           {lastSyncDate ? `Último backup: ${new Date(lastSyncDate).toLocaleDateString('pt-PT')} às ${new Date(lastSyncDate).toLocaleTimeString('pt-PT', {hour:'2-digit', minute:'2-digit'})}` : "Nunca foi feito backup"}
                         </p>
-                        
-                        {lastSyncDate && Date.now() - new Date(lastSyncDate).getTime() > 7 * 24 * 60 * 60 * 1000 && (
-                          <p className="text-xs text-amber-600 mt-1 font-medium">⚠️ Último backup há mais de 7 dias!</p>
-                        )}
 
                         {unsyncedQueueCount > 0 ? (
                           <div className="mt-2 text-xs font-semibold text-amber-700 bg-amber-50 p-2 rounded border border-amber-200 flex items-center gap-1.5">
