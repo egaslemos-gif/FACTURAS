@@ -113,24 +113,39 @@ export default function DashboardLayout({
   const [isScrolled, setIsScrolled] = useState(false);
   const profileMenuContainerRef = useRef<HTMLDivElement>(null);
   const mobileProfileMenuContainerRef = useRef<HTMLDivElement>(null);
+  const syncMenuContainerRef = useRef<HTMLDivElement>(null);
+  const mobileSyncMenuContainerRef = useRef<HTMLDivElement>(null);
   
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as Node;
-      const isOutsideDesktop = profileMenuContainerRef.current && !profileMenuContainerRef.current.contains(target);
-      const isOutsideMobile = mobileProfileMenuContainerRef.current && !mobileProfileMenuContainerRef.current.contains(target);
       
-      if (isOutsideDesktop && isOutsideMobile) {
-        setIsProfileMenuOpen(false);
+      // Handle Profile Menu Close
+      if (isProfileMenuOpen) {
+        const isOutsideDesktop = profileMenuContainerRef.current && !profileMenuContainerRef.current.contains(target);
+        const isOutsideMobile = mobileProfileMenuContainerRef.current && !mobileProfileMenuContainerRef.current.contains(target);
+        if (isOutsideDesktop && isOutsideMobile) {
+          setIsProfileMenuOpen(false);
+        }
+      }
+
+      // Handle Sync Menu Close
+      if (isSyncMenuOpen) {
+        const isOutsideSyncDesktop = syncMenuContainerRef.current && !syncMenuContainerRef.current.contains(target);
+        const isOutsideSyncMobile = mobileSyncMenuContainerRef.current && !mobileSyncMenuContainerRef.current.contains(target);
+        if (isOutsideSyncDesktop && isOutsideSyncMobile) {
+          setIsSyncMenuOpen(false);
+        }
       }
     };
-    if (isProfileMenuOpen) {
+
+    if (isProfileMenuOpen || isSyncMenuOpen) {
       document.addEventListener("mousedown", handleClickOutside);
     }
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [isProfileMenuOpen]);
+  }, [isProfileMenuOpen, isSyncMenuOpen]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -782,11 +797,7 @@ export default function DashboardLayout({
 
            {/* Mobile Sync Menu */}
            {isSyncMenuOpen && (
-             <>
-               <div 
-                 className="fixed inset-0 z-40" 
-                 onClick={() => setIsSyncMenuOpen(false)}
-               ></div>
+             <div ref={mobileSyncMenuContainerRef}>
                <div className="absolute top-12 right-0 mt-2 w-80 bg-[var(--color-surface-elevated)] rounded-xl shadow-elevated border border-gray-100 overflow-hidden z-50">
                  <div className="p-4 border-b border-gray-100 bg-[var(--color-surface-elevated)]">
                    <p className="text-sm font-semibold text-[var(--color-on-surface)]">Backup Google Drive</p>
@@ -831,7 +842,7 @@ export default function DashboardLayout({
                    </button>
                  </div>
                </div>
-             </>
+             </div>
            )}
         </div>
       </header>
@@ -879,7 +890,7 @@ export default function DashboardLayout({
                Nova Proforma
              </Link>
 
-             <div className="hidden md:block relative">
+             <div className="hidden md:block relative" ref={syncMenuContainerRef}>
                 <button 
                   onClick={() => setIsSyncMenuOpen(!isSyncMenuOpen)}
                   className={cn(
@@ -905,12 +916,7 @@ export default function DashboardLayout({
                 </button>
 
                 {isSyncMenuOpen && (
-                  <>
-                    <div 
-                      className="fixed inset-0 z-40" 
-                      onClick={() => setIsSyncMenuOpen(false)}
-                    ></div>
-                    <div className="absolute top-12 right-0 mt-2 w-80 bg-[var(--color-surface-elevated)] rounded-xl shadow-elevated border border-gray-100 overflow-hidden z-50">
+                  <div className="absolute top-12 right-0 mt-2 w-80 bg-[var(--color-surface-elevated)] rounded-xl shadow-elevated border border-gray-100 overflow-hidden z-50">
                       <div className="p-4 border-b border-gray-100 bg-[var(--color-surface-elevated)]">
                         <p className="text-sm font-semibold text-[var(--color-on-surface)]">Backup Google Drive</p>
                         <p className="text-xs text-[var(--color-on-surface-variant)] mt-1">
@@ -958,7 +964,6 @@ export default function DashboardLayout({
                         </button>
                       </div>
                     </div>
-                  </>
                 )}
              </div>
 

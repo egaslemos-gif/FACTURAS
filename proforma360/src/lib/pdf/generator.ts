@@ -664,30 +664,59 @@ function renderSignatures(page: PDFPage, width: number, height: number, stampIma
     });
   }
 
-  // Determinism Signatures removed per request
+  // Professional Signature Block on the right
+  const sigBlockCenterX = width - 150;
+  const sigBlockWidth = 180;
+  const sigBlockStartX = sigBlockCenterX - (sigBlockWidth / 2);
+  const lineY = bottomY + 20;
 
+  // Draw the stamp first (so it goes behind the signature)
   if (stampImage) {
     const sDims = stampImage.scale(0.5);
     const scaleFactor = Math.min(80 / sDims.width, 80 / sDims.height, 1);
+    const finalW = sDims.width * scaleFactor;
+    const finalH = sDims.height * scaleFactor;
     page.drawImage(stampImage, {
-      x: width - 250,
-      y: bottomY,
-      width: sDims.width * scaleFactor,
-      height: sDims.height * scaleFactor,
-      opacity: 0.8,
+      x: sigBlockCenterX - finalW / 2 - 25, // shifted slightly left
+      y: lineY - (finalH / 2) + 10, // centered vertically on the line
+      width: finalW,
+      height: finalH,
+      opacity: 0.65, // Look like real ink soaked into paper
     });
   }
 
+  // Draw the signature
   if (sigImage) {
     const sigDims = sigImage.scale(0.5);
-    const sigScale = Math.min(100 / sigDims.width, 50 / sigDims.height, 1);
+    const sigScale = Math.min(130 / sigDims.width, 60 / sigDims.height, 1);
+    const finalW = sigDims.width * sigScale;
+    const finalH = sigDims.height * sigScale;
     page.drawImage(sigImage, {
-      x: width - 150,
-      y: bottomY + 10,
-      width: sigDims.width * sigScale,
-      height: sigDims.height * sigScale,
+      x: sigBlockCenterX - finalW / 2 + 15, // shifted slightly right to overlap stamp
+      y: lineY - 5, // base of the signature rests on the line
+      width: finalW,
+      height: finalH,
     });
   }
+
+  // Draw the signing line
+  page.drawLine({
+    start: { x: sigBlockStartX, y: lineY },
+    end: { x: sigBlockStartX + sigBlockWidth, y: lineY },
+    thickness: 0.5,
+    color: rgb(0.3, 0.3, 0.3)
+  });
+
+  // Draw the label
+  const label = "A Direção";
+  const labelWidth = fontRegular.widthOfTextAtSize(label, 8);
+  page.drawText(label, {
+    x: sigBlockCenterX - (labelWidth / 2),
+    y: lineY - 12,
+    size: 8,
+    font: fontRegular,
+    color: rgb(0.4, 0.4, 0.4)
+  });
 }
 // ==========================================
 // CORPORATE TEMPLATE
