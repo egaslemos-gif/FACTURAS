@@ -134,8 +134,8 @@ export default function NewQuotationPage() {
   };
 
   const updateLineItem = (id: string, field: keyof LineItem, value: any) => {
-    setItems(
-      items.map((item) => {
+    setItems((prevItems) =>
+      prevItems.map((item) => {
         if (item.id === id) {
           const updatedItem = { ...item, [field]: value };
           
