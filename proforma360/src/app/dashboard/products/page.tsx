@@ -53,8 +53,8 @@ export default function ProductsPage() {
 
       <div className="dashboard-section p-0 overflow-hidden">
         {/* Barra de Pesquisa */}
-        <div className="p-4 border-b border-slate-100/60 bg-slate-50/50 flex items-center gap-3">
-          <div className="relative flex-1 max-w-md">
+        <div className="p-4 border-b border-slate-100/60 bg-slate-50/50 flex flex-col sm:flex-row sm:items-center gap-3">
+          <div className="relative w-full sm:max-w-md">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
             <input
               type="text"

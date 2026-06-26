@@ -428,7 +428,7 @@ export default function ClientDetailsPage() {
       )}
 
       {/* Tabs Layout */}
-      <div className="flex border-b border-slate-200 mb-6">
+      <div className="flex border-b border-slate-200 mb-6 overflow-x-auto no-scrollbar whitespace-nowrap">
         <button
           onClick={() => setActiveTab("overview")}
           className={cn("px-6 py-3 font-bold text-sm transition-colors border-b-2", activeTab === "overview" ? "border-teal-600 text-teal-600" : "border-transparent text-slate-500 hover:text-slate-800")}
@@ -446,7 +446,7 @@ export default function ClientDetailsPage() {
           onClick={() => setActiveTab("crm")}
           className={cn("px-6 py-3 font-bold text-sm transition-colors border-b-2 flex items-center gap-2", activeTab === "crm" ? "border-teal-600 text-teal-600" : "border-transparent text-slate-500 hover:text-slate-800")}
         >
-          <MessageCircle className="w-4 h-4" />
+          <MessageCircle className="w-4 h-4 shrink-0" />
           Timeline & CRM
           <span className="bg-slate-100 text-xs py-0.5 px-2 rounded-full text-slate-600 font-black">{timelineEvents.length}</span>
         </button>
