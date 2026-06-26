@@ -132,7 +132,15 @@ export default function ClientDetailsPage() {
   }, [clientQuotations]);
 
   const activeQuotationForAction = useMemo(() => {
-    return clientQuotations.find(q => q.pipeline_stage !== "won" && q.pipeline_stage !== "lost") || null;
+    const active = clientQuotations.find(q => q.pipeline_stage !== "won" && q.pipeline_stage !== "lost");
+    if (active) return active;
+    
+    // Fallback para a proforma mais recente caso não haja uma "ativa"
+    if (clientQuotations.length > 0) {
+      return [...clientQuotations].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
+    }
+    
+    return null;
   }, [clientQuotations]);
 
   useEffect(() => {
@@ -202,15 +210,20 @@ export default function ClientDetailsPage() {
     const template = WHATSAPP_TEMPLATES.find(t => t.id === templateId);
     if (!template) return;
 
-    const doc = activeQuotationForAction || { quotation_number: "n/a", expiry_date: "", id: "" };
-    const docUrl = doc.id ? `${window.location.origin}/view/${doc.id}` : "";
+    if (!activeQuotationForAction) {
+      toast.error("O cliente não tem nenhuma proforma para partilhar.");
+      setWhatsappTemplateOpen(false);
+      return;
+    }
+
+    const docUrl = `${window.location.origin}/view/${activeQuotationForAction.id}`;
 
     const message = WhatsAppActions.formatMessage(template.text, {
       clientName: client.name,
-      docNumber: doc.quotation_number,
+      docNumber: activeQuotationForAction.quotation_number,
       docUrl,
       companyName: company?.name || "Nossa Empresa",
-      expiryDate: doc.expiry_date
+      expiryDate: activeQuotationForAction.expiry_date
     });
 
     const url = WhatsAppActions.getClickToChatUrl(client.phone, message);
@@ -223,15 +236,20 @@ export default function ClientDetailsPage() {
     const template = EMAIL_TEMPLATES.find(t => t.id === templateId);
     if (!template) return;
 
-    const doc = activeQuotationForAction || { quotation_number: "n/a", expiry_date: "", id: "" };
-    const docUrl = doc.id ? `${window.location.origin}/view/${doc.id}` : "";
+    if (!activeQuotationForAction) {
+      toast.error("O cliente não tem nenhuma proforma para partilhar.");
+      setEmailTemplateOpen(false);
+      return;
+    }
+
+    const docUrl = `${window.location.origin}/view/${activeQuotationForAction.id}`;
 
     const { subject, body } = EmailActions.formatTemplate(template, {
       clientName: client.name,
-      docNumber: doc.quotation_number,
+      docNumber: activeQuotationForAction.quotation_number,
       docUrl,
       companyName: company?.name || "Nossa Empresa",
-      expiryDate: doc.expiry_date ? formatDate(doc.expiry_date) : ""
+      expiryDate: activeQuotationForAction.expiry_date ? formatDate(activeQuotationForAction.expiry_date) : ""
     });
 
     const mailtoUrl = `mailto:${client.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;

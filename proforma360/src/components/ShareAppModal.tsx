@@ -93,10 +93,32 @@ https://proforma360.vercel.app/`;
             <MessageCircle className="w-5 h-5" /> Partilhar no WhatsApp
           </button>
 
+          <div className="relative flex items-center py-2">
+            <div className="flex-grow border-t border-gray-200"></div>
+            <span className="flex-shrink-0 mx-4 text-emerald-600 font-semibold text-sm">Design Profissional (Recomendado)</span>
+            <div className="flex-grow border-t border-gray-200"></div>
+          </div>
+
+          <button 
+            onClick={handleCopyHtmlEmail}
+            className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 text-white py-4 rounded-xl font-bold shadow-md hover:shadow-lg transition-all animate-pulse-slow"
+          >
+            <Copy className="w-5 h-5" /> Copiar Email HTML (Para colar no Gmail/Outlook)
+          </button>
+          <p className="text-[11px] text-gray-500 text-center leading-tight px-4">
+            Devido a limitações dos navegadores web, para enviar um email com imagens e cores ricas, <strong>clique no botão acima</strong>, abra o seu email e faça <strong>Colar (Ctrl+V)</strong> no corpo da mensagem.
+          </p>
+
+          <div className="relative flex items-center py-2">
+            <div className="flex-grow border-t border-gray-200"></div>
+            <span className="flex-shrink-0 mx-4 text-gray-400 text-sm">Ou Abertura Rápida (Texto Simples)</span>
+            <div className="flex-grow border-t border-gray-200"></div>
+          </div>
+
           <div className="grid grid-cols-2 gap-3">
             <button 
               onClick={handleEmailDesktop}
-              className="flex items-center justify-center gap-2 bg-gray-800 hover:bg-gray-900 text-white py-3 rounded-xl font-semibold text-sm transition-all"
+              className="flex items-center justify-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-800 py-3 rounded-xl font-semibold text-sm transition-all"
             >
               <Mail className="w-4 h-4" /> App de Email
             </button>
@@ -108,31 +130,12 @@ https://proforma360.vercel.app/`;
             </button>
           </div>
 
-          <div className="relative flex items-center py-2">
-            <div className="flex-grow border-t border-gray-200"></div>
-            <span className="flex-shrink-0 mx-4 text-gray-400 text-sm">email premium visual</span>
-            <div className="flex-grow border-t border-gray-200"></div>
-          </div>
-
-          <button 
-            onClick={handleCopyHtmlEmail}
-            className="w-full flex items-center justify-center gap-2 bg-[#0f172a] hover:bg-[#1e293b] text-white py-3.5 rounded-xl font-bold shadow-sm transition-all"
-          >
-            <Copy className="w-5 h-5" /> Copiar Email Completo (Para colar no Gmail)
-          </button>
-
-          <div className="relative flex items-center py-2">
-            <div className="flex-grow border-t border-gray-200"></div>
-            <span className="flex-shrink-0 mx-4 text-gray-400 text-sm">ou apenas copiar link</span>
-            <div className="flex-grow border-t border-gray-200"></div>
-          </div>
-
           <button 
             onClick={handleCopyLink}
-            className={`w-full flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm transition-all border ${copiedLink ? 'bg-green-50 text-green-700 border-green-200' : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100'}`}
+            className={`w-full flex items-center justify-center gap-2 py-3 mt-2 rounded-xl font-bold text-sm transition-all border ${copiedLink ? 'bg-green-50 text-green-700 border-green-200' : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100'}`}
           >
             {copiedLink ? <Check className="w-4 h-4" /> : <Link2 className="w-4 h-4" />} 
-            {copiedLink ? 'Link Copiado!' : 'Copiar Link Direto'}
+            {copiedLink ? 'Link Copiado!' : 'Apenas Copiar Link Direto'}
           </button>
 
         </div>
