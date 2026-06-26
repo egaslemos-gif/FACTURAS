@@ -3,12 +3,24 @@ const withPWA = require("@ducanh2912/next-pwa").default({
   disable: process.env.NODE_ENV === "development",
   register: true,
   skipWaiting: false, // Controlado manualmente pelo versionGuard e UpdateBanner
-  publicExcludes: ['!**/*.wasm'], // Manter WASM do sql.js
+  buildExcludes: [/\.wasm$/], // Excluir .wasm do precache (são grandes), mas cachear via runtimeCaching abaixo
   cleanupOutdatedCaches: true, // Forçar limpeza de caches antigos para evitar storage eviction
   cacheOnFrontEndNav: true,
   aggressiveFrontEndNavCaching: true,
   extendDefaultRuntimeCaching: true,
   runtimeCaching: [
+    {
+      // Cache de ficheiros WASM (sql.js) — CacheFirst para performance offline
+      urlPattern: /\.wasm$/i,
+      handler: 'CacheFirst',
+      options: {
+        cacheName: 'wasm-cache',
+        expiration: {
+          maxEntries: 5,
+          maxAgeSeconds: 30 * 24 * 60 * 60, // 30 dias
+        },
+      }
+    },
     {
       urlPattern: /\/api\/auth\/.*$/i,
       handler: 'StaleWhileRevalidate',
