@@ -16,9 +16,9 @@ export default function PdfPreviewPage() {
   const id = params.id as string;
   const { data: session } = useSession();
   
-  const { currentDetail, fetchQuotationDetail } = useQuotationsStore();
-  const { company, fetchCompany } = useCompanyStore();
-  const { clients, fetchClients } = useClientsStore();
+  const { currentDetail, fetchQuotationDetail, isLoading: isQuotationLoading } = useQuotationsStore();
+  const { company, fetchCompany, isLoading: isCompanyLoading } = useCompanyStore();
+  const { clients, fetchClients, isLoading: isClientsLoading } = useClientsStore();
   
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [pdfBytes, setPdfBytes] = useState<Uint8Array | null>(null);
@@ -36,34 +36,40 @@ export default function PdfPreviewPage() {
 
   useEffect(() => {
     async function buildPdf() {
-      if (currentDetail && company && clients.length > 0) {
-        // O limite agora é testado rigorosamente na criação da proforma.
-        // Já não barramos a pré-visualização, pois o utilizador tem direito a visualizar e gerar o PDF da proforma que conseguiu criar.
+      // Aguardar até que as dependências estejam completamente carregadas
+      if (isQuotationLoading || isCompanyLoading || isClientsLoading) {
+        return;
+      }
+
+      // Se após carregar ainda faltarem dados fundamentais, evitar loop infinito
+      if (!currentDetail || !company || clients.length === 0) {
+        setIsGenerating(false);
+        return;
+      }
+
+      setIsGenerating(true);
+      try {
+        const client = clients.find(c => c.id === currentDetail.quotation.client_id);
+        if (!client) throw new Error("Client not found");
+
+        const bytes = await generateQuotationPDF({
+          company,
+          client,
+          quotation: currentDetail.quotation,
+          items: currentDetail.items,
+        });
+
+        setPdfBytes(bytes);
         
-        setIsGenerating(true);
-        try {
-          const client = clients.find(c => c.id === currentDetail.quotation.client_id);
-          if (!client) throw new Error("Client not found");
-
-          const bytes = await generateQuotationPDF({
-            company,
-            client,
-            quotation: currentDetail.quotation,
-            items: currentDetail.items,
-          });
-
-          setPdfBytes(bytes);
-          
-          // Create blob URL for iframe preview
-          const blob = new Blob([bytes as any], { type: "application/pdf" });
-          const url = URL.createObjectURL(blob);
-          setPdfUrl(`${url}#toolbar=0`);
-          document.title = `${currentDetail.quotation.quotation_number}_${currentDetail.quotation.client_name}.pdf`;
-        } catch (error) {
-          console.error("Error generating PDF", error);
-        } finally {
-          setIsGenerating(false);
-        }
+        // Create blob URL for iframe preview
+        const blob = new Blob([bytes as any], { type: "application/pdf" });
+        const url = URL.createObjectURL(blob);
+        setPdfUrl(`${url}#toolbar=0`);
+        document.title = `${currentDetail.quotation.quotation_number}_${currentDetail.quotation.client_name}.pdf`;
+      } catch (error) {
+        console.error("Error generating PDF", error);
+      } finally {
+        setIsGenerating(false);
       }
     }
 
@@ -73,7 +79,7 @@ export default function PdfPreviewPage() {
     return () => {
       if (pdfUrl) URL.revokeObjectURL(pdfUrl);
     };
-  }, [currentDetail, company, clients]);
+  }, [currentDetail, company, clients, isQuotationLoading, isCompanyLoading, isClientsLoading]);
 
   const handleDownload = () => {
     if (pdfUrl && currentDetail) {
