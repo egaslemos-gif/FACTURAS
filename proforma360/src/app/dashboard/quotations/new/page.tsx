@@ -68,14 +68,20 @@ export default function NewQuotationPage() {
   }, [fetchClients, fetchProducts, fetchCompany]);
 
   useEffect(() => {
-    if (company) {
-      // Find latest quotation to generate the next number
-      const existingNumbers = quotations.map(q => q.quotation_number).filter(Boolean) as string[];
-      setHeaderData(prev => ({
+    // Sempre gera o número, usando "PF" como fallback se a empresa não estiver configurada
+    const existingNumbers = quotations.map(q => q.quotation_number).filter(Boolean) as string[];
+    const prefix = company?.quotation_prefix || "PF";
+    
+    setHeaderData(prev => {
+      // Evitar re-gerar e sobrescrever se já tiver um número e não mudou o prefixo
+      if (prev.quotation_number && prev.quotation_number.startsWith(prefix)) {
+        return prev;
+      }
+      return {
         ...prev,
-        quotation_number: generateQuotationNumber(existingNumbers, company.quotation_prefix || "PF")
-      }));
-    }
+        quotation_number: generateQuotationNumber(existingNumbers, prefix)
+      };
+    });
   }, [company, quotations]);
 
   // Recalculate validity in terms when dates change
