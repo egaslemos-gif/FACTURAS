@@ -25,6 +25,7 @@ export default function PdfPreviewPage() {
   const [isGenerating, setIsGenerating] = useState(true);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadSuccess, setUploadSuccess] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   useEffect(() => {
     fetchCompany();
@@ -42,15 +43,29 @@ export default function PdfPreviewPage() {
       }
 
       // Se após carregar ainda faltarem dados fundamentais, evitar loop infinito
-      if (!currentDetail || !company || clients.length === 0) {
+      if (!currentDetail) {
+        setErrorMsg("Detalhes da proforma não encontrados.");
+        setIsGenerating(false);
+        return;
+      }
+      
+      if (!company) {
+        setErrorMsg("Perfil da empresa não configurado. Por favor, configure os dados da empresa nas Definições.");
+        setIsGenerating(false);
+        return;
+      }
+      
+      if (clients.length === 0) {
+        setErrorMsg("Nenhum cliente encontrado na base de dados.");
         setIsGenerating(false);
         return;
       }
 
       setIsGenerating(true);
+      setErrorMsg(null);
       try {
         const client = clients.find(c => c.id === currentDetail.quotation.client_id);
-        if (!client) throw new Error("Client not found");
+        if (!client) throw new Error("Cliente associado à proforma não foi encontrado.");
 
         const bytes = await generateQuotationPDF({
           company,
@@ -66,8 +81,9 @@ export default function PdfPreviewPage() {
         const url = URL.createObjectURL(blob);
         setPdfUrl(`${url}#toolbar=0`);
         document.title = `${currentDetail.quotation.quotation_number}_${currentDetail.quotation.client_name}.pdf`;
-      } catch (error) {
+      } catch (error: any) {
         console.error("Error generating PDF", error);
+        setErrorMsg(error.message || "Erro desconhecido ao gerar o PDF.");
       } finally {
         setIsGenerating(false);
       }
@@ -212,8 +228,9 @@ export default function PdfPreviewPage() {
             </div>
           </>
         ) : (
-          <div className="flex items-center justify-center h-full text-gray-500">
-            Falha ao carregar a pré-visualização.
+          <div className="flex flex-col items-center justify-center h-full text-gray-500 p-6 text-center">
+            <p className="mb-2 text-lg font-medium">Falha ao carregar a pré-visualização.</p>
+            {errorMsg && <p className="text-red-500 font-medium bg-red-50 px-4 py-2 rounded-md border border-red-100">{errorMsg}</p>}
           </div>
         )}
       </div>
