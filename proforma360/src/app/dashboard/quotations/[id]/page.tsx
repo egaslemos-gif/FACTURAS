@@ -79,8 +79,8 @@ export default function QuotationDetailPage() {
   const handleDuplicate = async () => {
     setIsDuplicating(true);
     try {
-      const latestQuotation = quotations.length > 0 ? quotations[0].quotation_number : null;
-      const newNumber = generateQuotationNumber(latestQuotation, company?.quotation_prefix || "PF");
+      const existingNumbers = quotations.map(q => q.quotation_number).filter(Boolean) as string[];
+      const newNumber = generateQuotationNumber(existingNumbers, company?.quotation_prefix || "PF");
       
       const newItems = items.map(({id, quotation_id, ...rest}, index) => ({...rest, sort_order: index})) as any;
       

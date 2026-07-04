@@ -63,24 +63,32 @@ export function generateId(): string {
  * Formato: PF-2026-0001
  */
 export function generateQuotationNumber(
-  lastNumber: string | null,
+  existingNumbers: string[],
   prefix: string = "PF"
 ): string {
   const year = new Date().getFullYear();
 
-  if (!lastNumber) {
-    return `${prefix}-${year}-0001`;
+  let maxSeq = 0;
+  for (const num of existingNumbers) {
+    if (!num) continue;
+    
+    const parts = num.split("-");
+    if (parts.length >= 3) {
+      const qYear = parseInt(parts[parts.length - 2], 10);
+      if (qYear === year) {
+        const seqStr = parts[parts.length - 1];
+        const numMatch = seqStr.match(/\d+/);
+        if (numMatch) {
+          const seq = parseInt(numMatch[0], 10);
+          if (!isNaN(seq) && seq > maxSeq) {
+            maxSeq = seq;
+          }
+        }
+      }
+    }
   }
 
-  const parts = lastNumber.split("-");
-  const lastSeq = parseInt(parts[parts.length - 1], 10);
-  const lastYear = parseInt(parts[parts.length - 2], 10);
-
-  if (lastYear !== year) {
-    return `${prefix}-${year}-0001`;
-  }
-
-  const nextSeq = (lastSeq + 1).toString().padStart(4, "0");
+  const nextSeq = (maxSeq + 1).toString().padStart(4, "0");
   return `${prefix}-${year}-${nextSeq}`;
 }
 

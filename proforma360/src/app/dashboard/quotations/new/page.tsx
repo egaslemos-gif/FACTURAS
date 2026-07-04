@@ -70,10 +70,10 @@ export default function NewQuotationPage() {
   useEffect(() => {
     if (company) {
       // Find latest quotation to generate the next number
-      const latestQuotation = quotations.length > 0 ? quotations[0].quotation_number : null;
+      const existingNumbers = quotations.map(q => q.quotation_number).filter(Boolean) as string[];
       setHeaderData(prev => ({
         ...prev,
-        quotation_number: generateQuotationNumber(latestQuotation, company.quotation_prefix || "PF")
+        quotation_number: generateQuotationNumber(existingNumbers, company.quotation_prefix || "PF")
       }));
     }
   }, [company, quotations]);
