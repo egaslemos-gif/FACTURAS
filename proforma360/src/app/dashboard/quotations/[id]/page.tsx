@@ -265,7 +265,13 @@ export default function QuotationDetailPage() {
             <CheckCircle2 className="w-4 h-4" /> Aprovar
           </button>
         )}
-        <Link href={`/dashboard/quotations/${quotation.id}/edit`} className="flex items-center justify-center p-3 border border-slate-200 bg-slate-50 text-slate-700 rounded-xl">
+        <Link 
+          href={`/dashboard/proposals/new?quotationId=${quotation.id}`}
+          className="flex items-center justify-center gap-1.5 px-3 py-3 bg-blue-600 text-white font-bold rounded-xl shrink-0"
+        >
+          <FileText className="w-4 h-4" /> Proposta
+        </Link>
+        <Link href={`/dashboard/quotations/${quotation.id}/edit`} className="flex items-center justify-center p-3 border border-slate-200 bg-slate-50 text-slate-700 rounded-xl shrink-0">
           <Edit2 className="w-5 h-5" />
         </Link>
         <button onClick={() => setIsShareModalOpen(true)} className="flex items-center justify-center p-3 border border-slate-200 bg-slate-50 text-slate-700 rounded-xl">

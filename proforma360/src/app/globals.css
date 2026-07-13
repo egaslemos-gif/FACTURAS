@@ -686,11 +686,10 @@ vercel-live-feedback,
     font-size: 10.5pt !important;
     line-height: 1.65 !important;
     margin: 0 !important;
-    padding: 0 !important;
-    text-align: justify !important;
-    -webkit-hyphens: auto !important;
-    hyphens: auto !important;
-    word-break: break-word !important;
+    padding: 0 0 48px 0 !important;
+    text-align: left !important;
+    hyphens: none !important;
+    word-break: normal !important;
   }
 
   /* ═══════════════════════════════════════
@@ -703,6 +702,7 @@ vercel-live-feedback,
     display: flex !important;
     flex-direction: column !important;
     align-items: center !important;
+    position: relative !important;
     page-break-after: always !important;
     break-after: page !important;
     padding: 60px !important;
@@ -872,12 +872,181 @@ vercel-live-feedback,
      ═══════════════════════════════════════ */
   .printable-section {
     padding: 0 60px !important;
-    margin: 0 0 8px 0 !important;
+    margin: 0 !important;
     overflow: visible !important;
+    page-break-inside: avoid !important;
   }
 
   .printable-section:first-of-type {
     padding-top: 48px !important;
+  }
+
+  .printable-section + .printable-section,
+  .pmin-section + .pmin-section,
+  .pcorp-section + .pcorp-section {
+    page-break-before: auto !important;
+    break-before: auto !important;
+    padding-top: 0 !important;
+  }
+
+  .proposal-section-newpage {
+    page-break-before: always !important;
+    break-before: page !important;
+    padding-top: 40px !important;
+  }
+
+  .proposal-section-flow {
+    margin-top: 36px !important;
+    padding-top: 28px !important;
+    border-top: 1px solid #e2e8f0 !important;
+  }
+
+  .printable-section:first-of-type,
+  .pmin-section:first-of-type,
+  .pcorp-section:first-of-type {
+    padding-top: 48px !important;
+    border-top: none !important;
+    margin-top: 0 !important;
+  }
+
+  .proposal-section-newpage:first-of-type {
+    padding-top: 48px !important;
+  }
+
+  /* ── Assinaturas: colunas alinhadas, datas na mesma linha ── */
+  .proposal-sig-card,
+  .printable-signature-box,
+  .pmin-sig-box,
+  .pcorp-sig-card {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    align-self: stretch !important;
+    text-align: center !important;
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  .proposal-sig-body {
+    flex: 1 1 auto !important;
+    width: 100% !important;
+    min-height: 108px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .proposal-sig-client-block {
+    width: 100% !important;
+    min-height: 108px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    padding-bottom: 8px !important;
+    margin: 0 !important;
+  }
+
+  .proposal-sig-composite,
+  .proposal-sig-assets,
+  .proposal-sig-zone,
+  .printable-signature-zone,
+  .pmin-sig-zone,
+  .pcorp-sig-zone {
+    position: relative !important;
+    width: 100% !important;
+    max-width: 180px !important;
+    min-height: 108px !important;
+    height: 108px !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+    overflow: visible !important;
+  }
+
+  .proposal-sig-role {
+    width: 100% !important;
+    text-align: center !important;
+    margin: 0 0 10px 0 !important;
+    padding: 0 !important;
+    flex-shrink: 0 !important;
+  }
+
+  .proposal-stamp-layer {
+    position: relative !important;
+    width: 100% !important;
+    height: 100% !important;
+    min-height: 108px !important;
+    display: flex !important;
+    align-items: flex-end !important;
+    justify-content: center !important;
+    padding: 0 4px 12px 4px !important;
+  }
+
+  .proposal-stamp-layer .proposal-stamp-image {
+    position: absolute !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    max-height: 72px !important;
+    max-width: 150px !important;
+    width: auto !important;
+    height: auto !important;
+    object-fit: contain !important;
+    opacity: 0.95 !important;
+    z-index: 1 !important;
+    margin: 0 !important;
+  }
+
+  .proposal-sig-name-on-stamp {
+    position: relative !important;
+    z-index: 2 !important;
+    margin: 0 !important;
+    padding: 0 2px !important;
+    font-size: 9.5pt !important;
+    font-weight: 700 !important;
+    color: #0f172a !important;
+    text-align: center !important;
+    line-height: 1.15 !important;
+    background: transparent !important;
+  }
+
+  .proposal-sig-over-stamp {
+    position: absolute !important;
+    top: 4px !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    z-index: 4 !important;
+    max-height: 34px !important;
+    max-width: 140px !important;
+    object-fit: contain !important;
+    margin: 0 !important;
+    pointer-events: none !important;
+  }
+
+  .proposal-sig-name,
+  .printable-signature-name,
+  .pmin-sig-name,
+  .pcorp-sig-name {
+    width: 100% !important;
+    text-align: center !important;
+    margin: 8px 0 0 0 !important;
+    padding: 0 !important;
+  }
+
+  .proposal-sig-date-line,
+  .proposal-sig-date,
+  .printable-signature-detail,
+  .pmin-sig-date,
+  .pcorp-sig-meta {
+    width: 100% !important;
+    text-align: center !important;
+    margin: 12px 0 0 0 !important;
+    padding: 8px 0 0 0 !important;
+    border-top: 1px solid #e2e8f0 !important;
+    flex-shrink: 0 !important;
   }
 
   .printable-section-header {
@@ -934,10 +1103,13 @@ vercel-live-feedback,
     font-size: 10.5pt !important;
     color: #334155 !important;
     line-height: 1.75 !important;
-    margin: 0 0 32px 0 !important;
-    padding: 0 !important;
+    margin: 0 0 40px 0 !important;
+    padding: 16px 0 0 0 !important;
     overflow: visible !important;
     text-align: justify !important;
+    hyphens: auto !important;
+    -webkit-hyphens: auto !important;
+    word-break: normal !important;
   }
 
   .printable-section-content p {
@@ -1041,8 +1213,31 @@ vercel-live-feedback,
   .printable-financial-table {
     width: 100% !important;
     border-collapse: collapse !important;
-    font-size: 10pt !important;
+    font-size: 9.5pt !important;
     table-layout: fixed !important;
+    hyphens: none !important;
+    word-break: normal !important;
+    text-align: left !important;
+  }
+
+  .printable-financial-table thead {
+    display: table-header-group !important;
+  }
+
+  .printable-financial-table tfoot {
+    display: table-footer-group !important;
+  }
+
+  .printable-financial-table tr {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  .printable-financial-table th,
+  .printable-financial-table td {
+    hyphens: none !important;
+    word-break: normal !important;
+    overflow-wrap: normal !important;
   }
 
   .printable-th {
@@ -1054,13 +1249,14 @@ vercel-live-feedback,
     letter-spacing: 0.06em !important;
     padding: 10px 14px !important;
     border: none !important;
+    white-space: nowrap !important;
   }
 
-  .printable-th-item { text-align: left !important; width: 42% !important; }
-  .printable-th-qty { text-align: center !important; width: 10% !important; }
-  .printable-th-price { text-align: right !important; width: 18% !important; }
-  .printable-th-tax { text-align: center !important; width: 10% !important; }
-  .printable-th-total { text-align: right !important; width: 20% !important; }
+  .printable-th-item { text-align: left !important; }
+  .printable-th-qty { text-align: center !important; white-space: nowrap !important; }
+  .printable-th-price { text-align: right !important; white-space: nowrap !important; }
+  .printable-th-tax { text-align: center !important; white-space: nowrap !important; }
+  .printable-th-total { text-align: right !important; white-space: nowrap !important; }
 
   .printable-td {
     padding: 10px 14px !important;
@@ -1074,12 +1270,26 @@ vercel-live-feedback,
     text-align: left !important;
     color: #1e293b !important;
     font-weight: 500 !important;
-    font-size: 10pt !important;
+    font-size: 9.5pt !important;
+    word-wrap: break-word !important;
+    overflow-wrap: break-word !important;
+    white-space: normal !important;
   }
-  .printable-td-qty { text-align: center !important; color: #475569 !important; font-size: 10pt !important; }
-  .printable-td-price { text-align: right !important; color: #475569 !important; font-size: 10pt !important; }
-  .printable-td-tax { text-align: center !important; color: #475569 !important; font-size: 10pt !important; }
-  .printable-td-total { text-align: right !important; color: #1e293b !important; font-weight: 700 !important; font-size: 10pt !important; }
+  .printable-td-qty,
+  .printable-td-price,
+  .printable-td-tax,
+  .printable-td-total,
+  .printable-tfoot-label,
+  .printable-tfoot-value,
+  .printable-tfoot-total-label,
+  .printable-tfoot-total-value {
+    font-variant-numeric: tabular-nums !important;
+    white-space: nowrap !important;
+  }
+  .printable-td-qty { text-align: center !important; color: #475569 !important; font-size: 9.5pt !important; }
+  .printable-td-price { text-align: right !important; color: #475569 !important; font-size: 9pt !important; padding-right: 10px !important; }
+  .printable-td-tax { text-align: center !important; color: #475569 !important; font-size: 9pt !important; }
+  .printable-td-total { text-align: right !important; color: #1e293b !important; font-weight: 700 !important; font-size: 9pt !important; padding-right: 10px !important; }
 
   .printable-tfoot-row td {
     padding: 8px 14px !important;
@@ -1091,6 +1301,7 @@ vercel-live-feedback,
     color: #64748b !important;
     font-size: 10pt !important;
     font-weight: 500 !important;
+    white-space: nowrap !important;
   }
 
   .printable-tfoot-value {
@@ -1098,6 +1309,7 @@ vercel-live-feedback,
     color: #1e293b !important;
     font-weight: 600 !important;
     font-size: 10pt !important;
+    white-space: nowrap !important;
   }
 
   .printable-tfoot-total {
@@ -1117,13 +1329,16 @@ vercel-live-feedback,
     font-size: 10pt !important;
     text-transform: uppercase !important;
     letter-spacing: 0.04em !important;
+    white-space: nowrap !important;
   }
 
   .printable-tfoot-total-value {
     text-align: right !important;
     color: white !important;
     font-weight: 900 !important;
-    font-size: 13pt !important;
+    font-size: 11pt !important;
+    white-space: nowrap !important;
+    padding-right: 10px !important;
   }
 
   /* ═══════════════════════════════════════
@@ -1187,7 +1402,7 @@ vercel-live-feedback,
   .printable-signatures-block {
     display: flex !important;
     justify-content: space-between !important;
-    align-items: flex-start !important;
+    align-items: stretch !important;
     margin: 60px 0 0 0 !important;
     padding: 0 !important;
     gap: 40px !important;
@@ -1200,21 +1415,44 @@ vercel-live-feedback,
     margin: 0 !important;
   }
 
-  .printable-signature-role {
+  .printable-signature-box .proposal-sig-role {
     font-size: 9pt !important;
     font-weight: 600 !important;
     color: #0f766e !important;
     text-transform: uppercase !important;
     letter-spacing: 0.06em !important;
-    margin: 0 0 48px 0 !important;
-    padding: 0 !important;
+  }
+
+  .pcorp-sig-card .proposal-sig-role {
+    font-size: 8pt !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.1em !important;
+    color: #2563eb !important;
+    font-weight: 700 !important;
   }
 
   .printable-signature-line {
     border: none !important;
-    border-bottom: 2px solid #1e293b !important;
+    border-bottom: 1px solid #cbd5e1 !important;
     margin: 0 0 8px 0 !important;
-    height: 0 !important;
+    height: 48px !important;
+  }
+
+  .printable-signature-assets {
+    display: flex !important;
+    align-items: flex-end !important;
+    justify-content: center !important;
+    gap: 12px !important;
+    min-height: 56px !important;
+    margin: 0 0 8px 0 !important;
+    padding: 0 !important;
+  }
+
+  .printable-signature-assets .proposal-sig-image,
+  .printable-signature-assets .proposal-stamp-image {
+    max-height: 48px !important;
+    max-width: 120px !important;
+    object-fit: contain !important;
   }
 
   .printable-signature-name {
@@ -1282,6 +1520,66 @@ vercel-live-feedback,
     color: #cbd5e1 !important;
   }
 
+  .proposal-footer-thanks,
+  .printable-running-footer-thanks,
+  .pmin-footer-thanks,
+  .pcorp-footer-thanks {
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    padding: 0 60px 8px 60px !important;
+    background: white !important;
+    margin: 0 !important;
+    text-align: center !important;
+    z-index: 4 !important;
+  }
+
+  .printable-running-footer-thanks-text,
+  .pmin-footer-thanks-text,
+  .pcorp-footer-thanks-text,
+  .proposal-footer-thanks span {
+    font-size: 7pt !important;
+    color: #94a3b8 !important;
+    font-style: italic !important;
+  }
+
+  .printable-running-footer {
+    bottom: 18px !important;
+    border-top: none !important;
+    z-index: 3 !important;
+  }
+
+  .pmin-footer {
+    bottom: 18px !important;
+    border-top: none !important;
+    z-index: 3 !important;
+  }
+
+  .pcorp-footer {
+    bottom: 18px !important;
+    z-index: 3 !important;
+  }
+
+  .proposal-cover-footer-mask,
+  .printable-cover .proposal-cover-footer-mask,
+  .pmin-cover-footer-mask,
+  .pcorp-cover-footer-mask {
+    position: absolute !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    height: 40px !important;
+    background: white !important;
+    z-index: 12 !important;
+    pointer-events: none !important;
+  }
+
+  .pmin-cover,
+  .pcorp-cover {
+    position: relative !important;
+  }
+
   /* ═══════════════════════════════════════════════════════
      TEMPLATE: MINIMALISTA  (.pmin)
      Clean, airy, lots of whitespace, thin lines
@@ -1299,24 +1597,78 @@ vercel-live-feedback,
     break-after: page !important;
     overflow: visible !important;
   }
-  .pmin-cover-top { text-align: left !important; margin: 0 !important; padding: 0 !important; }
-  .pmin-cover-logo { height: 40px !important; object-fit: contain !important; display: block !important; }
-  .pmin-cover-brand { font-size: 16pt !important; font-weight: 700 !important; color: #1e293b !important; letter-spacing: -0.02em !important; }
-  .pmin-cover-middle { flex: 1 !important; display: flex !important; flex-direction: column !important; justify-content: center !important; padding: 0 !important; margin: 0 !important; }
+  .pmin-cover-top { text-align: center !important; margin: 0 !important; padding: 0 !important; }
+  .pmin-cover-logo { height: 48px !important; max-width: 220px !important; object-fit: contain !important; display: block !important; margin: 0 auto !important; }
+  .pmin-cover-brand { font-size: 16pt !important; font-weight: 700 !important; color: #1e293b !important; letter-spacing: -0.02em !important; display: block !important; text-align: center !important; }
+  .pmin-cover-middle { flex: 1 !important; display: flex !important; flex-direction: column !important; justify-content: center !important; align-items: center !important; padding: 0 !important; margin: 0 !important; text-align: center !important; }
   .pmin-cover-label { font-size: 9pt !important; text-transform: uppercase !important; letter-spacing: 0.15em !important; color: #94a3b8 !important; margin: 0 0 8px 0 !important; padding: 0 !important; }
-  .pmin-cover-title { font-size: 36pt !important; font-weight: 300 !important; color: #0f172a !important; line-height: 1.1 !important; margin: 0 0 24px 0 !important; padding: 0 !important; letter-spacing: -0.03em !important; text-align: left !important; }
-  .pmin-cover-line { width: 48px !important; height: 1px !important; background: #0f172a !important; margin: 0 0 24px 0 !important; border: none !important; }
-  .pmin-cover-info { font-size: 10pt !important; color: #64748b !important; line-height: 1.8 !important; }
+  .pmin-cover-title { font-size: 36pt !important; font-weight: 300 !important; color: #0f172a !important; line-height: 1.1 !important; margin: 0 0 24px 0 !important; padding: 0 !important; letter-spacing: -0.03em !important; text-align: center !important; }
+  .pmin-cover-line { width: 48px !important; height: 1px !important; background: #0f172a !important; margin: 0 auto 24px !important; border: none !important; }
+  .pmin-cover-info { font-size: 10pt !important; color: #64748b !important; line-height: 1.8 !important; text-align: center !important; }
   .pmin-cover-info p { margin: 0 !important; padding: 0 !important; }
-  .pmin-cover-bottom { font-size: 8.5pt !important; color: #94a3b8 !important; border-top: 1px solid #e2e8f0 !important; padding: 16px 0 0 0 !important; margin: 0 !important; text-align: left !important; }
+  .pmin-cover-bottom { font-size: 8.5pt !important; color: #94a3b8 !important; border-top: 1px solid #e2e8f0 !important; padding: 16px 0 0 0 !important; margin: 0 !important; text-align: center !important; }
   .pmin-cover-bottom p { margin: 0 !important; padding: 0 !important; line-height: 1.6 !important; }
+
+  .pmin-toc {
+    padding: 48px 72px 32px !important;
+    margin: 0 !important;
+    page-break-after: always !important;
+    break-after: page !important;
+    text-align: center !important;
+  }
+  .pmin-toc-title {
+    font-size: 14pt !important;
+    font-weight: 300 !important;
+    color: #0f172a !important;
+    letter-spacing: 0.12em !important;
+    text-transform: uppercase !important;
+    margin: 0 0 12px 0 !important;
+    padding: 0 !important;
+  }
+  .pmin-toc-line {
+    width: 32px !important;
+    height: 1px !important;
+    background: #0f172a !important;
+    margin: 0 auto 28px !important;
+    border: none !important;
+  }
+  .pmin-toc-list {
+    max-width: 360px !important;
+    margin: 0 auto !important;
+    text-align: left !important;
+  }
+  .pmin-toc-item {
+    display: flex !important;
+    align-items: baseline !important;
+    gap: 12px !important;
+    padding: 8px 0 !important;
+    border-bottom: 1px solid #f1f5f9 !important;
+    margin: 0 !important;
+  }
+  .pmin-toc-num {
+    font-size: 9pt !important;
+    color: #94a3b8 !important;
+    min-width: 20px !important;
+    font-weight: 500 !important;
+  }
+  .pmin-toc-label {
+    font-size: 10pt !important;
+    color: #334155 !important;
+    font-weight: 400 !important;
+  }
 
   .pmin-section {
     padding: 0 72px !important;
-    margin: 0 0 24px 0 !important;
+    margin: 0 !important;
     overflow: visible !important;
+    page-break-inside: avoid !important;
   }
   .pmin-section:first-of-type { padding-top: 48px !important; }
+  .pmin-section + .pmin-section {
+    page-break-before: auto !important;
+    break-before: auto !important;
+    padding-top: 0 !important;
+  }
 
   .pmin-section-title {
     font-size: 13pt !important;
@@ -1337,6 +1689,9 @@ vercel-live-feedback,
     color: #334155 !important;
     line-height: 1.8 !important;
     text-align: justify !important;
+    hyphens: auto !important;
+    -webkit-hyphens: auto !important;
+    word-break: normal !important;
     margin: 0 !important;
     padding: 0 !important;
     overflow: visible !important;
@@ -1352,20 +1707,33 @@ vercel-live-feedback,
     border-collapse: collapse !important;
     font-size: 9.5pt !important;
     margin: 12px 0 24px 0 !important;
+    table-layout: fixed !important;
+    hyphens: none !important;
+    word-break: normal !important;
   }
-  .pmin-th-left, .pmin-th-center, .pmin-th-right { padding: 8px 10px !important; border-bottom: 2px solid #0f172a !important; font-weight: 600 !important; color: #0f172a !important; font-size: 8pt !important; text-transform: uppercase !important; letter-spacing: 0.05em !important; }
+  .pmin-table thead { display: table-header-group !important; }
+  .pmin-table tfoot { display: table-footer-group !important; }
+  .pmin-table tr { page-break-inside: avoid !important; break-inside: avoid !important; }
+  .pmin-th-left, .pmin-th-center, .pmin-th-right { padding: 8px 10px !important; border-bottom: 2px solid #0f172a !important; font-weight: 600 !important; color: #0f172a !important; font-size: 7.5pt !important; text-transform: uppercase !important; letter-spacing: 0.05em !important; white-space: nowrap !important; hyphens: none !important; }
   .pmin-th-left { text-align: left !important; }
   .pmin-th-center { text-align: center !important; }
   .pmin-th-right { text-align: right !important; }
-  .pmin-td-left, .pmin-td-center, .pmin-td-right { padding: 7px 10px !important; border-bottom: 1px solid #f1f5f9 !important; color: #334155 !important; }
-  .pmin-td-left { text-align: left !important; }
+  .pmin-td-left { padding: 7px 10px !important; border-bottom: 1px solid #f1f5f9 !important; color: #334155 !important; text-align: left !important; word-wrap: break-word !important; overflow-wrap: break-word !important; white-space: normal !important; }
+  .pmin-td-center, .pmin-td-right, .pmin-td-num,
+  .pmin-tfoot-label, .pmin-tfoot-val, .pmin-tfoot-total-label, .pmin-tfoot-total-val {
+    font-variant-numeric: tabular-nums !important;
+    white-space: nowrap !important;
+    hyphens: none !important;
+    word-break: normal !important;
+  }
+  .pmin-td-center, .pmin-td-right { padding: 7px 10px !important; border-bottom: 1px solid #f1f5f9 !important; color: #334155 !important; }
   .pmin-td-center { text-align: center !important; }
   .pmin-td-right { text-align: right !important; }
-  .pmin-tfoot-label { text-align: right !important; padding: 5px 10px !important; color: #64748b !important; font-size: 9.5pt !important; border: none !important; }
-  .pmin-tfoot-val { text-align: right !important; padding: 5px 10px !important; color: #1e293b !important; font-weight: 500 !important; border: none !important; }
+  .pmin-tfoot-label { text-align: right !important; padding: 5px 10px !important; color: #64748b !important; font-size: 9.5pt !important; border: none !important; white-space: nowrap !important; }
+  .pmin-tfoot-val { text-align: right !important; padding: 5px 10px !important; color: #1e293b !important; font-weight: 500 !important; border: none !important; white-space: nowrap !important; }
   .pmin-tfoot-total { border-top: 2px solid #0f172a !important; }
-  .pmin-tfoot-total-label { text-align: right !important; padding: 8px 10px !important; color: #0f172a !important; font-weight: 700 !important; font-size: 10pt !important; border: none !important; }
-  .pmin-tfoot-total-val { text-align: right !important; padding: 8px 10px !important; color: #0f172a !important; font-weight: 800 !important; font-size: 12pt !important; border: none !important; }
+  .pmin-tfoot-total-label { text-align: right !important; padding: 8px 10px !important; color: #0f172a !important; font-weight: 700 !important; font-size: 10pt !important; border: none !important; white-space: nowrap !important; }
+  .pmin-tfoot-total-val { text-align: right !important; padding: 8px 10px !important; color: #0f172a !important; font-weight: 800 !important; font-size: 12pt !important; border: none !important; white-space: nowrap !important; }
 
   .pmin-signatures {
     page-break-before: always !important;
@@ -1375,11 +1743,11 @@ vercel-live-feedback,
     overflow: visible !important;
   }
   .pmin-sig-text { font-size: 10pt !important; color: #64748b !important; margin: 0 0 48px 0 !important; padding: 0 !important; text-align: left !important; }
-  .pmin-sig-grid { display: flex !important; justify-content: space-between !important; gap: 48px !important; margin: 0 !important; padding: 0 !important; }
+  .pmin-sig-grid { display: flex !important; justify-content: space-between !important; align-items: stretch !important; gap: 48px !important; margin: 0 !important; padding: 0 !important; }
   .pmin-sig-box { width: 45% !important; padding: 0 !important; margin: 0 !important; }
-  .pmin-sig-line { border: none !important; border-bottom: 1px solid #0f172a !important; margin: 0 0 8px 0 !important; height: 48px !important; }
-  .pmin-sig-name { font-size: 10pt !important; font-weight: 600 !important; color: #0f172a !important; margin: 0 0 2px 0 !important; padding: 0 !important; }
-  .pmin-sig-date { font-size: 8.5pt !important; color: #94a3b8 !important; margin: 0 !important; padding: 0 !important; }
+  .pmin-sig-name { font-size: 10pt !important; font-weight: 600 !important; color: #0f172a !important; margin: 0 0 6px 0 !important; padding: 0 !important; text-align: center !important; width: 100% !important; }
+  .pmin-sig-date { font-size: 8.5pt !important; color: #94a3b8 !important; margin: 0 !important; padding: 0 !important; text-align: center !important; width: 100% !important; }
+  .pmin-sig-box .proposal-sig-role { font-size: 8pt !important; text-transform: uppercase !important; letter-spacing: 0.08em !important; color: #64748b !important; font-weight: 600 !important; margin: 0 0 16px 0 !important; }
 
   .pmin-footer {
     position: fixed !important;
@@ -1387,13 +1755,17 @@ vercel-live-feedback,
     left: 0 !important;
     right: 0 !important;
     padding: 6px 72px 8px !important;
+    background: white !important;
+    margin: 0 !important;
+    border-top: 1px solid #e2e8f0 !important;
+  }
+  .pmin-footer-content {
     display: flex !important;
     justify-content: center !important;
     gap: 16px !important;
     font-size: 7pt !important;
     color: #94a3b8 !important;
-    background: white !important;
-    margin: 0 !important;
+    flex-wrap: wrap !important;
   }
 
   /* ═══════════════════════════════════════════════════════
@@ -1482,10 +1854,16 @@ vercel-live-feedback,
 
   .pcorp-section {
     padding: 0 60px !important;
-    margin: 0 0 12px 0 !important;
+    margin: 0 !important;
     overflow: visible !important;
+    page-break-inside: avoid !important;
   }
   .pcorp-section:first-of-type { padding-top: 48px !important; }
+  .pcorp-section + .pcorp-section {
+    page-break-before: auto !important;
+    break-before: auto !important;
+    padding-top: 0 !important;
+  }
 
   .pcorp-section-head {
     display: flex !important;
@@ -1548,6 +1926,9 @@ vercel-live-feedback,
     color: #334155 !important;
     line-height: 1.75 !important;
     text-align: justify !important;
+    hyphens: auto !important;
+    -webkit-hyphens: auto !important;
+    word-break: normal !important;
     margin: 0 0 28px 0 !important;
     padding: 0 !important;
     overflow: visible !important;
@@ -1562,27 +1943,40 @@ vercel-live-feedback,
   .pcorp-table {
     width: 100% !important;
     border-collapse: collapse !important;
-    font-size: 10pt !important;
+    font-size: 9.5pt !important;
     margin: 16px 0 28px 0 !important;
     border: 1px solid #cbd5e1 !important;
     border-radius: 6px !important;
     overflow: visible !important;
+    table-layout: fixed !important;
+    hyphens: none !important;
+    word-break: normal !important;
   }
-  .pcorp-th { padding: 10px 14px !important; background: #1e3a5f !important; color: white !important; font-size: 8pt !important; font-weight: 600 !important; text-transform: uppercase !important; letter-spacing: 0.05em !important; border: none !important; }
+  .pcorp-table thead { display: table-header-group !important; }
+  .pcorp-table tfoot { display: table-footer-group !important; }
+  .pcorp-table tr { page-break-inside: avoid !important; break-inside: avoid !important; }
+  .pcorp-th { padding: 10px 12px !important; background: #1e3a5f !important; color: white !important; font-size: 7.5pt !important; font-weight: 600 !important; text-transform: uppercase !important; letter-spacing: 0.05em !important; border: none !important; white-space: nowrap !important; hyphens: none !important; }
   .pcorp-th-left { text-align: left !important; }
   .pcorp-th-center { text-align: center !important; }
   .pcorp-th-right { text-align: right !important; }
-  .pcorp-td { padding: 9px 14px !important; border-bottom: 1px solid #e2e8f0 !important; color: #334155 !important; font-size: 10pt !important; }
-  .pcorp-td-left { text-align: left !important; }
-  .pcorp-td-center { text-align: center !important; }
-  .pcorp-td-right { text-align: right !important; }
+  .pcorp-td { padding: 9px 10px !important; border-bottom: 1px solid #e2e8f0 !important; color: #334155 !important; font-size: 9pt !important; hyphens: none !important; word-break: normal !important; overflow: hidden !important; }
+  .pcorp-td-left { text-align: left !important; word-wrap: break-word !important; overflow-wrap: break-word !important; white-space: normal !important; overflow: visible !important; }
+  .pcorp-td-center, .pcorp-td-right, .pcorp-td-num,
+  .pcorp-tf-label, .pcorp-tf-val, .pcorp-tf-total-label, .pcorp-tf-total-val {
+    font-variant-numeric: tabular-nums !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: clip !important;
+  }
+  .pcorp-td-center { text-align: center !important; padding-left: 4px !important; padding-right: 4px !important; }
+  .pcorp-td-right { text-align: right !important; padding-left: 6px !important; padding-right: 10px !important; }
   .pcorp-td-bold { font-weight: 600 !important; color: #1e293b !important; }
   .pcorp-tr-alt { background: #f8fafc !important; }
-  .pcorp-tf-label { text-align: right !important; padding: 6px 14px !important; color: #64748b !important; font-size: 10pt !important; border: none !important; }
-  .pcorp-tf-val { text-align: right !important; padding: 6px 14px !important; color: #1e293b !important; font-weight: 600 !important; border: none !important; }
+  .pcorp-tf-label { text-align: right !important; padding: 6px 14px !important; color: #64748b !important; font-size: 10pt !important; border: none !important; white-space: nowrap !important; }
+  .pcorp-tf-val { text-align: right !important; padding: 6px 14px !important; color: #1e293b !important; font-weight: 600 !important; border: none !important; white-space: nowrap !important; }
   .pcorp-tf-total { background: #1e3a5f !important; border: none !important; }
-  .pcorp-tf-total-label { text-align: right !important; padding: 12px 14px !important; color: white !important; font-weight: 800 !important; font-size: 10pt !important; text-transform: uppercase !important; border: none !important; }
-  .pcorp-tf-total-val { text-align: right !important; padding: 12px 14px !important; color: #fbbf24 !important; font-weight: 900 !important; font-size: 13pt !important; border: none !important; }
+  .pcorp-tf-total-label { text-align: right !important; padding: 12px 14px !important; color: white !important; font-weight: 800 !important; font-size: 10pt !important; text-transform: uppercase !important; border: none !important; white-space: nowrap !important; }
+  .pcorp-tf-total-val { text-align: right !important; padding: 12px 10px !important; color: #fbbf24 !important; font-weight: 900 !important; font-size: 11pt !important; border: none !important; white-space: nowrap !important; letter-spacing: -0.01em !important; }
 
   .pcorp-signatures {
     page-break-before: always !important;
@@ -1601,7 +1995,7 @@ vercel-live-feedback,
   }
   .pcorp-sig-intro { font-size: 10.5pt !important; color: #475569 !important; line-height: 1.7 !important; margin: 0 0 12px 0 !important; padding: 0 !important; text-align: justify !important; }
   .pcorp-sig-intro p { margin: 0 !important; padding: 0 !important; }
-  .pcorp-sig-grid { display: flex !important; justify-content: space-between !important; gap: 32px !important; margin: 40px 0 0 0 !important; padding: 0 !important; }
+  .pcorp-sig-grid { display: flex !important; justify-content: space-between !important; align-items: stretch !important; gap: 32px !important; margin: 40px 0 0 0 !important; padding: 0 !important; }
   .pcorp-sig-card {
     width: 45% !important;
     padding: 24px !important;
@@ -1611,9 +2005,11 @@ vercel-live-feedback,
     background: #f8fafc !important;
     text-align: center !important;
   }
-  .pcorp-sig-role { font-size: 8pt !important; text-transform: uppercase !important; letter-spacing: 0.1em !important; color: #2563eb !important; font-weight: 700 !important; margin: 0 0 36px 0 !important; padding: 0 !important; }
-  .pcorp-sig-line { border: none !important; border-bottom: 2px solid #1e3a5f !important; margin: 0 0 8px 0 !important; height: 0 !important; }
-  .pcorp-sig-name { font-size: 10.5pt !important; font-weight: 700 !important; color: #1e3a5f !important; margin: 0 0 4px 0 !important; padding: 0 !important; }
+  .pcorp-sig-role { font-size: 8pt !important; text-transform: uppercase !important; letter-spacing: 0.1em !important; color: #2563eb !important; font-weight: 700 !important; margin: 0 0 16px 0 !important; padding: 0 !important; text-align: center !important; width: 100% !important; }
+  .pcorp-sig-line { border: none !important; border-bottom: 2px solid #1e3a5f !important; margin: 0 0 8px 0 !important; height: 48px !important; }
+  .pcorp-sig-assets { display: flex !important; align-items: flex-end !important; justify-content: center !important; gap: 10px !important; min-height: 52px !important; margin: 0 0 8px 0 !important; }
+  .pcorp-sig-assets .proposal-sig-image, .pcorp-sig-assets .proposal-stamp-image { max-height: 44px !important; max-width: 110px !important; object-fit: contain !important; }
+  .pcorp .proposal-sig-name-on-stamp { color: #1e3a5f !important; font-size: 9pt !important; }
   .pcorp-sig-meta { font-size: 8pt !important; color: #94a3b8 !important; margin: 0 !important; padding: 0 !important; line-height: 1.6 !important; }
 
   .pcorp-footer {

@@ -24,12 +24,12 @@ export class DocumentContextResolver {
 
     return {
       company: {
-        name: safeCompany.name || "Nossa Empresa",
-        businessProfile: safeCompany.business_profile || "Geral",
+        name: safeCompany.name || "Empresa",
+        businessProfile: safeCompany.business_profile || "Comercial geral",
       },
       client: {
-        name: safeClient.name || "Cliente",
-        industry: safeClient.tags?.join(", ") || "",
+        name: safeClient.name || safeQuotation.client_name || "Cliente",
+        industry: safeClient.tags?.join(", ") || safeClient.notes || "",
       },
       contacts: [],
       quotation: {
@@ -45,7 +45,8 @@ export class DocumentContextResolver {
       items: params.items.map(i => ({
         description: i.description,
         quantity: i.quantity,
-        total: i.total
+        total: i.total,
+        unit_price: i.unit_price,
       })),
       businessProfile: safeCompany.business_profile || "DEFAULT",
       pipeline: null,

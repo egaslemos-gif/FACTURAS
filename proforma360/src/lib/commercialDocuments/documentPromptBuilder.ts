@@ -1,50 +1,57 @@
 import { DocumentContext, PromptComponents } from "./documentTypes";
 
 export class DocumentPromptBuilder {
-  /**
-   * Build a single prompt string based on the provided context and instructions.
-   */
   static buildPrompt(context: DocumentContext): string {
+    const itemLines = context.items.map(item =>
+      `- ${item.quantity}x ${item.description} (${context.currency} ${item.total})`
+    ).join("\n");
+
     const components: PromptComponents = {
-      identity: `És um especialista em vendas e redação de propostas comerciais (Proposal Manager) que trabalha para a empresa "${context.company.name}".`,
+      identity: `És um redactor de propostas comerciais B2B a trabalhar para "${context.company.name}".`,
       businessRules: `
-Regras Estritas de Redação (Style Guide):
-1. **PROIBIDO** usar expressões como: "Nossa Empresa", "tem o prazer", "inovadora", "revolucionária", "desvendar", "transformar o futuro", "solução de ponta".
-2. **OBRIGATÓRIO** usar o nome real da empresa: "${context.company.name}".
-3. **OBRIGATÓRIO** usar Tom Institucional e Português Europeu (PT-PT).
-4. Escreve frases objetivas e parágrafos curtos.
-5. Sem marketing exagerado, sem adjetivos vazios, sem emojis e sem linguagem típica de IA.
-6. Nunca inventes valores financeiros. Usa estritamente os dados dos itens fornecidos. O total é ${context.currency} ${context.quotation?.grand_total}.
-7. Responde APENAS com o conteúdo do documento em formato Markdown (headings, bold, bullet points curtos).
+Regras estritas:
+1. PROIBIDO: "Nossa Empresa", "tem o prazer", "inovadora", "revolucionária", "transformação digital" genérica, "solução de ponta", "holística", "arquitectura modular" sem contexto, emojis.
+2. OBRIGATÓRIO: usar "${context.company.name}" e "${context.client.name}" pelos nomes reais.
+3. Português Europeu (PT-PT), tom institucional, objectivo e conciso.
+4. Nunca inventar preços, prazos, fases ou serviços que não estejam nos itens da proforma.
+5. Referir apenas produtos/serviços listados nos itens. Não adicionar módulos, integrações ERP/CRM ou funcionalidades não mencionadas.
+6. Cada secção: 2 a 4 parágrafos curtos (máx. 120 palavras por secção). Sem repetição entre secções.
+7. Total da proforma: ${context.currency} ${context.quotation?.grand_total} — usar apenas este valor quando mencionar montantes.
+8. Responde APENAS com JSON válido (sem blocos \`\`\`).
 `,
-      writingStyle: `O idioma da proposta deve ser o Português de Portugal. ${context.customNotes.includes("Tom:") ? context.customNotes : "O tom deve ser B2B, corporativo, institucional, seco e altamente profissional."}`,
+      writingStyle: `Tom B2B profissional. ${context.customNotes.includes("Tom:") ? context.customNotes.split("Tom:")[1]?.split("\n")[0] : "Directo, elegante, sem marketing vazio."}`,
       context: `
-DADOS DA EMPRESA:
+EMPRESA FORNECEDORA:
 - Nome: ${context.company.name}
-- Perfil: ${context.businessProfile}
+- Perfil/sector: ${context.businessProfile}
 
-DADOS DO CLIENTE:
+CLIENTE:
 - Nome: ${context.client.name}
+${context.client.industry ? `- Contexto: ${context.client.industry}` : ""}
 
-DADOS DA PROPOSTA (Proforma ${context.quotation?.number}):
-- Total a pagar: ${context.currency} ${context.quotation?.grand_total}
+PROFORMA ${context.quotation?.number}:
+- Total: ${context.currency} ${context.quotation?.grand_total}
 - Validade: ${context.validity}
-- Condições: ${context.paymentTerms}
+- Condições de pagamento: ${context.paymentTerms}
+${context.quotation?.notes ? `- Notas da proforma: ${context.quotation.notes}` : ""}
+${context.quotation?.terms ? `- Termos: ${context.quotation.terms}` : ""}
 
-ITENS INCLUÍDOS:
-${context.items.map(item => `- ${item.quantity}x ${item.description}`).join('\n')}
+ITENS (usar exclusivamente estes — não inventar outros):
+${itemLines || "(sem itens)"}
 
 INSTRUÇÕES DO UTILIZADOR:
 ${context.customNotes}
 `,
-      section: ``, // Em futuras versões isto indicaria a secção a gerar
-      instructions: `Gera uma Proposta Técnica e Comercial completa dividida estritamente nas seguintes secções:
-1. Resumo Executivo (executiveSummary): Foco nos benefícios para o cliente.
-2. Solução Proposta (proposedSolution): Como os nossos itens resolvem o problema.
-3. Escopo do Serviço (scope): Resumo dos itens listados.
-4. Cronograma Estimado (timeline): Prazos ou próximos passos.
-5. Condições Gerais (conditions): Validade, pagamentos e regras.`,
-      outputSchema: `Responde EXCLUSIVAMENTE com um objeto JSON válido (sem blocos de código \`\`\`json) contendo estas chaves exatas:
+      section: "",
+      instructions: `Gera uma Proposta Técnica alinhada com a proforma acima. Cada secção deve reflectir o contexto real das empresas e dos itens listados.
+
+Secções:
+1. executiveSummary — Porque esta proposta faz sentido para ${context.client.name}, com base nos itens.
+2. proposedSolution — Como ${context.company.name} responde com os itens/serviços da proforma.
+3. scope — Lista e descreve apenas o que está nos itens da proforma.
+4. timeline — Prazos realistas e genéricos (sem inventar semanas específicas salvo indicação nas notas).
+5. conditions — Validade, pagamento e regras baseadas nos dados da proforma.`,
+      outputSchema: `Responde EXCLUSIVAMENTE com JSON (sem markdown wrapper):
 {
   "executiveSummary": "...",
   "proposedSolution": "...",

@@ -1,13 +1,12 @@
 import React from "react";
 import ReactMarkdown from "react-markdown";
-import { formatCurrency } from "@/lib/utils";
-import { PrintableProposalProps, safeNumber } from "./proposalTypes";
+import { PrintableProposalProps, safeNumber, resolveVisibility } from "./proposalTypes";
+import { buildProposalContentSections } from "./proposalContent";
+import { FinancialTable } from "./FinancialTable";
+import { ProposalPageFooters, ProposalSignatureCard, CoverFooterMask, sectionPageClass } from "./ProposalShared";
 
-function safeCurrency(val: unknown): string {
-  return formatCurrency(safeNumber(val));
-}
-
-export function PrintableProposalMinimal({ company, client, quotation, items, sections }: PrintableProposalProps) {
+export function PrintableProposalMinimal({ company, client, quotation, items, sections, customSections, visibility: vis }: PrintableProposalProps) {
+  const v = resolveVisibility(vis);
   if (!quotation) return null;
 
   const date = new Date().toLocaleDateString("pt-PT");
@@ -29,15 +28,13 @@ export function PrintableProposalMinimal({ company, client, quotation, items, se
   const companyLogo = company?.logoUrl || company?.logo_url || "";
   const clientName = client?.name || "";
 
-  const contentSections: Array<{ key: string; title: string; content: string }> = [];
-  if (sections.executiveSummary?.trim()) contentSections.push({ key: "exec", title: "Resumo Executivo", content: sections.executiveSummary });
-  if (sections.proposedSolution?.trim()) contentSections.push({ key: "solution", title: "Solução Proposta", content: sections.proposedSolution });
-  if (sections.scope?.trim()) contentSections.push({ key: "scope", title: "Escopo do Serviço", content: sections.scope });
-  if (sections.timeline?.trim()) contentSections.push({ key: "timeline", title: "Cronograma Estimado", content: sections.timeline });
+  const contentSections = buildProposalContentSections(sections, customSections, v);
 
   let sn = contentSections.length;
-  const financialNum = safeItems.length > 0 ? ++sn : 0;
-  const conditionsNum = sections.conditions?.trim() ? ++sn : 0;
+  const showFinancial = v.financialTable && safeItems.length > 0;
+  const showConditions = v.conditions && !!sections.conditions?.trim();
+  const financialNum = showFinancial ? ++sn : 0;
+  const conditionsNum = showConditions ? ++sn : 0;
 
   return (
     <div className="printable-proposal-root pmin">
@@ -64,11 +61,45 @@ export function PrintableProposalMinimal({ company, client, quotation, items, se
           {company?.address && <p>{company.address}</p>}
           {company?.email && <p>{company.email}</p>}
         </div>
+        <CoverFooterMask className="pmin-cover-footer-mask" />
       </div>
+
+      {v.toc === true && (contentSections.length > 0 || showFinancial || showConditions) && (
+        <div className="pmin-toc">
+          <h2 className="pmin-toc-title">Índice</h2>
+          <div className="pmin-toc-line" />
+          <div className="pmin-toc-list">
+            {contentSections.map((s, idx) => (
+              <div key={s.key} className="pmin-toc-item">
+                <span className="pmin-toc-num">{idx + 1}.</span>
+                <span className="pmin-toc-label">{s.title}</span>
+              </div>
+            ))}
+            {showFinancial && (
+              <div className="pmin-toc-item">
+                <span className="pmin-toc-num">{financialNum}.</span>
+                <span className="pmin-toc-label">Investimento</span>
+              </div>
+            )}
+            {showConditions && (
+              <div className="pmin-toc-item">
+                <span className="pmin-toc-num">{conditionsNum}.</span>
+                <span className="pmin-toc-label">Condições</span>
+              </div>
+            )}
+            {v.signatures && (
+              <div className="pmin-toc-item">
+                <span className="pmin-toc-num">&nbsp;</span>
+                <span className="pmin-toc-label">Aceitação</span>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* CONTENT SECTIONS */}
       {contentSections.map((section, idx) => (
-        <div key={section.key} className="pmin-section">
+        <div key={section.key} className={`pmin-section ${sectionPageClass(section.content)}`}>
           <h2 className="pmin-section-title">
             <span className="pmin-section-num">{idx + 1}.</span> {section.title}
           </h2>
@@ -77,42 +108,24 @@ export function PrintableProposalMinimal({ company, client, quotation, items, se
       ))}
 
       {/* FINANCIAL TABLE */}
-      {safeItems.length > 0 && (
-        <div className="pmin-section">
+      {showFinancial && (
+        <div className={`pmin-section ${safeItems.length > 2 ? "proposal-section-newpage" : "proposal-section-flow"}`}>
           <h2 className="pmin-section-title">
             <span className="pmin-section-num">{financialNum}.</span> Investimento
           </h2>
-          <table className="pmin-table">
-            <thead><tr>
-              <th className="pmin-th-left">Descrição</th>
-              <th className="pmin-th-center">Qtd</th>
-              <th className="pmin-th-right">Preço</th>
-              <th className="pmin-th-center">IVA</th>
-              <th className="pmin-th-right">Total</th>
-            </tr></thead>
-            <tbody>
-              {safeItems.map((item, idx) => (
-                <tr key={idx}>
-                  <td className="pmin-td-left">{item.description}</td>
-                  <td className="pmin-td-center">{item.quantity}</td>
-                  <td className="pmin-td-right">{safeCurrency(item.unit_price)}</td>
-                  <td className="pmin-td-center">{item.tax_rate}%</td>
-                  <td className="pmin-td-right">{safeCurrency(item.total)}</td>
-                </tr>
-              ))}
-            </tbody>
-            <tfoot>
-              <tr><td colSpan={4} className="pmin-tfoot-label">Subtotal</td><td className="pmin-tfoot-val">{safeCurrency(subtotal)}</td></tr>
-              <tr><td colSpan={4} className="pmin-tfoot-label">IVA</td><td className="pmin-tfoot-val">{safeCurrency(taxTotal)}</td></tr>
-              <tr className="pmin-tfoot-total"><td colSpan={4} className="pmin-tfoot-total-label">Total</td><td className="pmin-tfoot-total-val">{safeCurrency(total)}</td></tr>
-            </tfoot>
-          </table>
+          <FinancialTable
+            variant="minimal"
+            items={safeItems}
+            subtotal={subtotal}
+            taxTotal={taxTotal}
+            total={total}
+          />
         </div>
       )}
 
       {/* CONDITIONS */}
-      {sections.conditions?.trim() && (
-        <div className="pmin-section">
+      {showConditions && (
+        <div className={`pmin-section ${sectionPageClass(sections.conditions)}`}>
           <h2 className="pmin-section-title">
             <span className="pmin-section-num">{conditionsNum}.</span> Condições
           </h2>
@@ -121,24 +134,33 @@ export function PrintableProposalMinimal({ company, client, quotation, items, se
       )}
 
       {/* SIGNATURES */}
-      {(clientName || companyName) && (
+      {v.signatures && (clientName || companyName) && (
         <div className="pmin-signatures">
           <h2 className="pmin-section-title">Aceitação</h2>
           <p className="pmin-sig-text">Ao assinar, as partes aceitam os termos desta proposta.</p>
           <div className="pmin-sig-grid">
             {companyName && (
-              <div className="pmin-sig-box">
-                <div className="pmin-sig-line"></div>
-                <p className="pmin-sig-name">{companyName}</p>
-                <p className="pmin-sig-date">Data: ___/___/______</p>
-              </div>
+              <ProposalSignatureCard
+                role="Fornecedor"
+                company={company}
+                partyName={companyName}
+                lineClassName="pmin-sig-line"
+                zoneClassName="pmin-sig-zone"
+                nameClassName="pmin-sig-name"
+                dateClassName="pmin-sig-date"
+                cardClassName="pmin-sig-box"
+                showCompanyAssets
+              />
             )}
             {clientName && (
-              <div className="pmin-sig-box">
-                <div className="pmin-sig-line"></div>
-                <p className="pmin-sig-name">{clientName}</p>
-                <p className="pmin-sig-date">Data: ___/___/______</p>
-              </div>
+              <ProposalSignatureCard
+                role="Cliente"
+                partyName={clientName}
+                lineClassName="pmin-sig-line"
+                nameClassName="pmin-sig-name"
+                dateClassName="pmin-sig-date"
+                cardClassName="pmin-sig-box"
+              />
             )}
           </div>
         </div>
@@ -146,11 +168,14 @@ export function PrintableProposalMinimal({ company, client, quotation, items, se
 
       {/* FOOTER */}
       {companyName && (
-        <div className="pmin-footer">
-          <span>{companyName}</span>
-          {company?.phone && <span>{company.phone}</span>}
-          {company?.email && <span>{company.email}</span>}
-        </div>
+        <ProposalPageFooters
+          company={company}
+          companyName={companyName}
+          mainWrapperClass="pmin-footer"
+          mainContentClass="pmin-footer-content"
+          thanksWrapperClass="pmin-footer-thanks"
+          thanksContentClass="pmin-footer-thanks-text"
+        />
       )}
     </div>
   );

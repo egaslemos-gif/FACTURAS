@@ -3,6 +3,8 @@ import { auth } from "@/lib/auth";
 import { initializeDriveWorkspace } from "@/lib/google/setup";
 import { backupDatabaseToDrive, findLatestBackup } from "@/lib/google/drive";
 
+export const maxDuration = 60;
+
 export async function POST(req: NextRequest) {
   try {
     const session = await auth();

@@ -1,13 +1,12 @@
 import React from "react";
 import ReactMarkdown from "react-markdown";
-import { formatCurrency } from "@/lib/utils";
-import { PrintableProposalProps, safeNumber } from "./proposalTypes";
+import { PrintableProposalProps, safeNumber, resolveVisibility } from "./proposalTypes";
+import { buildProposalContentSections } from "./proposalContent";
+import { FinancialTable } from "./FinancialTable";
+import { ProposalPageFooters, ProposalSignatureCard, CoverFooterMask, sectionPageClass } from "./ProposalShared";
 
-function safeCurrency(val: unknown): string {
-  return formatCurrency(safeNumber(val));
-}
-
-export function PrintableProposalCorporate({ company, client, quotation, items, sections }: PrintableProposalProps) {
+export function PrintableProposalCorporate({ company, client, quotation, items, sections, customSections, visibility: vis }: PrintableProposalProps) {
+  const v = resolveVisibility(vis);
   if (!quotation) return null;
 
   const date = new Date().toLocaleDateString("pt-PT");
@@ -29,15 +28,13 @@ export function PrintableProposalCorporate({ company, client, quotation, items, 
   const companyLogo = company?.logoUrl || company?.logo_url || "";
   const clientName = client?.name || "";
 
-  const contentSections: Array<{ key: string; title: string; content: string }> = [];
-  if (sections.executiveSummary?.trim()) contentSections.push({ key: "exec", title: "Resumo Executivo", content: sections.executiveSummary });
-  if (sections.proposedSolution?.trim()) contentSections.push({ key: "solution", title: "Solução Proposta", content: sections.proposedSolution });
-  if (sections.scope?.trim()) contentSections.push({ key: "scope", title: "Escopo do Serviço", content: sections.scope });
-  if (sections.timeline?.trim()) contentSections.push({ key: "timeline", title: "Cronograma Estimado", content: sections.timeline });
+  const contentSections = buildProposalContentSections(sections, customSections, v);
 
   let sn = contentSections.length;
-  const financialNum = safeItems.length > 0 ? ++sn : 0;
-  const conditionsNum = sections.conditions?.trim() ? ++sn : 0;
+  const showFinancial = v.financialTable && safeItems.length > 0;
+  const showConditions = v.conditions && !!sections.conditions?.trim();
+  const financialNum = showFinancial ? ++sn : 0;
+  const conditionsNum = showConditions ? ++sn : 0;
 
   return (
     <div className="printable-proposal-root pcorp">
@@ -73,10 +70,11 @@ export function PrintableProposalCorporate({ company, client, quotation, items, 
           {companyName && <p className="pcorp-cover-footer-name">{companyName}</p>}
           {company?.address && <p className="pcorp-cover-footer-addr">{company.address}</p>}
         </div>
+        <CoverFooterMask className="pcorp-cover-footer-mask" />
       </div>
 
       {/* TOC */}
-      {contentSections.length > 0 && (
+      {v.toc === true && (contentSections.length > 0 || showFinancial || showConditions) && (
         <div className="pcorp-toc">
           <div className="pcorp-toc-bar"></div>
           <h2 className="pcorp-toc-title">Conteúdo</h2>
@@ -86,13 +84,13 @@ export function PrintableProposalCorporate({ company, client, quotation, items, 
               <span className="pcorp-toc-name">{s.title}</span>
             </div>
           ))}
-          {financialNum > 0 && (
+          {showFinancial && (
             <div className="pcorp-toc-row">
               <span className="pcorp-toc-num">{String(financialNum).padStart(2, "0")}</span>
               <span className="pcorp-toc-name">Investimento</span>
             </div>
           )}
-          {conditionsNum > 0 && (
+          {showConditions && (
             <div className="pcorp-toc-row">
               <span className="pcorp-toc-num">{String(conditionsNum).padStart(2, "0")}</span>
               <span className="pcorp-toc-name">Condições Gerais</span>
@@ -103,7 +101,7 @@ export function PrintableProposalCorporate({ company, client, quotation, items, 
 
       {/* SECTIONS */}
       {contentSections.map((section, idx) => (
-        <div key={section.key} className="pcorp-section">
+        <div key={section.key} className={`pcorp-section ${sectionPageClass(section.content)}`}>
           <div className="pcorp-section-head">
             <div className="pcorp-section-badge">{String(idx + 1).padStart(2, "0")}</div>
             <h2 className="pcorp-section-title">{section.title}</h2>
@@ -113,43 +111,24 @@ export function PrintableProposalCorporate({ company, client, quotation, items, 
       ))}
 
       {/* FINANCIAL TABLE */}
-      {safeItems.length > 0 && (
-        <div className="pcorp-section">
+      {showFinancial && (
+        <div className={`pcorp-section ${safeItems.length > 2 ? "proposal-section-newpage" : "proposal-section-flow"}`}>
           <div className="pcorp-section-head">
             <div className="pcorp-section-badge">{String(financialNum).padStart(2, "0")}</div>
             <h2 className="pcorp-section-title">Investimento</h2>
           </div>
-          <table className="pcorp-table">
-            <thead><tr>
-              <th className="pcorp-th pcorp-th-left">Item</th>
-              <th className="pcorp-th pcorp-th-center">Qtd</th>
-              <th className="pcorp-th pcorp-th-right">Preço Unit.</th>
-              <th className="pcorp-th pcorp-th-center">IVA</th>
-              <th className="pcorp-th pcorp-th-right">Total</th>
-            </tr></thead>
-            <tbody>
-              {safeItems.map((item, idx) => (
-                <tr key={idx} className={idx % 2 === 1 ? "pcorp-tr-alt" : ""}>
-                  <td className="pcorp-td pcorp-td-left pcorp-td-bold">{item.description}</td>
-                  <td className="pcorp-td pcorp-td-center">{item.quantity}</td>
-                  <td className="pcorp-td pcorp-td-right">{safeCurrency(item.unit_price)}</td>
-                  <td className="pcorp-td pcorp-td-center">{item.tax_rate}%</td>
-                  <td className="pcorp-td pcorp-td-right pcorp-td-bold">{safeCurrency(item.total)}</td>
-                </tr>
-              ))}
-            </tbody>
-            <tfoot>
-              <tr><td colSpan={4} className="pcorp-tf-label">Subtotal</td><td className="pcorp-tf-val">{safeCurrency(subtotal)}</td></tr>
-              <tr><td colSpan={4} className="pcorp-tf-label">IVA</td><td className="pcorp-tf-val">{safeCurrency(taxTotal)}</td></tr>
-              <tr className="pcorp-tf-total"><td colSpan={4} className="pcorp-tf-total-label">TOTAL</td><td className="pcorp-tf-total-val">{safeCurrency(total)}</td></tr>
-            </tfoot>
-          </table>
+          <FinancialTable
+            variant="corporate"
+            items={safeItems}
+            subtotal={subtotal}
+            taxTotal={taxTotal}
+            total={total}
+          />
         </div>
       )}
 
-      {/* CONDITIONS */}
-      {sections.conditions?.trim() && (
-        <div className="pcorp-section">
+      {showConditions && (
+        <div className={`pcorp-section ${sectionPageClass(sections.conditions)}`}>
           <div className="pcorp-section-head">
             <div className="pcorp-section-badge">{String(conditionsNum).padStart(2, "0")}</div>
             <h2 className="pcorp-section-title">Condições Gerais</h2>
@@ -159,7 +138,7 @@ export function PrintableProposalCorporate({ company, client, quotation, items, 
       )}
 
       {/* SIGNATURES */}
-      {(clientName || companyName) && (
+      {v.signatures && (clientName || companyName) && (
         <div className="pcorp-signatures">
           <div className="pcorp-sig-header">
             <div className="pcorp-section-badge-dark">✓</div>
@@ -170,22 +149,27 @@ export function PrintableProposalCorporate({ company, client, quotation, items, 
           </div>
           <div className="pcorp-sig-grid">
             {companyName && (
-              <div className="pcorp-sig-card">
-                <p className="pcorp-sig-role">Fornecedor</p>
-                <div className="pcorp-sig-line"></div>
-                <p className="pcorp-sig-name">{companyName}</p>
-                <p className="pcorp-sig-meta">Assinatura e carimbo</p>
-                <p className="pcorp-sig-meta">Data: ____/____/________</p>
-              </div>
+              <ProposalSignatureCard
+                role="Fornecedor"
+                company={company}
+                partyName={companyName}
+                lineClassName="pcorp-sig-line"
+                zoneClassName="pcorp-sig-zone"
+                nameClassName="pcorp-sig-name"
+                dateClassName="pcorp-sig-meta"
+                cardClassName="pcorp-sig-card"
+                showCompanyAssets
+              />
             )}
             {clientName && (
-              <div className="pcorp-sig-card">
-                <p className="pcorp-sig-role">Cliente</p>
-                <div className="pcorp-sig-line"></div>
-                <p className="pcorp-sig-name">{clientName}</p>
-                <p className="pcorp-sig-meta">Assinatura e carimbo</p>
-                <p className="pcorp-sig-meta">Data: ____/____/________</p>
-              </div>
+              <ProposalSignatureCard
+                role="Cliente"
+                partyName={clientName}
+                lineClassName="pcorp-sig-line"
+                nameClassName="pcorp-sig-name"
+                dateClassName="pcorp-sig-meta"
+                cardClassName="pcorp-sig-card"
+              />
             )}
           </div>
         </div>
@@ -193,15 +177,16 @@ export function PrintableProposalCorporate({ company, client, quotation, items, 
 
       {/* FOOTER */}
       {companyName && (
-        <div className="pcorp-footer">
-          <div className="pcorp-footer-bar"></div>
-          <div className="pcorp-footer-content">
-            <span className="pcorp-footer-brand">{companyName}</span>
-            {company?.address && <span>{company.address}</span>}
-            {company?.phone && <span>{company.phone}</span>}
-            {company?.email && <span>{company.email}</span>}
-          </div>
-        </div>
+        <ProposalPageFooters
+          company={company}
+          companyName={companyName}
+          mainWrapperClass="pcorp-footer"
+          mainContentClass="pcorp-footer-content"
+          brandClassName="pcorp-footer-brand"
+          thanksWrapperClass="pcorp-footer-thanks"
+          thanksContentClass="pcorp-footer-thanks-text"
+          header={<div className="pcorp-footer-bar" />}
+        />
       )}
     </div>
   );

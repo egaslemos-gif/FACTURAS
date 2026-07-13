@@ -1,13 +1,12 @@
 import React from "react";
 import ReactMarkdown from "react-markdown";
-import { formatCurrency } from "@/lib/utils";
-import { PrintableProposalProps, safeNumber } from "./proposalTypes";
+import { PrintableProposalProps, safeNumber, resolveVisibility } from "./proposalTypes";
+import { buildProposalContentSections } from "./proposalContent";
+import { FinancialTable } from "./FinancialTable";
+import { ProposalPageFooters, ProposalSignatureCard, CoverFooterMask, sectionPageClass } from "./ProposalShared";
 
-function safeCurrency(val: unknown): string {
-  return formatCurrency(safeNumber(val));
-}
-
-export function PrintableProposal({ company, client, quotation, items, sections }: PrintableProposalProps) {
+export function PrintableProposal({ company, client, quotation, items, sections, customSections, visibility: vis }: PrintableProposalProps) {
+  const v = resolveVisibility(vis);
   if (!quotation) return null;
 
   const date = new Date().toLocaleDateString("pt-PT");
@@ -29,15 +28,13 @@ export function PrintableProposal({ company, client, quotation, items, sections 
   const companyLogo = company?.logoUrl || company?.logo_url || "";
   const clientName = client?.name || "";
 
-  const contentSections: Array<{ key: string; title: string; content: string }> = [];
-  if (sections.executiveSummary?.trim()) contentSections.push({ key: "exec", title: "Resumo Executivo", content: sections.executiveSummary });
-  if (sections.proposedSolution?.trim()) contentSections.push({ key: "solution", title: "Solução Proposta", content: sections.proposedSolution });
-  if (sections.scope?.trim()) contentSections.push({ key: "scope", title: "Escopo do Serviço", content: sections.scope });
-  if (sections.timeline?.trim()) contentSections.push({ key: "timeline", title: "Cronograma Estimado", content: sections.timeline });
+  const contentSections = buildProposalContentSections(sections, customSections, v);
 
   let sectionCounter = contentSections.length;
-  const financialNum = safeItems.length > 0 ? ++sectionCounter : 0;
-  const conditionsNum = sections.conditions?.trim() ? ++sectionCounter : 0;
+  const showFinancial = v.financialTable && safeItems.length > 0;
+  const showConditions = v.conditions && !!sections.conditions?.trim();
+  const financialNum = showFinancial ? ++sectionCounter : 0;
+  const conditionsNum = showConditions ? ++sectionCounter : 0;
 
   return (
     <div className="printable-proposal-root">
@@ -62,9 +59,10 @@ export function PrintableProposal({ company, client, quotation, items, sections 
             <p className="printable-cover-footer-name">{companyName}</p>
           </div>
         )}
+        <CoverFooterMask />
       </div>
 
-      {contentSections.length > 0 && (
+      {v.toc === true && (contentSections.length > 0 || showFinancial || showConditions) && (
         <div className="printable-toc">
           <div className="printable-toc-header">
             <div className="printable-toc-accent"></div>
@@ -78,31 +76,33 @@ export function PrintableProposal({ company, client, quotation, items, sections 
                 <span className="printable-toc-dots"></span>
               </div>
             ))}
-            {financialNum > 0 && (
+            {showFinancial && (
               <div className="printable-toc-item">
                 <span className="printable-toc-num">{String(financialNum).padStart(2, "0")}</span>
                 <span className="printable-toc-label">Investimento e Tabela Financeira</span>
                 <span className="printable-toc-dots"></span>
               </div>
             )}
-            {conditionsNum > 0 && (
+            {showConditions && (
               <div className="printable-toc-item">
                 <span className="printable-toc-num">{String(conditionsNum).padStart(2, "0")}</span>
                 <span className="printable-toc-label">Condições Gerais</span>
                 <span className="printable-toc-dots"></span>
               </div>
             )}
-            <div className="printable-toc-item">
-              <span className="printable-toc-num">&nbsp;&nbsp;</span>
-              <span className="printable-toc-label">Aceitação da Proposta</span>
-              <span className="printable-toc-dots"></span>
-            </div>
+            {v.signatures && (
+              <div className="printable-toc-item">
+                <span className="printable-toc-num">&nbsp;&nbsp;</span>
+                <span className="printable-toc-label">Aceitação da Proposta</span>
+                <span className="printable-toc-dots"></span>
+              </div>
+            )}
           </div>
         </div>
       )}
 
       {contentSections.map((section, idx) => (
-        <div key={section.key} className="printable-section">
+        <div key={section.key} className={`printable-section ${sectionPageClass(section.content)}`}>
           <div className="printable-section-header">
             <span className="printable-section-number">{String(idx + 1).padStart(2, "0")}</span>
             <div className="printable-section-header-text">
@@ -114,8 +114,8 @@ export function PrintableProposal({ company, client, quotation, items, sections 
         </div>
       ))}
 
-      {safeItems.length > 0 && (
-        <div className="printable-section">
+      {showFinancial && (
+        <div className={`printable-section ${safeItems.length > 2 ? "proposal-section-newpage" : "proposal-section-flow"}`}>
           <div className="printable-section-header">
             <span className="printable-section-number">{String(financialNum).padStart(2, "0")}</span>
             <div className="printable-section-header-text">
@@ -124,37 +124,19 @@ export function PrintableProposal({ company, client, quotation, items, sections 
             </div>
           </div>
           <div className="printable-financial-table-wrapper">
-            <table className="printable-financial-table">
-              <thead><tr>
-                <th className="printable-th printable-th-item">Item / Descrição</th>
-                <th className="printable-th printable-th-qty">Qtd.</th>
-                <th className="printable-th printable-th-price">Preço Unit.</th>
-                <th className="printable-th printable-th-tax">IVA</th>
-                <th className="printable-th printable-th-total">Total</th>
-              </tr></thead>
-              <tbody>
-                {safeItems.map((item, idx) => (
-                  <tr key={idx} className={idx % 2 === 0 ? "printable-tr-even" : "printable-tr-odd"}>
-                    <td className="printable-td printable-td-item">{item.description}</td>
-                    <td className="printable-td printable-td-qty">{item.quantity}</td>
-                    <td className="printable-td printable-td-price">{safeCurrency(item.unit_price)}</td>
-                    <td className="printable-td printable-td-tax">{item.tax_rate}%</td>
-                    <td className="printable-td printable-td-total">{safeCurrency(item.total)}</td>
-                  </tr>
-                ))}
-              </tbody>
-              <tfoot>
-                <tr className="printable-tfoot-row"><td colSpan={4} className="printable-tfoot-label">Subtotal</td><td className="printable-tfoot-value">{safeCurrency(subtotal)}</td></tr>
-                <tr className="printable-tfoot-row"><td colSpan={4} className="printable-tfoot-label">IVA</td><td className="printable-tfoot-value">{safeCurrency(taxTotal)}</td></tr>
-                <tr className="printable-tfoot-total"><td colSpan={4} className="printable-tfoot-total-label">TOTAL GERAL</td><td className="printable-tfoot-total-value">{safeCurrency(total)}</td></tr>
-              </tfoot>
-            </table>
+            <FinancialTable
+              variant="executivo"
+              items={safeItems}
+              subtotal={subtotal}
+              taxTotal={taxTotal}
+              total={total}
+            />
           </div>
         </div>
       )}
 
-      {sections.conditions?.trim() && (
-        <div className="printable-section">
+      {showConditions && (
+        <div className={`printable-section ${sectionPageClass(sections.conditions)}`}>
           <div className="printable-section-header">
             <span className="printable-section-number">{String(conditionsNum).padStart(2, "0")}</span>
             <div className="printable-section-header-text">
@@ -166,7 +148,7 @@ export function PrintableProposal({ company, client, quotation, items, sections 
         </div>
       )}
 
-      {(clientName || companyName) && (
+      {v.signatures && (clientName || companyName) && (
         <div className="printable-signatures">
           <div className="printable-signatures-header">
             <div className="printable-toc-accent"></div>
@@ -179,20 +161,27 @@ export function PrintableProposal({ company, client, quotation, items, sections 
           </div>
           <div className="printable-signatures-block">
             {companyName && (
-              <div className="printable-signature-box">
-                <p className="printable-signature-role">Pelo Fornecedor</p>
-                <div className="printable-signature-line"></div>
-                <p className="printable-signature-name">{companyName}</p>
-                <p className="printable-signature-detail">Data: ____/____/________</p>
-              </div>
+              <ProposalSignatureCard
+                role="Pelo Fornecedor"
+                company={company}
+                partyName={companyName}
+                lineClassName="printable-signature-line"
+                zoneClassName="printable-signature-zone"
+                nameClassName="printable-signature-name"
+                dateClassName="printable-signature-detail"
+                cardClassName="printable-signature-box"
+                showCompanyAssets
+              />
             )}
             {clientName && (
-              <div className="printable-signature-box">
-                <p className="printable-signature-role">Pelo Cliente</p>
-                <div className="printable-signature-line"></div>
-                <p className="printable-signature-name">{clientName}</p>
-                <p className="printable-signature-detail">Data: ____/____/________</p>
-              </div>
+              <ProposalSignatureCard
+                role="Pelo Cliente"
+                partyName={clientName}
+                lineClassName="printable-signature-line"
+                nameClassName="printable-signature-name"
+                dateClassName="printable-signature-detail"
+                cardClassName="printable-signature-box"
+              />
             )}
           </div>
           <div className="printable-signatures-legal">
@@ -202,14 +191,15 @@ export function PrintableProposal({ company, client, quotation, items, sections 
       )}
 
       {companyName && (
-        <div className="printable-running-footer">
-          <div className="printable-running-footer-content">
-            <span className="printable-running-footer-company">{companyName}</span>
-            {company?.address && <><span className="printable-running-footer-sep">|</span><span>{company.address}</span></>}
-            {company?.phone && <><span className="printable-running-footer-sep">|</span><span>{company.phone}</span></>}
-            {company?.email && <><span className="printable-running-footer-sep">|</span><span>{company.email}</span></>}
-          </div>
-        </div>
+        <ProposalPageFooters
+          company={company}
+          companyName={companyName}
+          mainWrapperClass="printable-running-footer"
+          mainContentClass="printable-running-footer-content"
+          brandClassName="printable-running-footer-company"
+          sepClassName="printable-running-footer-sep"
+          thanksContentClass="printable-running-footer-thanks-text"
+        />
       )}
     </div>
   );

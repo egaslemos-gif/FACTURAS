@@ -31,12 +31,16 @@ import {
   MoreHorizontal,
   CircleHelp,
   Share2,
-  CreditCard
+  CreditCard,
+  ClipboardList
 } from "lucide-react";
 import ShareAppModal from "@/components/ShareAppModal";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { useSyncStore, useClientsStore, useProductsStore, useQuotationsStore, useCompanyStore } from "@/stores";
+import { restoreBackupFromCloud } from "@/lib/cloud/restoreBackup";
+import { backupToCloud } from "@/lib/cloud/cloudBackup";
+import { useAutoBackup } from "@/hooks/useAutoBackup";
 import { dbClient } from "@/lib/db/client";
 import { PWAInstallPrompt } from "@/components/PWAInstallPrompt";
 import { useNetworkStatus } from "@/hooks/useNetworkStatus";
@@ -60,6 +64,7 @@ const BASE_NAV_GROUPS = [
     items: [
       { id: "dashboard", name: "Dashboard", href: "/dashboard", icon: Home },
       { id: "quotations", name: "Proformas", href: "/dashboard/quotations", icon: FileText },
+      { id: "proposals", name: "Propostas Técnicas", href: "/dashboard/proposals", icon: ClipboardList },
       { id: "pipeline", name: "Pipeline", href: "/dashboard/pipeline", icon: Kanban },
     ]
   },
@@ -88,11 +93,12 @@ const BASE_NAV_GROUPS = [
 const BASE_MOBILE_NAV = [
   { id: "dashboard", name: "Dashboard", href: "/dashboard", icon: Home },
   { id: "quotations", name: "Proformas", href: "/dashboard/quotations", icon: FileText },
+  { id: "proposals", name: "Propostas", href: "/dashboard/proposals", icon: ClipboardList },
   { id: "clients", name: "Clientes", href: "/dashboard/clients", icon: Users },
-  { id: "products", name: "Produtos", href: "/dashboard/products", icon: Package },
 ];
 
 const BASE_MOBILE_MORE = [
+  { id: "proposals", name: "Propostas Técnicas", href: "/dashboard/proposals", icon: ClipboardList },
   { id: "pipeline", name: "Pipeline", href: "/dashboard/pipeline", icon: Kanban },
   { id: "company", name: "A Minha Empresa", href: "/dashboard/company", icon: Building2 },
   { id: "subscription", name: "Planos & Subscrição", href: "/dashboard/subscription", icon: CreditCard },
@@ -167,6 +173,7 @@ export default function DashboardLayout({
 
   const hasUnsyncedChanges = useSyncStore(state => state.hasUnsyncedChanges);
   const lastSyncDate = useSyncStore(state => state.lastSyncDate);
+  const autoBackupEnabled = useSyncStore(state => state.autoBackupEnabled);
   const setHasUnsyncedChanges = useSyncStore(state => state.setHasUnsyncedChanges);
   const setLastSyncDate = useSyncStore(state => state.setLastSyncDate);
 
@@ -366,28 +373,29 @@ export default function DashboardLayout({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
+  useAutoBackup({
+    enabled: runtimeReady && !!session?.accessToken && !isOffline,
+    isOnline: !isOffline,
+    isAuthenticated: !!session?.accessToken && session?.error !== "RefreshAccessTokenError",
+    onSyncingChange: setIsSyncing,
+    onAutoBackupError: (message) => {
+      toast.error("Backup automático falhou: " + message, { duration: 6000 });
+    },
+  });
+
   const handleBackup = async () => {
     try {
       setIsSyncing(true);
-      const dbFile = await dbClient.getDatabaseFile();
-      if (!dbFile) throw new Error("Base de dados vazia.");
-      
-      const formData = new FormData();
-      formData.append("file", new Blob([dbFile as unknown as BlobPart]), "proforma360.db");
-      
-      const res = await fetch("/api/drive/backup", { method: "POST", body: formData });
-      if (!res.ok) {
-        const errorData = await res.json().catch(() => ({}));
-        throw new Error(errorData.details || errorData.error || "Falha no upload. Verifique a sua ligação e tente novamente.");
-      }
-      
+      const result = await backupToCloud();
       setHasUnsyncedChanges(false);
-      setLastSyncDate(new Date().toISOString());
+      setLastSyncDate(result.date);
+      useSyncStore.getState().setLastAutoBackupAt(result.date);
       setIsSyncMenuOpen(false);
       toast.success("Backup guardado com sucesso na Cloud!");
-    } catch (e: any) {
-      toast.error("Erro ao fazer backup: " + e.message);
-      if (e.message.includes("Invalid Credentials") || e.message.includes("Não autorizado")) {
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : "Erro desconhecido";
+      toast.error("Erro ao fazer backup: " + message);
+      if (message.includes("Invalid Credentials") || message.includes("Não autorizado")) {
         toast.info("A sua sessão Google pode ter expirado. Por favor, faça logout e login novamente.");
       }
     } finally {
@@ -402,24 +410,17 @@ export default function DashboardLayout({
     
     try {
       setIsSyncing(true);
-      const res = await fetch("/api/drive/restore");
-      if (!res.ok) {
-        const errorData = await res.json().catch(() => ({}));
-        throw new Error(errorData.details || errorData.error || "Nenhum backup encontrado ou falha no download.");
-      }
-      
-      const buffer = await res.arrayBuffer();
-      await dbClient.restoreDatabaseFile(new Uint8Array(buffer));
-      
+      const { backupDate } = await restoreBackupFromCloud();
+
       setHasUnsyncedChanges(false);
-      const backupDate = res.headers.get("X-Backup-Date");
       if (backupDate) setLastSyncDate(backupDate);
-      
+
       setIsSyncMenuOpen(false);
       toast.success("Dados restaurados com sucesso da Cloud.");
       setTimeout(() => window.location.reload(), 1000);
-    } catch (error: any) {
-      toast.error(error.message || "Ocorreu um erro na restauração.");
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "Ocorreu um erro na restauração.";
+      toast.error(message);
     } finally {
       setIsSyncing(false);
     }
@@ -808,6 +809,9 @@ export default function DashboardLayout({
                    <p className="text-xs text-[var(--color-on-surface-variant)] mt-1">
                      {lastSyncDate ? `Último backup: ${new Date(lastSyncDate).toLocaleDateString('pt-PT')} às ${new Date(lastSyncDate).toLocaleTimeString('pt-PT', {hour:'2-digit', minute:'2-digit'})}` : "Nunca foi feito backup"}
                    </p>
+                   {autoBackupEnabled && !isOffline && (
+                     <p className="text-[11px] text-green-700 mt-1.5">Backup automático activo</p>
+                   )}
 
                     {unsyncedQueueCount > 0 ? (
                       <div className="mt-2 text-xs font-semibold text-amber-700 bg-amber-50 p-2 rounded border border-amber-200 flex items-center gap-1.5">
@@ -922,6 +926,9 @@ export default function DashboardLayout({
                         <p className="text-xs text-[var(--color-on-surface-variant)] mt-1">
                           {lastSyncDate ? `Último backup: ${new Date(lastSyncDate).toLocaleDateString('pt-PT')} às ${new Date(lastSyncDate).toLocaleTimeString('pt-PT', {hour:'2-digit', minute:'2-digit'})}` : "Nunca foi feito backup"}
                         </p>
+                        {autoBackupEnabled && !isOffline && (
+                          <p className="text-[11px] text-green-700 mt-1.5">Backup automático activo</p>
+                        )}
 
                         {unsyncedQueueCount > 0 ? (
                           <div className="mt-2 text-xs font-semibold text-amber-700 bg-amber-50 p-2 rounded border border-amber-200 flex items-center gap-1.5">
@@ -1094,6 +1101,20 @@ export default function DashboardLayout({
                 <div className="flex-1">
                   <div className="text-sm font-semibold text-gray-900">Nova Proforma</div>
                   <div className="text-[11px] text-gray-500">Criar orçamento ou fatura proforma</div>
+                </div>
+              </Link>
+
+              <Link 
+                href="/dashboard/proposals" 
+                onClick={() => setIsQuickActionsOpen(false)}
+                className="flex items-center gap-3 px-4 py-3.5 rounded-xl hover:bg-gray-50 active:bg-gray-100 transition-colors"
+              >
+                <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center">
+                  <ClipboardList className="w-5 h-5 text-blue-600" />
+                </div>
+                <div className="flex-1">
+                  <div className="text-sm font-semibold text-gray-900">Proposta Técnica</div>
+                  <div className="text-[11px] text-gray-500">Gerar proposta comercial a partir de proforma</div>
                 </div>
               </Link>
               

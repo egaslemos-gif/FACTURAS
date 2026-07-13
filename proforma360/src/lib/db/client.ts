@@ -97,148 +97,13 @@ class DatabaseClient {
         // Load existing
         this.db = new SQL.Database(savedData);
         console.log("Database loaded from IndexedDB.");
-        
-        // Run migrations for existing DBs
-        const safeRun = (query: string) => {
-          try {
-            this.db?.run(query);
-          } catch (e) {
-            // Ignore column exists errors
-          }
-        };
-
-        // Migration 1: pdf_template
-        safeRun("ALTER TABLE companies ADD COLUMN pdf_template TEXT DEFAULT 'minimal'");
-        // Migration 2: Financial fields
-        safeRun("ALTER TABLE companies ADD COLUMN bank_name TEXT");
-        safeRun("ALTER TABLE companies ADD COLUMN account_holder TEXT");
-        safeRun("ALTER TABLE companies ADD COLUMN account_number TEXT");
-        safeRun("ALTER TABLE companies ADD COLUMN nib_iban TEXT");
-        safeRun("ALTER TABLE companies ADD COLUMN mpesa TEXT");
-        safeRun("ALTER TABLE companies ADD COLUMN emola TEXT");
-        // Migration 3: Client fields
-        safeRun("ALTER TABLE clients ADD COLUMN origin TEXT");
-        safeRun("ALTER TABLE clients ADD COLUMN tags TEXT");
-        // Migration 4: Rename classic to minimal in existing rows
-        safeRun("UPDATE companies SET pdf_template = 'minimal' WHERE pdf_template = 'classic'");
-        // Migration 5: Add sent_at
-        safeRun("ALTER TABLE quotations ADD COLUMN sent_at TEXT");
-        // Migration 6: Add show_branding
-        safeRun("ALTER TABLE companies ADD COLUMN show_branding INTEGER DEFAULT 1");
-        // Migration 7: CRM Pipeline fields
-        safeRun("ALTER TABLE quotations ADD COLUMN pipeline_stage TEXT DEFAULT 'lead'");
-        safeRun("ALTER TABLE quotations ADD COLUMN next_action TEXT");
-        safeRun("ALTER TABLE quotations ADD COLUMN next_action_date TEXT");
-        // Migration 8: Client Interactions table
-        this.db?.run(`
-          CREATE TABLE IF NOT EXISTS client_interactions (
-            id TEXT PRIMARY KEY,
-            client_id TEXT NOT NULL,
-            type TEXT NOT NULL,
-            title TEXT NOT NULL,
-            description TEXT,
-            created_at TEXT,
-            FOREIGN KEY(client_id) REFERENCES clients(id)
-          )
-        `);
-        // Migration 9: Priority
-        safeRun("ALTER TABLE quotations ADD COLUMN priority TEXT DEFAULT 'medium'");
-        // Migration 10: Pipeline Operations Phase 1
-        safeRun("ALTER TABLE quotations ADD COLUMN next_action_time TEXT");
-        safeRun("ALTER TABLE quotations ADD COLUMN last_activity_at TEXT");
-        safeRun("ALTER TABLE quotations ADD COLUMN last_contact_at TEXT");
-        safeRun("ALTER TABLE quotations ADD COLUMN reminders_enabled INTEGER DEFAULT 1");
-        
-        // Migration 11: Pipeline Operations Phase 2 & Calendar Sync Fields
-        safeRun("ALTER TABLE quotations ADD COLUMN assigned_user TEXT");
-        safeRun("ALTER TABLE quotations ADD COLUMN followup_status TEXT DEFAULT 'pending'");
-        safeRun("ALTER TABLE quotations ADD COLUMN reminder_offset TEXT DEFAULT '15m'");
-        safeRun("ALTER TABLE quotations ADD COLUMN completed_at TEXT");
-        safeRun("ALTER TABLE quotations ADD COLUMN calendar_sync_enabled INTEGER DEFAULT 0");
-        safeRun("ALTER TABLE quotations ADD COLUMN external_calendar_provider TEXT");
-        safeRun("ALTER TABLE quotations ADD COLUMN calendar_sync_status TEXT");
-        safeRun("ALTER TABLE quotations ADD COLUMN calendar_sync_date TEXT");
-        safeRun("ALTER TABLE quotations ADD COLUMN external_calendar_event_id TEXT");
-        safeRun("ALTER TABLE quotations ADD COLUMN calendar_sync_error TEXT");
-        
-        // Migration 12: Telemetry & Persistent Sync Queue
-        this.db?.run(`
-          CREATE TABLE IF NOT EXISTS proposal_telemetry (
-            quotation_id TEXT PRIMARY KEY,
-            views_count INTEGER DEFAULT 0,
-            downloads_count INTEGER DEFAULT 0,
-            last_viewed_at TEXT,
-            FOREIGN KEY(quotation_id) REFERENCES quotations(id)
-          )
-        `);
-        this.db?.run(`
-          CREATE TABLE IF NOT EXISTS persistent_sync_queue (
-            id TEXT PRIMARY KEY,
-            event_type TEXT NOT NULL,
-            payload TEXT,
-            status TEXT DEFAULT 'pending',
-            retries INTEGER DEFAULT 0,
-            next_attempt_at TEXT,
-            priority TEXT DEFAULT 'medium',
-            idempotency_key TEXT UNIQUE,
-            version INTEGER DEFAULT 1,
-            created_at TEXT
-          )
-        `);
-        
-        // Migration 13: Runtime Diagnostics Log
-        this.db?.run(`
-          CREATE TABLE IF NOT EXISTS runtime_diagnostics (
-            id TEXT PRIMARY KEY,
-            type TEXT NOT NULL,
-            message TEXT,
-            timestamp TEXT
-          )
-        `);
-
-        // Migration 15: Replay Determinism Receipts
-        this.db?.run(`
-          CREATE TABLE IF NOT EXISTS document_execution_receipts (
-            id TEXT PRIMARY KEY,
-            quotation_id TEXT,
-            semantic_schema_signature TEXT,
-            execution_plan_signature TEXT,
-            totals_ast_signature TEXT,
-            runtime_kernel_version TEXT,
-            timestamp TEXT
-          )
-        `);
-        this.db?.run(`
-          CREATE TABLE IF NOT EXISTS runtime_replay_receipts (
-            id TEXT PRIMARY KEY,
-            quotation_id TEXT,
-            replay_context TEXT,
-            determinism_result TEXT,
-            semantic_schema_signature TEXT,
-            execution_plan_signature TEXT,
-            totals_ast_signature TEXT,
-            timestamp TEXT
-          )
-        `);
-        // Migration 16: MVP Commercial Document Studio
-        this.db?.run(`
-          CREATE TABLE IF NOT EXISTS commercial_proposals (
-            id TEXT PRIMARY KEY,
-            quotation_id TEXT UNIQUE,
-            title TEXT,
-            content TEXT,
-            status TEXT DEFAULT 'draft',
-            created_at TEXT,
-            updated_at TEXT,
-            FOREIGN KEY(quotation_id) REFERENCES quotations(id)
-          )
-        `);
-        
+        this.applyPendingMigrations();
         await this.save();
       } else {
         // Create new
         this.db = new SQL.Database();
         this.createSchema();
+        this.applyPendingMigrations();
         await this.save();
         this.isNewDatabase = true;
         console.log("New database created and saved.");
@@ -503,6 +368,173 @@ class DatabaseClient {
         url TEXT NOT NULL,
         created_at TEXT
       );
+
+      CREATE TABLE IF NOT EXISTS commercial_proposals (
+        id TEXT PRIMARY KEY,
+        quotation_id TEXT UNIQUE,
+        title TEXT,
+        content TEXT,
+        status TEXT DEFAULT 'draft',
+        created_at TEXT,
+        updated_at TEXT,
+        FOREIGN KEY(quotation_id) REFERENCES quotations(id)
+      );
+
+      CREATE TABLE IF NOT EXISTS document_execution_receipts (
+        id TEXT PRIMARY KEY,
+        quotation_id TEXT,
+        semantic_schema_signature TEXT,
+        execution_plan_signature TEXT,
+        totals_ast_signature TEXT,
+        runtime_kernel_version TEXT,
+        timestamp TEXT
+      );
+
+      CREATE TABLE IF NOT EXISTS runtime_replay_receipts (
+        id TEXT PRIMARY KEY,
+        quotation_id TEXT,
+        replay_context TEXT,
+        determinism_result TEXT,
+        semantic_schema_signature TEXT,
+        execution_plan_signature TEXT,
+        totals_ast_signature TEXT,
+        timestamp TEXT
+      );
+    `);
+  }
+
+  private applyPendingMigrations() {
+    if (!this.db) return;
+
+    const safeRun = (query: string) => {
+      try {
+        this.db?.run(query);
+      } catch {
+        // Ignore column/table exists errors
+      }
+    };
+
+    // Migration 1: pdf_template
+    safeRun("ALTER TABLE companies ADD COLUMN pdf_template TEXT DEFAULT 'minimal'");
+    // Migration 2: Financial fields
+    safeRun("ALTER TABLE companies ADD COLUMN bank_name TEXT");
+    safeRun("ALTER TABLE companies ADD COLUMN account_holder TEXT");
+    safeRun("ALTER TABLE companies ADD COLUMN account_number TEXT");
+    safeRun("ALTER TABLE companies ADD COLUMN nib_iban TEXT");
+    safeRun("ALTER TABLE companies ADD COLUMN mpesa TEXT");
+    safeRun("ALTER TABLE companies ADD COLUMN emola TEXT");
+    // Migration 3: Client fields
+    safeRun("ALTER TABLE clients ADD COLUMN origin TEXT");
+    safeRun("ALTER TABLE clients ADD COLUMN tags TEXT");
+    // Migration 4: Rename classic to minimal in existing rows
+    safeRun("UPDATE companies SET pdf_template = 'minimal' WHERE pdf_template = 'classic'");
+    // Migration 5: Add sent_at
+    safeRun("ALTER TABLE quotations ADD COLUMN sent_at TEXT");
+    // Migration 6: Add show_branding
+    safeRun("ALTER TABLE companies ADD COLUMN show_branding INTEGER DEFAULT 1");
+    // Migration 7: CRM Pipeline fields
+    safeRun("ALTER TABLE quotations ADD COLUMN pipeline_stage TEXT DEFAULT 'lead'");
+    safeRun("ALTER TABLE quotations ADD COLUMN next_action TEXT");
+    safeRun("ALTER TABLE quotations ADD COLUMN next_action_date TEXT");
+    // Migration 8: Client Interactions table
+    this.db.run(`
+      CREATE TABLE IF NOT EXISTS client_interactions (
+        id TEXT PRIMARY KEY,
+        client_id TEXT NOT NULL,
+        type TEXT NOT NULL,
+        title TEXT NOT NULL,
+        description TEXT,
+        created_at TEXT,
+        FOREIGN KEY(client_id) REFERENCES clients(id)
+      )
+    `);
+    // Migration 9: Priority
+    safeRun("ALTER TABLE quotations ADD COLUMN priority TEXT DEFAULT 'medium'");
+    // Migration 10: Pipeline Operations Phase 1
+    safeRun("ALTER TABLE quotations ADD COLUMN next_action_time TEXT");
+    safeRun("ALTER TABLE quotations ADD COLUMN last_activity_at TEXT");
+    safeRun("ALTER TABLE quotations ADD COLUMN last_contact_at TEXT");
+    safeRun("ALTER TABLE quotations ADD COLUMN reminders_enabled INTEGER DEFAULT 1");
+    // Migration 11: Pipeline Operations Phase 2 & Calendar Sync Fields
+    safeRun("ALTER TABLE quotations ADD COLUMN assigned_user TEXT");
+    safeRun("ALTER TABLE quotations ADD COLUMN followup_status TEXT DEFAULT 'pending'");
+    safeRun("ALTER TABLE quotations ADD COLUMN reminder_offset TEXT DEFAULT '15m'");
+    safeRun("ALTER TABLE quotations ADD COLUMN completed_at TEXT");
+    safeRun("ALTER TABLE quotations ADD COLUMN calendar_sync_enabled INTEGER DEFAULT 0");
+    safeRun("ALTER TABLE quotations ADD COLUMN external_calendar_provider TEXT");
+    safeRun("ALTER TABLE quotations ADD COLUMN calendar_sync_status TEXT");
+    safeRun("ALTER TABLE quotations ADD COLUMN calendar_sync_date TEXT");
+    safeRun("ALTER TABLE quotations ADD COLUMN external_calendar_event_id TEXT");
+    safeRun("ALTER TABLE quotations ADD COLUMN calendar_sync_error TEXT");
+    // Migration 12: Telemetry & Persistent Sync Queue
+    this.db.run(`
+      CREATE TABLE IF NOT EXISTS proposal_telemetry (
+        quotation_id TEXT PRIMARY KEY,
+        views_count INTEGER DEFAULT 0,
+        downloads_count INTEGER DEFAULT 0,
+        last_viewed_at TEXT,
+        FOREIGN KEY(quotation_id) REFERENCES quotations(id)
+      )
+    `);
+    this.db.run(`
+      CREATE TABLE IF NOT EXISTS persistent_sync_queue (
+        id TEXT PRIMARY KEY,
+        event_type TEXT NOT NULL,
+        payload TEXT,
+        status TEXT DEFAULT 'pending',
+        retries INTEGER DEFAULT 0,
+        next_attempt_at TEXT,
+        priority TEXT DEFAULT 'medium',
+        idempotency_key TEXT UNIQUE,
+        version INTEGER DEFAULT 1,
+        created_at TEXT
+      )
+    `);
+    // Migration 13: Runtime Diagnostics Log
+    this.db.run(`
+      CREATE TABLE IF NOT EXISTS runtime_diagnostics (
+        id TEXT PRIMARY KEY,
+        type TEXT NOT NULL,
+        message TEXT,
+        timestamp TEXT
+      )
+    `);
+    // Migration 15: Replay Determinism Receipts
+    this.db.run(`
+      CREATE TABLE IF NOT EXISTS document_execution_receipts (
+        id TEXT PRIMARY KEY,
+        quotation_id TEXT,
+        semantic_schema_signature TEXT,
+        execution_plan_signature TEXT,
+        totals_ast_signature TEXT,
+        runtime_kernel_version TEXT,
+        timestamp TEXT
+      )
+    `);
+    this.db.run(`
+      CREATE TABLE IF NOT EXISTS runtime_replay_receipts (
+        id TEXT PRIMARY KEY,
+        quotation_id TEXT,
+        replay_context TEXT,
+        determinism_result TEXT,
+        semantic_schema_signature TEXT,
+        execution_plan_signature TEXT,
+        totals_ast_signature TEXT,
+        timestamp TEXT
+      )
+    `);
+    // Migration 16: MVP Commercial Document Studio
+    this.db.run(`
+      CREATE TABLE IF NOT EXISTS commercial_proposals (
+        id TEXT PRIMARY KEY,
+        quotation_id TEXT UNIQUE,
+        title TEXT,
+        content TEXT,
+        status TEXT DEFAULT 'draft',
+        created_at TEXT,
+        updated_at TEXT,
+        FOREIGN KEY(quotation_id) REFERENCES quotations(id)
+      )
     `);
   }
 
@@ -630,19 +662,33 @@ class DatabaseClient {
 
   // Import DB from Google Drive restore
   async restoreDatabaseFile(data: Uint8Array): Promise<void> {
-    await this.init();
-    
-    // Close existing DB
-    if (this.db) {
-      this.db.close();
+    if (data.length < 100) {
+      throw new Error("Ficheiro de backup inválido ou vazio.");
     }
 
-    // Load new WASM DB
+    const header = new TextDecoder().decode(data.slice(0, 16));
+    if (!header.startsWith("SQLite format 3")) {
+      throw new Error("O backup não é uma base de dados SQLite válida.");
+    }
+
+    await this.init();
+
+    if (this.db) {
+      this.db.close();
+      this.db = null;
+    }
+
     const SQL = await initSqlJs({ locateFile: (file) => `/${file}` });
-    this.db = new SQL.Database(data);
-    
-    // Save to IndexedDB
+    try {
+      this.db = new SQL.Database(data);
+    } catch {
+      throw new Error("Não foi possível ler o backup. O ficheiro pode estar corrompido.");
+    }
+
+    this.applyPendingMigrations();
     await this.save();
+    this.isNewDatabase = false;
+    this.isInitialized = true;
   }
 
   // Wipes out the current tenant database for extreme tenant isolation

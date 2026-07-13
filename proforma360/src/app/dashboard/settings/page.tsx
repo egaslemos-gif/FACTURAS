@@ -9,12 +9,22 @@ import {
   Database
 } from "lucide-react";
 import { useSyncStore, useCompanyStore } from "@/stores";
-import { dbClient } from "@/lib/db/client";
+import { restoreBackupFromCloud } from "@/lib/cloud/restoreBackup";
+import { backupToCloud } from "@/lib/cloud/cloudBackup";
+import { AUTO_BACKUP_POLICY, formatAutoBackupInterval } from "@/lib/cloud/autoBackupPolicy";
 import { toast } from "sonner";
 import { useLicenseStore } from "@/stores/licenseStore";
 
 export default function SettingsPage() {
-  const { hasUnsyncedChanges, lastSyncDate, setHasUnsyncedChanges, setLastSyncDate } = useSyncStore();
+  const {
+    hasUnsyncedChanges,
+    lastSyncDate,
+    autoBackupEnabled,
+    setHasUnsyncedChanges,
+    setLastSyncDate,
+    setLastAutoBackupAt,
+    setAutoBackupEnabled,
+  } = useSyncStore();
   const { company, updateCompany } = useCompanyStore();
   const { license, isAdmin } = useLicenseStore();
   const [isSyncing, setIsSyncing] = useState(false);
@@ -22,20 +32,14 @@ export default function SettingsPage() {
   const handleBackup = async () => {
     try {
       setIsSyncing(true);
-      const dbFile = await dbClient.getDatabaseFile();
-      if (!dbFile) throw new Error("Base de dados vazia.");
-      
-      const formData = new FormData();
-      formData.append("file", new Blob([dbFile as unknown as BlobPart]), "proforma360.db");
-      
-      const res = await fetch("/api/drive/backup", { method: "POST", body: formData });
-      if (!res.ok) throw new Error("Falha no upload.");
-      
+      const result = await backupToCloud();
       setHasUnsyncedChanges(false);
-      setLastSyncDate(new Date().toISOString());
+      setLastSyncDate(result.date);
+      setLastAutoBackupAt(result.date);
       toast.success("Backup guardado com sucesso na Cloud!");
-    } catch (e: any) {
-      toast.error("Erro ao fazer backup: " + e.message);
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : "Erro desconhecido";
+      toast.error("Erro ao fazer backup: " + message);
     } finally {
       setIsSyncing(false);
     }
@@ -48,20 +52,16 @@ export default function SettingsPage() {
     
     try {
       setIsSyncing(true);
-      const res = await fetch("/api/drive/restore");
-      if (!res.ok) throw new Error("Nenhum backup encontrado.");
-      
-      const buffer = await res.arrayBuffer();
-      await dbClient.restoreDatabaseFile(new Uint8Array(buffer));
-      
+      const { backupDate } = await restoreBackupFromCloud();
+
       setHasUnsyncedChanges(false);
-      const backupDate = res.headers.get("X-Backup-Date");
       if (backupDate) setLastSyncDate(backupDate);
-      
+
       toast.success("Backup restaurado com sucesso! A página será atualizada.");
       setTimeout(() => window.location.reload(), 1500);
-    } catch (e: any) {
-      toast.error("Erro ao restaurar: " + e.message);
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : "Erro desconhecido";
+      toast.error("Erro ao restaurar: " + message);
     } finally {
       setIsSyncing(false);
     }
@@ -86,9 +86,30 @@ export default function SettingsPage() {
             <CloudUpload className="w-8 h-8" />
           </div>
           <h2 className="text-xl font-bold text-[var(--color-on-surface)] mb-2">Guardar na Cloud</h2>
-          <p className="text-sm text-[var(--color-on-surface-variant)] mb-6 flex-1">
+          <p className="text-sm text-[var(--color-on-surface-variant)] mb-4 flex-1">
             Envia uma cópia de segurança de todos os seus Clientes, Produtos e Proformas para o seu Google Drive.
           </p>
+
+          <div className="w-full flex items-center justify-between gap-3 p-3 mb-4 rounded-lg border border-[var(--color-outline-variant)] bg-slate-50/80 text-left">
+            <div className="min-w-0">
+              <p className="text-sm font-semibold text-[var(--color-on-surface)]">Backup automático</p>
+              <p className="text-xs text-[var(--color-on-surface-variant)] mt-0.5">
+                A cada {formatAutoBackupInterval(AUTO_BACKUP_POLICY.SAFETY_INTERVAL_MS)} ou após alterações ({formatAutoBackupInterval(AUTO_BACKUP_POLICY.CHANGES_DEBOUNCE_MS)} de pausa)
+              </p>
+            </div>
+            <label className="relative inline-flex items-center cursor-pointer shrink-0">
+              <input
+                type="checkbox"
+                className="sr-only peer"
+                checked={autoBackupEnabled}
+                onChange={(e) => {
+                  setAutoBackupEnabled(e.target.checked);
+                  toast.success(e.target.checked ? "Backup automático activado." : "Backup automático desactivado.");
+                }}
+              />
+              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[var(--color-primary)]" />
+            </label>
+          </div>
           
           {hasUnsyncedChanges && (
             <div className="flex items-center gap-2 text-amber-600 bg-amber-50 px-3 py-1.5 rounded-md text-xs font-medium mb-4">

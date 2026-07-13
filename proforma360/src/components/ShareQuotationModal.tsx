@@ -6,6 +6,10 @@ import { useNetworkStore } from '@/stores/useNetworkStore';
 import { useLicenseStore } from '@/stores/licenseStore';
 import { formatCurrency, formatDate } from '@/lib/utils';
 import { generateQuotationPDF } from '@/lib/pdf/generator';
+import { generateProposalPDFFromTemplate } from '@/lib/pdf/proposalClientExport';
+import { parseSavedProposal } from '@/components/commercial/proposalTypes';
+import { proposalHasContent } from '@/components/commercial/proposalContent';
+import type { SavedProposalData } from '@/components/commercial/proposalTypes';
 
 interface ShareModalProps {
   isOpen: boolean;
@@ -38,8 +42,11 @@ export default function ShareQuotationModal({ isOpen, onClose, quotation, compan
   
   const [copiedLink, setCopiedLink] = useState(false);
   const [copiedHtml, setCopiedHtml] = useState(false);
+  const [attachTechnicalProposal, setAttachTechnicalProposal] = useState(false);
+  const [hasTechnicalProposal, setHasTechnicalProposal] = useState(false);
+  const [savedProposal, setSavedProposal] = useState<SavedProposalData | null>(null);
   
-  const { markAsSent } = useQuotationsStore();
+  const { markAsSent, fetchCommercialProposal } = useQuotationsStore();
   
   const htmlRef = useRef<HTMLDivElement>(null);
 
@@ -47,6 +54,28 @@ export default function ShareQuotationModal({ isOpen, onClose, quotation, compan
     if (!isOpen) return;
     
     let isMounted = true;
+
+    async function loadProposal() {
+      try {
+        const existing = await fetchCommercialProposal(quotation.id);
+        if (isMounted && existing?.content) {
+          const parsed = parseSavedProposal(existing.content);
+          const hasContent = proposalHasContent(parsed.sections || {}, parsed.customSections);
+          setHasTechnicalProposal(hasContent);
+          setSavedProposal(parsed);
+        } else if (isMounted) {
+          setHasTechnicalProposal(false);
+          setSavedProposal(null);
+        }
+      } catch {
+        if (isMounted) {
+          setHasTechnicalProposal(false);
+          setSavedProposal(null);
+        }
+      }
+    }
+
+    loadProposal();
     
     async function generateShareLink() {
       const { isOnline } = useNetworkStore.getState();
@@ -132,7 +161,40 @@ export default function ShareQuotationModal({ isOpen, onClose, quotation, compan
     generateShareLink();
     
     return () => { isMounted = false; };
-  }, [isOpen]); // Regenerate on open
+  }, [isOpen, quotation.id]);
+
+  const downloadPdfBlob = (bytes: Uint8Array, filename: string) => {
+    const blob = new Blob([bytes as BlobPart], { type: 'application/pdf' });
+    const urlObj = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = urlObj;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(urlObj);
+  };
+
+  const buildShareFiles = async (): Promise<File[]> => {
+    const files: File[] = [];
+    const proformaBytes = await generateQuotationPDF({ quotation, company, client: client as Client, items });
+    files.push(new File([proformaBytes as BlobPart], `Proforma_${quotation.quotation_number}.pdf`, { type: 'application/pdf' }));
+
+    if (attachTechnicalProposal && savedProposal) {
+      const proposalBytes = await generateProposalPDFFromTemplate({
+        company,
+        client: client as Client,
+        quotation,
+        items,
+        sections: savedProposal.sections,
+        customSections: savedProposal.customSections,
+        visibility: savedProposal.visibility,
+        template: savedProposal.template || "executivo",
+      });
+      files.push(new File([proposalBytes as BlobPart], `Proposta_${quotation.quotation_number}.pdf`, { type: 'application/pdf' }));
+    }
+    return files;
+  };
 
   if (!isOpen) return null;
 
@@ -166,17 +228,11 @@ export default function ShareQuotationModal({ isOpen, onClose, quotation, compan
       await navigator.clipboard.write([clipboardItem]);
       setCopiedHtml(true);
       
-      // Auto-download PDF so they can attach it
-      const pdfBytes = await generateQuotationPDF({ quotation, company, client: client as Client, items });
-      const blob = new Blob([pdfBytes as any], { type: 'application/pdf' });
-      const urlObj = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = urlObj;
-      a.download = `Proforma_${quotation.quotation_number}.pdf`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(urlObj);
+      // Auto-download PDF(s) so they can attach them
+      const files = await buildShareFiles();
+      for (const file of files) {
+        downloadPdfBlob(new Uint8Array(await file.arrayBuffer()), file.name);
+      }
 
       if (quotation.status === 'draft') await markAsSent(quotation.id);
       setTimeout(() => setCopiedHtml(false), 2000);
@@ -191,32 +247,23 @@ export default function ShareQuotationModal({ isOpen, onClose, quotation, compan
   const handleNativeShare = async (platform: 'whatsapp' | 'email' | 'email-web') => {
     try {
       setIsGeneratingPdf(true);
-      const pdfBytes = await generateQuotationPDF({ quotation, company, client: client as Client, items });
-      const blob = new Blob([pdfBytes as any], { type: 'application/pdf' });
-      const file = new File([blob], `Proforma_${quotation.quotation_number}.pdf`, { type: 'application/pdf' });
+      const files = await buildShareFiles();
 
       const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent || '');
       
-      // Only use native share on mobile, and skip it if they explicitly requested Gmail Web
-      const useNativeShare = isMobile && platform !== 'email-web' && navigator.canShare && navigator.canShare({ files: [file] });
+      const useNativeShare = isMobile && platform !== 'email-web' && navigator.canShare && navigator.canShare({ files });
 
       if (useNativeShare) {
         await navigator.share({
-          files: [file],
+          files,
           title: emailSubject,
           text: platform === 'whatsapp' ? whatsappText : emailBodyPlain
         });
         if (quotation.status === 'draft') await markAsSent(quotation.id);
       } else {
-        // Fallback: Download PDF + open web link
-        const urlObj = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = urlObj;
-        a.download = file.name;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(urlObj);
+        for (const file of files) {
+          downloadPdfBlob(new Uint8Array(await file.arrayBuffer()), file.name);
+        }
         
         let linkUrl = '';
         if (platform === 'whatsapp') {
@@ -315,6 +362,28 @@ export default function ShareQuotationModal({ isOpen, onClose, quotation, compan
                 <p className="text-sm text-amber-800 font-medium leading-relaxed">{offlineWarning}</p>
               </div>
             )}
+
+            {/* Anexar proposta técnica */}
+            {hasTechnicalProposal && (
+              <div className="px-6 pt-4">
+                <label className="flex items-start gap-3 p-4 bg-white border border-slate-200 rounded-xl cursor-pointer hover:border-teal-300 transition-colors">
+                  <input
+                    type="checkbox"
+                    checked={attachTechnicalProposal}
+                    onChange={(e) => setAttachTechnicalProposal(e.target.checked)}
+                    className="mt-1 rounded border-gray-300 text-teal-600 focus:ring-teal-500"
+                  />
+                  <div>
+                    <span className="font-semibold text-gray-900 text-sm">Anexar Proposta Técnica</span>
+                    <p className="text-xs text-gray-500 mt-0.5">
+                      Inclui um segundo PDF (<strong>Proposta_{quotation.quotation_number}.pdf</strong>) com o mesmo modelo guardado no Proposal Studio.
+                      {!savedProposal?.template && " Modelo: Executivo (predefinido)."}
+                    </p>
+                  </div>
+                </label>
+              </div>
+            )}
+
             {/* Tabs */}
             <div className="flex p-3 gap-2 border-b border-[var(--color-outline-variant)] bg-[var(--color-surface-elevated)] overflow-x-auto no-scrollbar">
               <button 
@@ -363,7 +432,7 @@ export default function ShareQuotationModal({ isOpen, onClose, quotation, compan
                     
                     <div className="p-3 bg-amber-50 border-b border-amber-100 flex items-start gap-2 text-sm text-amber-800">
                       <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
-                      <p><strong>Nota:</strong> Ao clicar em copiar, o PDF é automaticamente descarregado para as suas Transferências. Cole este texto no seu email e arraste o ficheiro PDF para os anexos.</p>
+                      <p><strong>Nota:</strong> Ao clicar em copiar, {attachTechnicalProposal ? 'os PDFs são descarregados' : 'o PDF é automaticamente descarregado'} para as suas Transferências. Cole este texto no seu email e arraste {attachTechnicalProposal ? 'os ficheiros' : 'o ficheiro PDF'} para os anexos.</p>
                     </div>
 
                     <div className="p-4 border-b border-gray-100 bg-gray-50 text-sm">
