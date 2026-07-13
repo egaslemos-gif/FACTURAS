@@ -859,14 +859,6 @@ vercel-live-feedback,
     flex: 1 !important;
   }
 
-  .printable-toc-dots {
-    flex: 2 !important;
-    border-bottom: 1px dotted #cbd5e1 !important;
-    margin: 0 8px !important;
-    min-width: 40px !important;
-    height: 1em !important;
-  }
-
   /* ═══════════════════════════════════════
      CONTENT SECTIONS
      ═══════════════════════════════════════ */

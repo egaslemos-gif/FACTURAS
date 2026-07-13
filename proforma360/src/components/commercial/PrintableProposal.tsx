@@ -73,28 +73,24 @@ export function PrintableProposal({ company, client, quotation, items, sections,
               <div key={s.key} className="printable-toc-item">
                 <span className="printable-toc-num">{String(idx + 1).padStart(2, "0")}</span>
                 <span className="printable-toc-label">{s.title}</span>
-                <span className="printable-toc-dots"></span>
               </div>
             ))}
             {showFinancial && (
               <div className="printable-toc-item">
                 <span className="printable-toc-num">{String(financialNum).padStart(2, "0")}</span>
                 <span className="printable-toc-label">Investimento e Tabela Financeira</span>
-                <span className="printable-toc-dots"></span>
               </div>
             )}
             {showConditions && (
               <div className="printable-toc-item">
                 <span className="printable-toc-num">{String(conditionsNum).padStart(2, "0")}</span>
                 <span className="printable-toc-label">Condições Gerais</span>
-                <span className="printable-toc-dots"></span>
               </div>
             )}
             {v.signatures && (
               <div className="printable-toc-item">
                 <span className="printable-toc-num">&nbsp;&nbsp;</span>
                 <span className="printable-toc-label">Aceitação da Proposta</span>
-                <span className="printable-toc-dots"></span>
               </div>
             )}
           </div>
