@@ -28,6 +28,10 @@ interface QuotationsState {
   setNextActionFull: (id: string, action: string | null, date: string | null, time: string | null, reminders: boolean) => Promise<void>;
   markAsSent: (id: string) => Promise<void>;
   deleteQuotation: (id: string) => Promise<void>;
+  
+  // Commercial Proposals
+  fetchCommercialProposal: (quotationId: string) => Promise<any>;
+  saveCommercialProposal: (quotationId: string, title: string, content: string, status: string) => Promise<void>;
 }
 
 export const useQuotationsStore = create<QuotationsState>((set, get) => ({
@@ -173,4 +177,27 @@ export const useQuotationsStore = create<QuotationsState>((set, get) => ({
       throw error;
     }
   },
+
+  fetchCommercialProposal: async (quotationId: string) => {
+    try {
+      const proposal = await quotationsRepo.getCommercialProposal(quotationId);
+      return proposal;
+    } catch (error: any) {
+      console.error(error);
+      return null;
+    }
+  },
+
+  saveCommercialProposal: async (quotationId: string, title: string, content: string, status: string) => {
+    try {
+      set({ isLoading: true });
+      await quotationsRepo.saveCommercialProposal(quotationId, title, content, status);
+    } catch (error: any) {
+      console.error(error);
+      throw error;
+    } finally {
+      set({ isLoading: false });
+    }
+  }
+
 }));

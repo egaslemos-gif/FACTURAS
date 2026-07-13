@@ -220,6 +220,19 @@ class DatabaseClient {
             timestamp TEXT
           )
         `);
+        // Migration 16: MVP Commercial Document Studio
+        this.db?.run(`
+          CREATE TABLE IF NOT EXISTS commercial_proposals (
+            id TEXT PRIMARY KEY,
+            quotation_id TEXT UNIQUE,
+            title TEXT,
+            content TEXT,
+            status TEXT DEFAULT 'draft',
+            created_at TEXT,
+            updated_at TEXT,
+            FOREIGN KEY(quotation_id) REFERENCES quotations(id)
+          )
+        `);
         
         await this.save();
       } else {
@@ -415,6 +428,80 @@ class DatabaseClient {
         type TEXT NOT NULL,
         message TEXT,
         timestamp TEXT
+      );
+
+      CREATE TABLE IF NOT EXISTS commercial_documents (
+        id TEXT PRIMARY KEY,
+        quotation_id TEXT,
+        document_type TEXT NOT NULL,
+        status TEXT NOT NULL,
+        version INTEGER DEFAULT 1,
+        created_at TEXT,
+        updated_at TEXT,
+        created_by TEXT,
+        FOREIGN KEY(quotation_id) REFERENCES quotations(id)
+      );
+
+      CREATE TABLE IF NOT EXISTS commercial_document_sections (
+        id TEXT PRIMARY KEY,
+        commercial_document_id TEXT NOT NULL,
+        section_key TEXT NOT NULL,
+        generated_by_ai INTEGER DEFAULT 0,
+        prompt_version TEXT,
+        model TEXT,
+        content TEXT,
+        edited INTEGER DEFAULT 0,
+        sort_order INTEGER DEFAULT 0,
+        FOREIGN KEY(commercial_document_id) REFERENCES commercial_documents(id)
+      );
+
+      CREATE TABLE IF NOT EXISTS commercial_document_versions (
+        id TEXT PRIMARY KEY,
+        commercial_document_id TEXT NOT NULL,
+        version INTEGER NOT NULL,
+        created_at TEXT,
+        author TEXT,
+        changes TEXT,
+        FOREIGN KEY(commercial_document_id) REFERENCES commercial_documents(id)
+      );
+
+      CREATE TABLE IF NOT EXISTS commercial_generation_logs (
+        id TEXT PRIMARY KEY,
+        commercial_document_id TEXT NOT NULL,
+        model TEXT,
+        tokens INTEGER,
+        duration INTEGER,
+        cost REAL,
+        temperature REAL,
+        prompt_hash TEXT,
+        response_hash TEXT,
+        FOREIGN KEY(commercial_document_id) REFERENCES commercial_documents(id)
+      );
+
+      CREATE TABLE IF NOT EXISTS commercial_receipts (
+        id TEXT PRIMARY KEY,
+        commercial_document_id TEXT NOT NULL,
+        render_signature TEXT,
+        runtime_signature TEXT,
+        schema_signature TEXT,
+        generated_at TEXT,
+        FOREIGN KEY(commercial_document_id) REFERENCES commercial_documents(id)
+      );
+
+      CREATE TABLE IF NOT EXISTS commercial_document_templates (
+        id TEXT PRIMARY KEY,
+        name TEXT NOT NULL,
+        description TEXT,
+        schema TEXT,
+        created_at TEXT
+      );
+
+      CREATE TABLE IF NOT EXISTS commercial_document_assets (
+        id TEXT PRIMARY KEY,
+        name TEXT NOT NULL,
+        type TEXT NOT NULL,
+        url TEXT NOT NULL,
+        created_at TEXT
       );
     `);
   }

@@ -543,7 +543,7 @@ export default function DashboardLayout({
     <div className="min-h-screen bg-[var(--color-surface-container-lowest)] flex">
       {/* Desktop Sidebar */}
       <aside className={cn(
-        "hidden md:flex flex-col bg-[var(--color-surface-container-lowest)] border-r border-[var(--color-outline-variant)] fixed h-full z-20 transition-all duration-300",
+        "hidden md:flex flex-col bg-[var(--color-surface-container-lowest)] border-r border-[var(--color-outline-variant)] fixed h-full z-20 transition-all duration-300 print:hidden",
         isSidebarCollapsed ? "w-20" : "w-64"
       )}>
         <div className="h-16 flex items-center justify-between px-4 border-b border-[var(--color-outline-variant)] shrink-0">
@@ -714,7 +714,7 @@ export default function DashboardLayout({
 
       {/* Mobile Header */}
       <header className={cn(
-        "md:hidden fixed top-0 w-full h-16 bg-white/98 backdrop-blur-sm flex items-center justify-between px-4 z-30 transition-shadow duration-200",
+        "md:hidden fixed top-0 w-full h-16 bg-white/98 backdrop-blur-sm flex items-center justify-between px-4 z-30 transition-shadow duration-200 print:hidden",
         isScrolled ? "shadow-soft border-b border-transparent" : "border-b border-gray-100"
       )}>
         <div className="flex items-center gap-2">
@@ -855,7 +855,7 @@ export default function DashboardLayout({
         
         {/* Desktop Topbar */}
         <header className={cn(
-          "hidden md:flex h-16 bg-white/98 backdrop-blur-sm items-center justify-between px-8 sticky top-0 z-30 transition-shadow duration-200",
+          "hidden md:flex h-16 bg-white/98 backdrop-blur-sm items-center justify-between px-8 sticky top-0 z-30 transition-shadow duration-200 print:hidden",
           isScrolled ? "shadow-soft border-b border-transparent" : "border-b border-gray-100"
         )}>
           <div className="flex-1 flex items-center gap-4">
@@ -1009,7 +1009,7 @@ export default function DashboardLayout({
       </main>
 
       {/* Mobile Bottom Navigation */}
-      <nav className="md:hidden fixed bottom-0 w-full bg-white/98 backdrop-blur-md border-t border-gray-100 shadow-surface-2 z-40 pb-[env(safe-area-inset-bottom)]">
+      <nav className="md:hidden fixed bottom-0 w-full bg-white/98 backdrop-blur-md border-t border-gray-100 shadow-surface-2 z-40 pb-[env(safe-area-inset-bottom)] print:hidden">
         <div className="flex justify-around items-center h-full px-2">
           {mobileNavItems.slice(0, 2).map((item) => {
             const isActive = item.href === '/dashboard'
@@ -1078,10 +1078,10 @@ export default function DashboardLayout({
       {isQuickActionsOpen && (
         <>
           <div 
-            className="md:hidden fixed inset-0 bg-gray-900/40 backdrop-blur-sm z-30 transition-opacity duration-300" 
+            className="md:hidden fixed inset-0 bg-gray-900/40 backdrop-blur-sm z-30 transition-opacity duration-300 print:hidden" 
             onClick={() => setIsQuickActionsOpen(false)} 
           />
-          <div className="md:hidden fixed bottom-[85px] left-1/2 -translate-x-1/2 w-[90%] max-w-[320px] bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] p-2 z-40 animate-in fade-in slide-in-from-bottom-6 duration-200 pb-[calc(0.5rem+env(safe-area-inset-bottom))]">
+          <div className="md:hidden fixed bottom-[85px] left-1/2 -translate-x-1/2 w-[90%] max-w-[320px] bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] p-2 z-40 animate-in fade-in slide-in-from-bottom-6 duration-200 pb-[calc(0.5rem+env(safe-area-inset-bottom))] print:hidden">
             <div className="grid gap-1">
               <Link 
                 href="/dashboard/quotations/new" 

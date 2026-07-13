@@ -141,6 +141,14 @@ export default function QuotationDetailPage() {
 
         {/* Desktop Actions */}
         <div className="hidden md:flex gap-2">
+          <Link 
+            href={`/dashboard/proposals/new?quotationId=${quotation.id}`}
+            title="Gerar Proposta Técnica"
+            className="flex items-center justify-center gap-2 px-4 py-2 border border-blue-600 bg-blue-50 hover:bg-blue-600 hover:text-white text-blue-700 font-bold rounded-lg transition-colors shrink-0"
+          >
+            <FileText className="w-4 h-4" /> Gerar Proposta
+          </Link>
+          
           <button 
             onClick={() => setIsShareModalOpen(true)}
             title="Partilhar"

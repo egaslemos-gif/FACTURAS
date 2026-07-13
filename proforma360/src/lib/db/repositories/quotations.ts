@@ -253,4 +253,24 @@ export const quotationsRepo = {
       [priority, now(), now(), id]
     );
   },
+
+  async getCommercialProposal(quotationId: string): Promise<any> {
+    const row = await dbClient.getOne("SELECT * FROM commercial_proposals WHERE quotation_id = ?", [quotationId]);
+    return row;
+  },
+
+  async saveCommercialProposal(quotationId: string, title: string, content: string, status: string): Promise<void> {
+    const existing = await this.getCommercialProposal(quotationId);
+    if (existing) {
+      await dbClient.executeWrite(
+        "UPDATE commercial_proposals SET title = ?, content = ?, status = ?, updated_at = ? WHERE quotation_id = ?",
+        [title, content, status, now(), quotationId]
+      );
+    } else {
+      await dbClient.executeWrite(
+        "INSERT INTO commercial_proposals (id, quotation_id, title, content, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
+        [generateId(), quotationId, title, content, status, now(), now()]
+      );
+    }
+  }
 };
