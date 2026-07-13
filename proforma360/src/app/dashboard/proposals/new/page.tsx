@@ -89,7 +89,7 @@ export default function NewProposalPage() {
   const quotationId = searchParams.get("quotationId");
   const router = useRouter();
 
-  const { currentDetail, fetchQuotationDetail, fetchCommercialProposal, saveCommercialProposal } = useQuotationsStore();
+  const { currentDetail, fetchQuotationDetail, fetchCommercialProposal, saveCommercialProposal, deleteCommercialProposal } = useQuotationsStore();
   const { company, fetchCompany } = useCompanyStore();
   const { clients, fetchClients } = useClientsStore();
 
@@ -114,6 +114,8 @@ export default function NewProposalPage() {
   const [customSections, setCustomSections] = useState<CustomProposalSection[]>([]);
 
   const [isInitialLoading, setIsInitialLoading] = useState(true);
+  const [hasSavedProposal, setHasSavedProposal] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     async function init() {
@@ -123,6 +125,7 @@ export default function NewProposalPage() {
         await fetchQuotationDetail(quotationId);
         const existing = await fetchCommercialProposal(quotationId);
         if (existing && existing.content) {
+          setHasSavedProposal(true);
           try {
             const saved = parseSavedProposal(existing.content);
             setSections({
@@ -223,6 +226,7 @@ export default function NewProposalPage() {
         "edited"
       );
       setStatus("edited");
+      setHasSavedProposal(true);
       toast.success("Proposta guardada com sucesso!");
     } catch {
       toast.error("Erro ao guardar proposta na base de dados.");
@@ -277,6 +281,21 @@ export default function NewProposalPage() {
     setStatus("edited");
   };
 
+  const handleDelete = async () => {
+    if (!hasSavedProposal) return;
+    if (!confirm(`Remover a proposta técnica da proforma ${proformaNum}? Esta acção não pode ser desfeita.`)) return;
+    setIsDeleting(true);
+    try {
+      await deleteCommercialProposal(quotationId);
+      toast.success("Proposta técnica removida.");
+      router.push("/dashboard/proposals");
+    } catch {
+      toast.error("Não foi possível remover a proposta.");
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   const hasContent = proposalHasContent(sections, customSections);
 
   const proposalProps = {
@@ -294,7 +313,7 @@ export default function NewProposalPage() {
       <div className="max-w-7xl mx-auto pb-24 md:pb-20 print:hidden">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div className="flex items-center gap-4">
-          <Link href={`/dashboard/quotations/${quotationId}`} className="p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-600">
+          <Link href="/dashboard/proposals" className="p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-600">
             <ArrowLeft className="w-5 h-5" />
           </Link>
           <div>
@@ -323,6 +342,17 @@ export default function NewProposalPage() {
             {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
             Guardar
           </button>
+          {hasSavedProposal && (
+            <button
+              type="button"
+              onClick={handleDelete}
+              disabled={isDeleting}
+              className="flex items-center gap-2 px-3 py-2.5 min-h-[44px] bg-white border border-red-200 text-red-600 rounded-md text-sm font-medium hover:bg-red-50 transition-colors disabled:opacity-50"
+            >
+              {isDeleting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+              Remover
+            </button>
+          )}
         </div>
       </div>
 

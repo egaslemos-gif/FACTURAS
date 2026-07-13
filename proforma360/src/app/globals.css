@@ -1043,9 +1043,9 @@ vercel-live-feedback,
   .pcorp-sig-meta {
     width: 100% !important;
     text-align: center !important;
-    margin: 12px 0 0 0 !important;
-    padding: 8px 0 0 0 !important;
-    border-top: 1px solid #e2e8f0 !important;
+    margin: 16px 0 0 0 !important;
+    padding: 0 !important;
+    border: none !important;
     flex-shrink: 0 !important;
   }
 
@@ -1995,14 +1995,14 @@ vercel-live-feedback,
   }
   .pcorp-sig-intro { font-size: 10.5pt !important; color: #475569 !important; line-height: 1.7 !important; margin: 0 0 12px 0 !important; padding: 0 !important; text-align: justify !important; }
   .pcorp-sig-intro p { margin: 0 !important; padding: 0 !important; }
-  .pcorp-sig-grid { display: flex !important; justify-content: space-between !important; align-items: stretch !important; gap: 32px !important; margin: 40px 0 0 0 !important; padding: 0 !important; }
+  .pcorp-sig-grid { display: flex !important; justify-content: space-between !important; align-items: stretch !important; gap: 48px !important; margin: 40px 0 0 0 !important; padding: 0 !important; }
   .pcorp-sig-card {
     width: 45% !important;
-    padding: 24px !important;
+    padding: 0 !important;
     margin: 0 !important;
-    border: 1px solid #e2e8f0 !important;
-    border-radius: 8px !important;
-    background: #f8fafc !important;
+    border: none !important;
+    border-radius: 0 !important;
+    background: transparent !important;
     text-align: center !important;
   }
   .pcorp-sig-role { font-size: 8pt !important; text-transform: uppercase !important; letter-spacing: 0.1em !important; color: #2563eb !important; font-weight: 700 !important; margin: 0 0 16px 0 !important; padding: 0 !important; text-align: center !important; width: 100% !important; }

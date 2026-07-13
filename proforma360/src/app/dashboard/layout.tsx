@@ -91,14 +91,13 @@ const BASE_NAV_GROUPS = [
 ];
 
 const BASE_MOBILE_NAV = [
-  { id: "dashboard", name: "Dashboard", href: "/dashboard", icon: Home },
-  { id: "quotations", name: "Proformas", href: "/dashboard/quotations", icon: FileText },
-  { id: "proposals", name: "Propostas", href: "/dashboard/proposals", icon: ClipboardList },
-  { id: "clients", name: "Clientes", href: "/dashboard/clients", icon: Users },
+  { id: "dashboard", name: "Início", href: "/dashboard", icon: Home, activeClass: "text-teal-600" },
+  { id: "quotations", name: "Proformas", href: "/dashboard/quotations", icon: FileText, activeClass: "text-teal-600" },
+  { id: "proposals", name: "Prop. Técnicas", href: "/dashboard/proposals", icon: ClipboardList, activeClass: "text-blue-600" },
+  { id: "clients", name: "Clientes", href: "/dashboard/clients", icon: Users, activeClass: "text-teal-600" },
 ];
 
 const BASE_MOBILE_MORE = [
-  { id: "proposals", name: "Propostas Técnicas", href: "/dashboard/proposals", icon: ClipboardList },
   { id: "pipeline", name: "Pipeline", href: "/dashboard/pipeline", icon: Kanban },
   { id: "company", name: "A Minha Empresa", href: "/dashboard/company", icon: Building2 },
   { id: "subscription", name: "Planos & Subscrição", href: "/dashboard/subscription", icon: CreditCard },
@@ -1023,19 +1022,20 @@ export default function DashboardLayout({
               ? pathname === '/dashboard'
               : pathname === item.href || pathname?.startsWith(item.href + '/');
             const Icon = item.icon;
+            const activeClass = item.activeClass || "text-teal-600";
             return (
               <Link
-                key={item.name}
+                key={item.id}
                 href={item.href}
                 prefetch={true}
                 className="flex flex-col items-center justify-center w-[20%] h-full relative group touch-target"
               >
                 <div className={cn(
                   "flex flex-col items-center transition-all duration-200",
-                  isActive ? "text-teal-600 scale-105" : "text-gray-400 group-active:scale-95"
+                  isActive ? `${activeClass} scale-105` : "text-gray-400 group-active:scale-95"
                 )}>
                   <Icon className={cn("w-5 h-5 mb-1", isActive ? "stroke-[2.5px]" : "stroke-2")} />
-                  <span className={cn("text-[10px] tracking-wide", isActive ? "font-bold" : "font-medium")}>{item.name}</span>
+                  <span className={cn("text-[9px] leading-tight text-center tracking-wide max-w-[4.5rem]", isActive ? "font-bold" : "font-medium")}>{item.name}</span>
                 </div>
               </Link>
             );
@@ -1061,19 +1061,20 @@ export default function DashboardLayout({
               ? pathname === '/dashboard'
               : pathname === item.href || pathname?.startsWith(item.href + '/');
             const Icon = item.icon;
+            const activeClass = item.activeClass || "text-teal-600";
             return (
               <Link
-                key={item.name}
+                key={item.id}
                 href={item.href}
                 prefetch={true}
                 className="flex flex-col items-center justify-center w-[20%] h-full relative group touch-target"
               >
                 <div className={cn(
                   "flex flex-col items-center transition-all duration-200",
-                  isActive ? "text-teal-600 scale-105" : "text-gray-400 group-active:scale-95"
+                  isActive ? `${activeClass} scale-105` : "text-gray-400 group-active:scale-95"
                 )}>
                   <Icon className={cn("w-5 h-5 mb-1", isActive ? "stroke-[2.5px]" : "stroke-2")} />
-                  <span className={cn("text-[10px] tracking-wide", isActive ? "font-bold" : "font-medium")}>{item.name}</span>
+                  <span className={cn("text-[9px] leading-tight text-center tracking-wide max-w-[4.5rem]", isActive ? "font-bold" : "font-medium")}>{item.name}</span>
                 </div>
               </Link>
             );

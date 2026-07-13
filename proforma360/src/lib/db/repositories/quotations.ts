@@ -259,6 +259,43 @@ export const quotationsRepo = {
     return row;
   },
 
+  async listCommercialProposals(): Promise<Array<{
+    id: string;
+    quotation_id: string;
+    title: string;
+    content: string;
+    status: string;
+    created_at: string;
+    updated_at: string;
+    quotation_number: string;
+    grand_total: number;
+    client_name: string | null;
+  }>> {
+    const rows = await dbClient.query(`
+      SELECT cp.*, q.quotation_number, q.grand_total, c.name as client_name
+      FROM commercial_proposals cp
+      JOIN quotations q ON cp.quotation_id = q.id
+      LEFT JOIN clients c ON q.client_id = c.id
+      ORDER BY cp.updated_at DESC
+    `);
+    return rows as Array<{
+      id: string;
+      quotation_id: string;
+      title: string;
+      content: string;
+      status: string;
+      created_at: string;
+      updated_at: string;
+      quotation_number: string;
+      grand_total: number;
+      client_name: string | null;
+    }>;
+  },
+
+  async deleteCommercialProposal(quotationId: string): Promise<void> {
+    await dbClient.executeWrite("DELETE FROM commercial_proposals WHERE quotation_id = ?", [quotationId]);
+  },
+
   async saveCommercialProposal(quotationId: string, title: string, content: string, status: string): Promise<void> {
     const existing = await this.getCommercialProposal(quotationId);
     if (existing) {

@@ -30,13 +30,28 @@ interface QuotationsState {
   deleteQuotation: (id: string) => Promise<void>;
   
   // Commercial Proposals
+  commercialProposals: Array<{
+    id: string;
+    quotation_id: string;
+    title: string;
+    content: string;
+    status: string;
+    created_at: string;
+    updated_at: string;
+    quotation_number: string;
+    grand_total: number;
+    client_name: string | null;
+  }>;
+  fetchCommercialProposals: () => Promise<void>;
   fetchCommercialProposal: (quotationId: string) => Promise<any>;
   saveCommercialProposal: (quotationId: string, title: string, content: string, status: string) => Promise<void>;
+  deleteCommercialProposal: (quotationId: string) => Promise<void>;
 }
 
 export const useQuotationsStore = create<QuotationsState>((set, get) => ({
   quotations: [],
   currentDetail: null,
+  commercialProposals: [],
   isLoading: false,
   error: null,
 
@@ -178,6 +193,16 @@ export const useQuotationsStore = create<QuotationsState>((set, get) => ({
     }
   },
 
+  fetchCommercialProposals: async () => {
+    try {
+      const proposals = await quotationsRepo.listCommercialProposals();
+      set({ commercialProposals: proposals });
+    } catch (error: any) {
+      console.error(error);
+      set({ commercialProposals: [] });
+    }
+  },
+
   fetchCommercialProposal: async (quotationId: string) => {
     try {
       const proposal = await quotationsRepo.getCommercialProposal(quotationId);
@@ -192,11 +217,26 @@ export const useQuotationsStore = create<QuotationsState>((set, get) => ({
     try {
       set({ isLoading: true });
       await quotationsRepo.saveCommercialProposal(quotationId, title, content, status);
+      await get().fetchCommercialProposals();
     } catch (error: any) {
       console.error(error);
       throw error;
     } finally {
       set({ isLoading: false });
+    }
+  },
+
+  deleteCommercialProposal: async (quotationId: string) => {
+    try {
+      set({ isLoading: true });
+      await quotationsRepo.deleteCommercialProposal(quotationId);
+      set({
+        commercialProposals: get().commercialProposals.filter((p) => p.quotation_id !== quotationId),
+        isLoading: false,
+      });
+    } catch (error: any) {
+      set({ isLoading: false });
+      throw error;
     }
   }
 
